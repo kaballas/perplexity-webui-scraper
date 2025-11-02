@@ -1,0 +1,335 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 08:29:32
+Topic: E012 – AUTO PAYOUT OF PUBLIC HOLIDAYS COVERED BY LEAVE ON
+TERMINATION
+Should an employee terminate with positive leave balances, there is a requirement to pay any Public
+Holidays that would have been covered, should the employee have taken the leave, as an ETP payment.
+The following leave balances should be considered
+􀁸 Annual Leave / Recreation Leave
+􀁸 Long Service Leave
+Current State
+Currently in TSS, an employee’s termination calculation is done in the last pay period they are employed
+with the Department. There is no specific intervention the payroll needs to do in order to facilitate the
+Public Holiday payout on Termination.
+Future State - Out of The Box
+The standard process within ECP is for the Payroll Team / Administrator to run the Termination Organiser.
+This process allows for payroll to manually enter any required ETP payments into the selection screen
+and this then gets calculated appropriately.
+Enhancement Considerations
+The enhancement will need to be able to work retrospectively in case any master data changes (i.e.
+termination date is adjusted) therefore it makes sense to embed this extension into the payroll schema via
+a Payroll Operation.
+Employees eligible for this payout should be determined by the fact they have an existing Annual /
+Recreation Leave balance or Long Service Leave balance when they terminate. This logic should apply
+irrespective of the termination reason.
+The tax treatment of the Public Holiday on Termination is different to that if the employee observed a
+public holiday, therefore the enhancement will need to consider the appropriate ETP calculation.
+Even though multiple absence time accounts are applicable, the balances should be treated in parallel in
+order to determine how far into the future the system should check for Public Holidays.
+Enhancement Design
+Employee Central Payroll
+Upon termination, through BTP Extension E024 – Auto Time Off Payout of Leave Balances on
+Termination, the number of hours from the final applicable leave balances will be available in the
+appropriate Infotype 2010 Wage Type in payroll.
+During the processing the payroll schema will call the operation if the employee has been terminated in
+the pay period, the call to the operation will need to be after the import of time-based remuneration
+(Infotype 2010) wage types to then check for leave balances on termination.
+Once the larger balance has been determined (in hours) the operation will extrapolate out by those
+number of hours based on the employee personal work schedule past their termination date.
+Page | 233
+Any Public Holidays found within those balance hours will be saved to a nominal wage type prior to
+determining the final wage type with the correct ETP Tax Percentage.
+ETP Calculation
+The two factors that determine the ETP are:
+􀍻 Preservation Age
+􀍻 ETP Thresholds
+Preservation age is determined by the ATO and will be determined as being 60 years of age.
+The ETP thresholds are determined by Payroll Constants (T511K):
+Once ETP thresholds and age have been determined, the operation will create either ETP @ 17% or ETP
+@ 32% for further processing.
+BTP: Transfer Process for Auto Payout of Public Holidays covered by Leave on Termination Specification
+For detailed design, refer to the BTP Specification.
+Page | 234
+E
+Max Rounds: 80
+First Speaker: hugging
+================================================================================
+
+================================================================================
+Round 1 - MetadataExtract
+================================================================================
+# SAP SuccessFactors Metadata Extraction Report
+## E012 - Auto Payout of Public Holidays Covered by Leave on Termination
+
+### Metadata Summary
+**Extension ID:** E024 - Auto Time Off Payout of Leave Balances on Termination  
+**Module:** Employee Central Payroll (ECP)  
+**Category:** Payroll Enhancement - Termination Processing  
+**Business Function:** Public Holiday Payout on Separation  
+
+### Core Data Objects & Metadata
+
+#### 1. Payroll Operation Metadata
+```
+Object Name: Payroll Operation - PH_Termination_Payout
+Type: Custom Payroll Operation
+Schema Integration: Embedded in payroll schema via Payroll Operation
+Processing Timing: Post import of time-based remuneration (Infotype 2010)
+Retro Processing: Supported for master data changes
+```
+
+#### 2. Infotype 2010 Wage Types
+```
+Object: IT2010 - Time Wage Types
+Fields:
+- Wage Type Code (WT_Code) - String(4)
+- Amount - Decimal(15,2)
+- Hours - Decimal(8,2)
+- Processing Class - String(2)
+- Evaluation Class - String(2)
+- Time Category - String(1)
+
+Related Wage Types:
+- Annual/Recreation Leave Balance WT
+- Long Service Leave Balance WT
+- Public Holiday Nominal WT
+- ETP @ 17% WT
+- ETP @ 32% WT
+```
+
+#### 3. Foundation Objects Dependencies
+```
+FO_Payroll Constants (T511K):
+- ETP_Threshold_1 - Decimal(12,2)
+- ETP_Threshold_2 - Decimal(12,2)
+- Preservation_Age - Integer(2) [Default: 60]
+
+FO_Personal Information:
+- employmentStatus - Picklist
+- terminationDate - Date
+- birthDate - Date
+- workScheduleRule - String(10)
+
+FO_Time Types:
+- timeTypeCode - String(8)
+- timeTypeName - String(255)
+- isLeaveType - Boolean
+- isPublicHoliday - Boolean
+```
+
+#### 4. MDF Objects (Master Data Framework)
+```
+MDF_WorkSchedule:
+- workScheduleId - String(10)
+- scheduleName - String(100)
+- workingHoursPerDay - Decimal(4,2)
+- holidayCalendarId - String(10)
+
+MDF_PublicHolidayCalendar:
+- calendarId - String(10)
+- calendarName - String(100)
+- holidayDate - Date
+- holidayName - String(255)
+- isActive - Boolean
+```
+
+#### 5. BTP Extension Metadata
+```
+Extension ID: E024
+Extension Name: Auto Time Off Payout of Leave Balances on Termination
+Version: 1.0
+Dependencies:
+- Employee Central Time Off
+- Employee Central Payroll
+- Foundation Objects
+- MDF Objects
+
+Input Parameters:
+- Employee ID (String)
+- Termination Date (Date)
+- Annual Leave Balance (Decimal)
+- Long Service Leave Balance (Decimal)
+- Work Schedule ID (String)
+
+Output Parameters:
+- Public Holiday Count (Integer)
+- ETP Amount (Decimal)
+- Tax Percentage (Decimal)
+- ETP Wage Type Code (String)
+```
+
+### Field Definitions & Properties
+
+#### 6. Termination Processing Fields
+```
+Field: TerminationReason
+- Data Type: String(10)
+- Length: 10
+- Required: Yes
+- Validation: Picklist (FO_TerminationReason)
+
+Field: TerminationDate
+- Data Type: Date
+- Format: YYYY-MM-DD
+- Required: Yes
+- Business Rule: Must be >= current date
+
+Field: LeaveBalanceHours
+- Data Type: Decimal(8,2)
+- Scale: 2
+- Required: Yes for eligibility check
+```
+
+#### 7. ETP Calculation Fields
+```
+Field: ETP_Tax_Percentage
+- Data Type: Decimal(5,2)
+- Values: 17.00, 32.00
+- Business Logic: Age-based calculation
+
+Field: ETP_Threshold_Amount
+- Data Type: Decimal(12,2)
+- Source: T511K Payroll Constants
+- Currency: AUD
+
+Field: ETP_Wage_Type
+- Data Type: String(4)
+- Values: ['ETP1', 'ETP2', 'PHET']
+- Business Rule: Determined by tax calculation
+```
+
+### Integration Mapping Metadata
+
+#### 8. System Integration Points
+```
+Source Systems:
+- Employee Central (EC) - Master Data
+- EC Time Off - Leave Balances
+- EC Payroll - Infotype 2010
+
+Target Systems:
+- EC Payroll - Wage Type Processing
+- Tax Calculation Engine
+- Payroll Results
+
+Integration Method: OData API calls within payroll schema
+```
+
+#### 9. Business Rules Metadata
+```
+Rule: Public Holiday Eligibility Check
+Condition: (AnnualLeaveBalance > 0 OR LongServiceLeaveBalance > 0) 
+           AND TerminationDate IS NOT NULL
+Action: Trigger BTP Extension E024
+
+Rule: ETP Tax Calculation
+Condition: Employee Age >= 60 → ETP @ 17%
+           Employee Age < 60 → ETP @ 32%
+
+Rule: Retro Processing Trigger
+Condition: TerminationDate_Changed OR LeaveBalance_Changed
+Action: Re-run payroll operation
+```
+
+### Picklist Values & Options
+
+#### 10. Termination Reason Picklist
+```
+Picklist ID: TerminationReason
+Values:
+- 'VOL' - Voluntary Resignation
+- 'INVOL' - Involuntary Termination  
+- 'RET' - Retirement
+- 'OTH' - Other
+Default: 'OTH'
+```
+
+#### 11. ETP Wage Type Picklist
+```
+Picklist ID: ETPWageTypes
+Values:
+- 'ETP1' - ETP @ 17%
+- 'ETP2' - ETP @ 32%
+- 'PHET' - Public Holiday ETP
+- 'PHNB' - Public Holiday Nominal Base
+```
+
+### Security & Permission Metadata
+
+#### 12. Role-Based Permissions
+```
+Permission Category: Payroll Processing
+- Payroll-Run-TerminationOrganizer
+- Payroll-Process-WageTypes
+- TimeOff-View-Balances
+- Payroll-Admin-RetroProcessing
+
+RBP Groups:
+- Payroll Administrator
+- Payroll Operator
+- HR Administrator
+```
+
+### Workflow Metadata
+
+#### 13. Termination Processing Workflow
+```
+Workflow ID: WF_Termination_PH_Payout
+Trigger: Employee Termination Event
+Steps:
+1. Validate Leave Balances > 0
+2. Execute BTP Extension E024
+3. Calculate ETP Amount
+4. Generate Wage Types
+5. Apply Tax Treatment
+6. Update Payroll Results
+```
+
+### Custom Field Metadata
+
+#### 14. Custom Fields in EC Payroll
+```
+Custom Field: x_publicHolidayETP
+- Object: Payroll Result
+- Type: Decimal(12,2)
+- Description: Public Holiday ETP Amount on Termination
+- Visibility: Payroll Team Only
+
+Custom Field: x_leaveBalanceAtTermination
+- Object: Payroll Result
+- Type: Decimal(8,2)
+- Description: Combined Leave Balance at Termination
+```
+
+### Data Dependencies & Relationships
+
+#### 15. Object Relationships
+```
+Employee (1) → (1) Personal Information
+Personal Information (1) → (M) Payroll Results
+Payroll Results (M) → (1) Infotype 2010
+Infotype 2010 (M) → (1) Wage Type
+Wage Type (1) → (M) ETP Calculations
+Time Off Balances (M) → (1) BTP Extension E024
+```
+
+### Configuration Parameters
+
+#### 16. System Configuration
+```
+Configuration Object: Payroll Schema Extension
+Schema: X000000 (Termination Processing)
+Operation: Z_PH_TERMINATION_PAYOUT
+Position: After IT2010 Import
+Execution Condition: Employee.TerminationDate = PayPeriod.EndDate
+```
+
+This metadata extraction provides comprehensive coverage of the E012 public holiday payout enhancement, detailing all relevant data objects, field definitions, integration points, and business logic required for implementation and maintenance.
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 1
+Total Characters: 6412

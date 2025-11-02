@@ -1,0 +1,260 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Queensland Department of Education - Requisition Management System
+
+### Executive Summary
+This metadata extraction focuses on the requisition management and hiring processes for the Queensland Department of Education, covering both corporate/region and teacher/school-based hiring scenarios within SAP SuccessFactors Recruiting Management (RCM) and Employee Central (EC).
+
+### 1. Core Recruitment Data Objects
+
+#### 1.1 Requisition Management Objects
+- **JobRequisition** - Core requisition entity
+  - **Key Fields**: 
+    - requisitionId (Primary Key)
+    - title, description
+    - jobCode, positionId (FK to Position MDF)
+    - status (Active, Closed, On Hold, Pending Approval, etc.)
+    - templateType (Corporate/Teacher/EOI/Exception/Generic/Evergreen)
+    - creationMethod (Position Management/Copy-Created)
+    - establishmentControl (Funded/Over-Establishment)
+    - externalJobReqPostId (ServiceNow approval reference)
+    - customString1-5 (Risk assessment reference, justification fields)
+    - customDate1-3 (Approval dates, timestamps)
+  - **Temporal Management**: Date-effective status changes
+  - **Relationships**: Links to Position MDF object, Job Classification FO
+  - **Constraints**: One-to-one relationship enforcement with Position ID
+  - **Business Rules**: Position status validation, over-establishment approval check
+
+#### 1.2 Position Management Objects (Employee Central)
+- **Position** - MDF Position object
+  - **Key Fields**:
+    - positionId (Primary Key)
+    - positionTitle, jobCode (FK to FOJobCode)
+    - status (Vacant, Filled, Inactive)
+    - establishmentControl (Funded/Over-Establishment flag)
+    - fte (Full-time equivalent value)
+    - costCenter (FK to FOCostCenter)
+    - department (FK to FODepartment)
+    - customString1-3 (ServiceNow approval references)
+  - **Temporal Management**: Effective dating for position changes
+  - **Relationships**: Linked to JobRequisition, Job Classification, Cost Center
+
+#### 1.3 Job Classification Objects
+- **JobClassification** - MDF Job Classification object
+  - **Key Fields**:
+    - jobClassificationId (Primary Key)
+    - jobCode (FK to FOJobCode)
+    - classificationLevel, awardClassification
+    - salaryGrade, salaryRange
+    - effectiveStartDate, effectiveEndDate
+  - **Relationships**: Connected to Position and Requisition objects
+
+### 2. Requisition Template Metadata
+
+#### 2.1 Corporate Requisition Templates
+- **Corporate/Region Job Requisition Template**
+  - **Template ID**: CORP_REQ_TEMPLATE
+  - **Fields**: Standard corporate fields, department selection, location
+  - **Workflow**: Hiring Manager → Upline Manager → Corporate Recruitment
+  - **Use Case**: Administration, HR, support roles
+
+- **School Based Classified Officer Job Requisition Template**
+  - **Template ID**: CLASSIFIED_OFFICER_TEMPLATE
+  - **Fields**: Teaching qualification fields, classification level
+  - **Workflow**: Principal → Regional HR BP → School Delegate
+  - **Use Case**: Formerly appointed teachers, permanent classification
+
+- **Expression of Interest (EOI) Requisition Template**
+  - **Template ID**: EOI_TEMPLATE
+  - **Fields**: Temporary role indicators, internal opportunity flags
+  - **Workflow**: Internal approval process
+  - **Use Case**: Short-term internal opportunities
+
+- **Exception from Advertising Requisition Template**
+  - **Template ID**: EXCEPTION_TEMPLATE
+  - **Fields**: Policy justification, compassionate transfer indicators
+  - **Workflow**: Policy-based approval route
+  - **Use Case**: Compassionate transfers, medical returns
+
+- **School Support Job Requisition Template**
+  - **Template ID**: SCHOOL_SUPPORT_TEMPLATE
+  - **Fields**: Support role classifications, school-specific requirements
+  - **Workflow**: School-based approval route
+  - **Use Case**: Administrative and support staff within schools
+
+- **Generic Job Requisition (Evergreen) Template**
+  - **Template ID**: EVERGREEN_GENERIC_TEMPLATE
+  - **Fields**: Talent pool indicators, general suitability fields
+  - **Workflow**: Continuous intake process
+  - **Use Case**: General talent acquisition
+
+#### 2.2 Teacher Requisition Templates
+- **Teacher Eligibility Job Requisition (Evergreen) Template**
+  - **Template ID**: TEACHER_ELIGIBILITY_TEMPLATE
+  - **Fields**: Eligibility criteria, subject expertise, location preferences
+  - **Workflow**: Continuous screening process
+  - **Use Case**: High-volume teaching roles, talent pipeline
+
+- **Teacher Job Requisition Template**
+  - **Template ID**: TEACHER_REQ_TEMPLATE
+  - **Fields**: Specific teaching role requirements, FTE values
+  - **Workflow**: School-based approval route
+  - **Use Case**: Specific classroom roles
+
+### 3. Approval Workflow Metadata
+
+#### 3.1 School-Based Approval Routes
+- **Route Map Configuration**:
+  - **Sequence**: Principal → Regional HR Business Partner → Endorser (conditional) → School Delegate
+  - **Trigger**: Requisition creation from school-based positions
+  - **Validation**: Position approval, funding verification
+  - **Notification**: Email notifications at each approval stage
+
+#### 3.2 Corporate Approval Routes
+- **Route Map Configuration**:
+  - **Sequence**: Hiring Manager → Delegate → Recruiter
+  - **Trigger**: Corporate position requisition creation
+  - **Validation**: Budget approval, position establishment
+  - **Notification**: Automated workflow notifications
+
+#### 3.3 Over-Establishment Approval Integration
+- **ServiceNow Integration**:
+  - **API Endpoint**: `/api/x_qed/approval/v1/status/{approval_id}`
+  - **Fields**: approval_id, status, position_number, approval_date, approver, risk_assessment_reference
+  - **Validation Rule**: ServiceNow approval status must be "Approved" before requisition creation
+  - **Business Rule**: Block requisition creation if ServiceNow approval is not completed
+
+### 4. Evergreen Requisition Metadata
+
+#### 4.1 Teacher Eligibility Pool Management
+- **Candidate Status Fields**:
+  - candidateStatus (New Application, Identity Verification, Job Ready, Future Teachers)
+  - eligibilityDate, jobReadyDate
+  - subjectExpertise, locationPreferences
+  - manualMovementFlag (for candidate transfer to specific requisitions)
+
+#### 4.2 Pipeline Management
+- **Child Requisition Linking**:
+  - parentRequisitionId (links to evergreen requisition)
+  - childRequisitionFlag (indicates derived requisition)
+  - candidateTransferDate, transferReason
+
+### 5. Integration Mapping Metadata
+
+#### 5.1 ServiceNow to SuccessFactors Field Mapping
+| Source System | Source Field | Target System | Target Field | Transformation Rule |
+|---------------|--------------|---------------|--------------|-------------------|
+| ServiceNow | approval_id | SuccessFactors | externalJobReqPostId | Direct mapping |
+| ServiceNow | position_number | SuccessFactors | positionNumber | Direct mapping |
+| ServiceNow | risk_assessment_reference | SuccessFactors | customString1 | Direct mapping |
+| ServiceNow | justification | SuccessFactors | comments | Direct mapping |
+| ServiceNow | approval_date | SuccessFactors | customDate1 | ISO 8601 format |
+| ServiceNow | approver | SuccessFactors | customString2 | Map to user email |
+
+#### 5.2 API Configuration
+- **ServiceNow Outbound Endpoint**:
+  - **Method**: GET
+  - **URL**: `/api/x_qed/approval/v1/status/{approval_id}`
+  - **Authentication**: OAuth 2.0 with SAML assertion
+  - **Response Format**: JSON
+
+- **SuccessFactors Inbound Endpoint**:
+  - **Method**: POST
+  - **URL**: `/odata/v2/JobRequisition`
+  - **Authentication**: OAuth 2.0 bearer token
+  - **Request Format**: JSON
+  - **Headers**: `Authorization: Bearer {token}`
+
+### 6. Business Rules and Validation Constraints
+
+#### 6.1 Position-Requsition Relationship Rules
+```
+IF (Position.Status = 'Vacant' AND
+    COUNT(Requisition WHERE Position_ID = X AND Status IN ['Open','Pending']) > 0)
+THEN Block_New_Requisition
+```
+
+#### 6.2 Over-Establishment Validation
+```
+IF (Position.Over_Establishment = TRUE AND
+    ServiceNow.Approval_Status ≠ 'Approved')
+THEN Block_Requisition_Creation
+```
+
+#### 6.3 FTE Split Management
+- **Rule**: When 1.0 FTE split across multiple positions, create separate requisitions with distinct position IDs
+- **Constraint**: Each requisition must link to unique position record
+- **Validation**: Prevent multiple active requisitions from referencing same position simultaneously
+
+### 7. Picklist Metadata
+
+#### 7.1 Requisition Status Picklist Values
+- Active
+- Closed
+- On Hold
+- Pending Approval
+- Approved
+- Posted
+- Filled
+- Cancelled
+
+#### 7.2 Template Type Picklist Values
+- Corporate/Region Job Requisition
+- School Based Classified Officer Job Requisition
+- Expression of Interest (EOI) Requisition
+- Exception from Advertising Requisition
+- School Support Job Requisition
+- Generic Job Requisition (Evergreen)
+- Teacher Eligibility Job Requisition (Evergreen)
+- Teacher Job Requisition
+
+#### 7.3 Establishment Control Picklist Values
+- Funded
+- Over-Establishment
+- Temporary
+- Contract
+
+### 8. Custom Field Definitions
+
+#### 8.1 Requisition Custom Fields
+- **customString1**: ServiceNow Risk Assessment Reference
+- **customString2**: Approver User Email
+- **customString3**: Justification Text
+- **customDate1**: ServiceNow Approval Date
+- **customDate2**: Requisition Creation Date
+- **customDate3**: Expected Start Date
+
+#### 8.2 Position Custom Fields
+- **customString1**: ServiceNow Approval Reference
+- **customString2**: Risk Assessment Number
+- **customBoolean1**: Over-Establishment Flag
+
+### 9. Workflow Configuration Metadata
+
+#### 9.1 Route Map Definitions
+- **Entity**: JobRequisition
+- **Routing Logic**: Based on position job family, org unit classification, recruitment method
+- **Approvers**: Dynamic role assignment via Workflow Derivation Lookup Table
+- **Participants**: Approvers, Contributors, CC Roles
+- **Approval Types**: Role-based, Dynamic Group, Dynamic Role
+
+#### 9.2 Notification Configuration
+- **Triggers**: Requisition creation, status changes, approval requests
+- **Channels**: Email, SuccessFactors inbox notifications
+- **Templates**: Role-specific notification templates
+- **Timing**: Immediate for critical approvals, batch for routine updates
+
+### 10. Audit and Compliance Metadata
+
+#### 10.1 Audit Trail Requirements
+- **Requisition Creation Log**: User, timestamp, position details
+- **Approval History**: Approver, approval date, comments
+- **Status Changes**: Previous status, new status, change reason
+- **Integration Transactions**: ServiceNow ↔ SuccessFactors data flow
+
+#### 10.2 Compliance Tracking
+- **Policy-Based Hiring**: Exception from advertising justification
+- **Equal Opportunity**: Compliance field tracking
+- **Documentation**: Supporting document references
+- **Reporting**: Compliance metrics and KPIs
+
+This metadata extraction provides comprehensive coverage of the requisition management system for the Queensland Department of Education, supporting both corporate and teacher recruitment processes with appropriate governance, compliance, and integration requirements.

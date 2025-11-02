@@ -1,0 +1,127 @@
+# STRUCTURED NOTES: BTP Application for SuccessFactors Leave Management
+
+## 1. DOCUMENT SCOPE AND SECTION HIERARCHY
+
+### **Primary Scope**
+- BTP application extension for unified leave management across multiple employee assignments
+- Consumption layer for already-integrated EC-ECP data
+- Employee self-service and manager approval workflows
+
+### **Section Hierarchy**
+```
+EC-ECP Integration Layer (SAP Native)
+├── OData API Synchronization
+├── Award Change Processing  
+├── Balance Consolidation
+└── Compliance Framework
+
+BTP Application Layer (Extension)
+├── Leave Request Management
+├── Multi-Assignment Workflows
+├── Balance Display Consolidation
+└── Approval Routing
+```
+
+## 2. KEY ENTITIES, SYSTEMS, AND COMPONENTS
+
+### **Core Systems**
+- **SAP SuccessFactors Employee Central (EC)**: Authoritative source for employee data
+- **SAP SuccessFactors Employee Central Payroll (ECP)**: Integrated payroll and time management data
+- **SAP BTP Application**: Consumption layer for leave management functionality
+- **SAP Integration Suite**: Handles EC-ECP synchronization
+
+### **Key Components**
+- **OData APIs**: EC-ECP data synchronization interface
+- **Advanced Event Mesh**: Real-time event processing
+- **Time Account Balances**: Leave balance management across assignments
+- **Workflow Engine**: Approval routing and processing
+- **Audit Trail System**: Compliance and governance logging
+
+### **Business Entities**
+- **Employees**: Multi-assignment capable users
+- **Assignments**: Concurrent organizational positions
+- **Leave Types**: Award-specific time off categories
+- **Award Rules**: Government sector employment regulations
+- **Managers**: Organizational hierarchy for approvals
+
+## 3. RELATIONSHIPS AND DEPENDENCIES
+
+### **Data Flow Dependencies**
+```
+EC (Master Data) → Integration Suite → ECP (Processed Data) → BTP (Consumption)
+```
+
+### **System Dependencies**
+- **EC-ECP Integration**: Prerequisite for BTP application functionality
+- **OData Connectivity**: Continuous sync between EC and ECP
+- **BTP Services**: Consumption of ECP data for leave management
+- **Authentication**: RBAC inherited from ECP security framework
+
+### **Temporal Dependencies**
+- **5-minute SLA**: EC-ECP synchronization latency
+- **Payroll Cut-offs**: Processing schedules affecting leave calculations
+- **Award Change Events**: Real-time processing requirements
+- **Batch Reconciliation**: Scheduled consistency validation
+
+## 4. TECHNICAL FLOWS AND INTEGRATIONS
+
+### **Primary Data Flow**
+1. **EC Update**: Employee/assignment changes in Employee Central
+2. **OData Sync**: Real-time synchronization to ECP via Integration Suite
+3. **ECP Processing**: Balance calculations and award rule application
+4. **BTP Consumption**: Application queries ECP for leave management
+5. **User Interaction**: Leave requests processed through BTP interface
+
+### **Leave Request Workflow**
+```
+Employee Leave Request → BTP Application → ECP Balance Validation → 
+EC Time Off Workflow → Multi-Assignment Approval → ECP Balance Update → 
+BTP Confirmation
+```
+
+### **Multi-Assignment Balance Consolidation**
+- Query ECP for all employee assignment balances
+- Consolidate balances using ECP as authoritative source
+- Handle award-specific accrual rates and rules
+- Provide unified balance display across assignments
+
+### **Award Change Processing**
+- EC processes award changes
+- Integration Suite propagates changes to ECP
+- ECP recalculates affected leave balances
+- BTP application reflects updated balances in real-time
+
+## 5. ACCURACY VALIDATION AND TRACEABILITY
+
+### **Technical Accuracy Verification**
+✓ **Integration Architecture**: Direct EC-ECP integration with BTP as consumption layer
+✓ **Data Authority**: EC remains authoritative source through ECP
+✓ **Performance Targets**: 10,000+ daily transactions, <5 minute latency
+✓ **Security Framework**: OAuth 2.0, RBAC, TLS 1.3 through existing infrastructure
+✓ **Compliance Requirements**: Audit trails, 7-year retention, data governance
+
+### **Traceability Matrix**
+| Requirement | Source Context | Implementation Layer | Status |
+|-------------|----------------|---------------------|---------|
+| Multi-location support | Context 0,1,3 | ECP processing | ✅ Validated |
+| 5-minute SLA | Context 0,2 | EC-ECP integration | ✅ Validated |
+| OAuth 2.0 security | All contexts | ECP authentication | ✅ Validated |
+| 99.5% uptime | Context 0,1 | BTP auto-scaling | ✅ Validated |
+| Audit trail | All contexts | ECP-BTP logging | ✅ Validated |
+| Award change processing | Context 0,1,3 | EC-ECP event-driven | ✅ Validated |
+
+### **Business Process Alignment**
+- **Government Sector**: Queensland government award compliance
+- **Multi-Assignment Reality**: Concurrent position management
+- **Payroll Integration**: Cut-off date awareness
+- **Regulatory Reporting**: Monthly balance reporting requirements
+- **Temporal Consistency**: Historical and future balance calculations
+
+### **Risk Mitigation**
+- **Data Consistency**: ECP as single source of truth
+- **Performance**: Auto-scaling and caching strategies
+- **Availability**: 99.5% uptime through ECP infrastructure
+- **Security**: Inherited RBAC and authentication framework
+- **Compliance**: Complete audit trail and retention policies
+
+**Note**: BTP application functions as an extension layer consuming integrated EC-ECP data, not as an integration middleware component.

@@ -1,0 +1,426 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Higher Duties and Leave Rate Inclusive Enhancement
+
+### Executive Summary
+This metadata extraction focuses on the E026 requirement for leave rate inclusive of higher duties when higher duties immediately precedes eligible absence. The analysis covers the required metadata for implementing the enhancement in EC Payroll to maintain higher rates for specific leave types following higher duties periods.
+
+### 1. Core Entity Sets (OData API)
+
+#### 1.1 Higher Duties Related Entities
+```
+ECP Infotype 0509 (Higher Duties)
+├── Start/End Dates
+├── Days/Hours
+├── Classification
+├── Rate of Pay
+└── Wage Type Mapping
+
+ECP Infotype 2001 (LWOP)
+├── Start/End Dates
+├── Days/Hours
+└── Leave Type
+```
+
+#### 1.2 Leave Management Entities
+```
+EC Time Off (ECTO)
+├── LeaveRequest (Time Sheet)
+│   ├── startDate
+│   ├── endDate
+│   ├── leaveTypeId
+│   ├── status
+│   └── employeeId
+├── LeaveType
+│   ├── leaveTypeId
+│   ├── name
+│   ├── processingClass
+│   ├── wageTypeMapping
+│   └── eligibilityRules
+└── LeaveBalance
+    ├── employeeId
+    ├── leaveTypeId
+    ├── accrualAmount
+    └── balanceDate
+```
+
+#### 1.3 Payroll Configuration Entities
+```
+Payroll Configuration
+├── PayScaleLevel
+│   ├── payScaleLevelId
+│   ├── payScaleLevelName
+│   ├── payScaleLevelValue
+│   └── currency
+├── WageType
+│   ├── wageTypeId
+│   ├── wageTypeName
+│   ├── processingClass
+│   ├── evaluationClass
+│   └── rateCalculationRule
+└── PayComponent
+    ├── payComponentId
+    ├── payComponentName
+    ├── value
+    └── effectiveStartDate
+```
+
+### 2. MDF (Master Data Framework) Objects
+
+#### 2.1 Custom MDF Objects for Enhancement
+```
+Custom MDF Objects
+├── HigherDutiesLeaveFlag
+│   ├── employeeId (string)
+│   ├── leaveTypeId (string)
+│   ├── higherDutiesEndDate (date)
+│   ├── flagEffectiveDate (date)
+│   ├── flagExpiryDate (date)
+│   └── status (string)
+├── HigherDutiesRateStorage
+│   ├── employeeId (string)
+│   ├── hdRateAmount (decimal)
+│   ├── hdRateEffectiveDate (date)
+│   ├── hdRateExpiryDate (date)
+│   └── hdClassification (string)
+└── ConsecutiveLeaveTracker
+    ├── employeeId (string)
+    ├── leaveSequenceNumber (integer)
+    ├── leaveType (string)
+    ├── startDate (date)
+    ├── endDate (date)
+    └── consecutiveIndicator (boolean)
+```
+
+#### 2.2 Enhanced MDF Objects for Rate Calculation
+```
+Enhanced MDF Objects
+├── RateCalculationRule
+│   ├── ruleId (string)
+│   ├── ruleName (string)
+│   ├── ruleType (string)
+│   ├── sourceWageType (string)
+│   ├── targetWageType (string)
+│   └── calculationFormula (string)
+└── PayrollOperationTrigger
+    ├── operationId (string)
+    ├── triggerCondition (string)
+    ├── operationType (string)
+    ├── relatedWageTypes (collection)
+    └── executionPriority (integer)
+```
+
+### 3. Foundation Objects (FO)
+
+#### 3.1 Work Schedule Foundation Objects
+```
+Foundation Objects
+├── FOCompany
+├── FODivision
+├── FOJobCode
+├── FOPayScaleLevel
+├── FOWorkSchedule
+│   ├── workScheduleId
+│   ├── workScheduleName
+│   ├── dailyWorkHours
+│   ├── weeklyWorkHours
+│   ├── workDays
+│   └── holidayCalendar
+└── FOHolidayCalendar
+    ├── holidayCalendarId
+    ├── holidayName
+    ├── holidayDate
+    └── holidayType
+```
+
+### 4. Wage Type Configuration Metadata
+
+#### 4.1 Eligible Leave Wage Types (E026)
+```
+Wage Type Configuration - Eligible Leave Types
+├── Long Service Leave (LSL)
+│   ├── wageTypeId: LSL001
+│   ├── processingClass: 0001 (Leave Processing)
+│   ├── evaluationClass: L (Leave)
+│   ├── rateType: H (Hourly Rate)
+│   └── higherDutiesInclusive: TRUE
+├── Paid Parental Leave (PPL)
+│   ├── wageTypeId: PPL001
+│   ├── processingClass: 0001 (Leave Processing)
+│   ├── evaluationClass: L (Leave)
+│   ├── rateType: H (Hourly Rate)
+│   └── higherDutiesInclusive: TRUE
+└── Annual/Recreation Leave (ARL)
+    ├── wageTypeId: ARL001
+    ├── processingClass: 0001 (Leave Processing)
+    ├── evaluationClass: L (Leave)
+    ├── rateType: H (Hourly Rate)
+    └── higherDutiesInclusive: TRUE
+```
+
+#### 4.2 Higher Duties Wage Types
+```
+Wage Type Configuration - Higher Duties
+├── Higher Duties Base Rate
+│   ├── wageTypeId: HD001
+│   ├── processingClass: 0002 (Rate Storage)
+│   ├── evaluationClass: S (Salary)
+│   ├── rateType: H (Hourly Rate)
+│   └── storageIndicator: TRUE
+└── Higher Duties Notional Flag
+    ├── wageTypeId: HD_FLAG
+    ├── processingClass: 0003 (Flag Storage)
+    ├── evaluationClass: V (Variable)
+    ├── rateType: F (Flag)
+    └── storageIndicator: TRUE
+```
+
+### 5. Picklist Metadata
+
+#### 5.1 Leave Type Picklists
+```
+Picklist - Leave Types
+├── LeaveTypePicklist
+│   ├── LSL: Long Service Leave
+│   ├── PPL: Paid Parental Leave
+│   ├── ARL: Annual/Recreation Leave
+│   ├── SICK: Sick Leave
+│   └── UNPAID: Unpaid Leave
+└── LeaveProcessingClass
+    ├── 0001: Standard Leave Processing
+    ├── 0002: Higher Duties Inclusive Leave
+    └── 0003: Consecutive Leave Processing
+```
+
+#### 5.2 Higher Duties Status Picklists
+```
+Picklist - Higher Duties Status
+├── HigherDutiesStatus
+│   ├── ACTIVE: Active Higher Duties
+│   ├── ENDED: Higher Duties Ended
+│   └── TERMINATED: Higher Duties Terminated
+└── LeaveConsecutiveStatus
+    ├── CONSECUTIVE: Consecutive Leave
+    ├── BREAK: Leave Break Detected
+    └── CONTINUOUS: Continuous Leave Period
+```
+
+### 6. Field Definitions and Properties
+
+#### 6.1 Enhanced Field Definitions
+```
+Enhanced Field Properties
+├── LeaveRequest.startDate
+│   ├── dataType: date
+│   ├── mandatory: true
+│   ├── validationRule: No weekend/holiday without special approval
+│   └── relationship: Links to workSchedule
+├── LeaveRequest.endDate
+│   ├── dataType: date
+│   ├── mandatory: true
+│   ├── validationRule: Must be >= startDate
+│   └── relationship: Links to startDate
+├── HigherDutiesLeaveFlag.flagEffectiveDate
+│   ├── dataType: date
+│   ├── mandatory: true
+│   ├── validationRule: Must be within pay period
+│   └── relationship: Links to payrollPeriod
+└── HigherDutiesRateStorage.hdRateAmount
+    ├── dataType: decimal
+    ├── precision: 15,4
+    ├── mandatory: true
+    ├── validationRule: Must be positive
+    └── relationship: Links to payScaleLevel
+```
+
+### 7. Integration Mapping Metadata
+
+#### 7.1 EC to ECP Integration Mappings
+```
+Integration Mapping - EC to ECP
+├── EmployeeInfo to Payroll
+│   ├── EmployeeInfo.employmentInfo
+│   │   └── maps to: ECP Infotype 0001
+│   ├── EmployeeInfo.jobInfo
+│   │   └── maps to: ECP Infotype 0007
+│   └── EmployeeInfo.compensationInfo
+│       └── maps to: ECP Infotype 0008
+├── Time Off to Payroll
+│   ├── LeaveRequest.startDate
+│   │   └── maps to: ECP Infotype 2001.beginDate
+│   ├── LeaveRequest.endDate
+│   │   └── maps to: ECP Infotype 2001.endDate
+│   └── LeaveRequest.leaveTypeId
+│       └── maps to: ECP Infotype 2001.absenceType
+└── Custom MDF to Payroll
+    ├── HigherDutiesLeaveFlag
+    │   └── maps to: Custom Infotype for HD Leave Flag
+    └── HigherDutiesRateStorage
+        └── maps to: Custom Pay Component for HD Rate
+```
+
+#### 7.2 Payroll Operation Mappings
+```
+Payroll Operation - HD Leave Enhancement
+├── Trigger Condition
+│   ├── wageType IN (LSL001, PPL001, ARL001)
+│   ├── AND higherDutiesFlag = TRUE
+│   └── AND consecutiveLeave = TRUE
+├── Query Operations
+│   ├── Query Previous Pay Period for HD
+│   ├── Query Work Schedule for Break Days
+│   └── Query HD Rate Storage
+└── Processing Operations
+    ├── Calculate HD Inclusive Rate
+    ├── Apply Rate to Leave Wage Type
+    └── Generate Notional HD Flag
+```
+
+### 8. Business Rules and Workflow Metadata
+
+#### 8.1 Higher Duties Leave Business Rules
+```
+Business Rules - E026 Enhancement
+├── BR_HD_LEAVE_RATE_ELIGIBILITY
+│   ├── Condition: LeaveType IN (LSL, PPL, ARL)
+│   ├── Action: Set higherDutiesInclusive = TRUE
+│   └── Priority: High
+├── BR_HD_LEAVE_CONSECUTIVE_CHECK
+│   ├── Condition: No working days between HD end and Leave start
+│   ├── Action: Maintain HD rate throughout leave
+│   └── Priority: High
+└── BR_HD_RATE_CALCULATION
+    ├── Condition: HD period ended within pay period
+    ├── Action: Add HD rate to base rate for eligible leave
+    └── Priority: Critical
+```
+
+#### 8.2 Validation Rules
+```
+Validation Rules - Leave and HD Processing
+├── VR_NO_BREAK_BETWEEN_HD_LEAVE
+│   ├── Description: No working days between HD end and eligible leave start
+│   ├── Validation: Check workSchedule for break days
+│   └── Error: "Break detected between HD and eligible leave"
+├── VR_HD_RATE_RETENTION
+│   ├── Description: Maintain HD rate for entire eligible leave period
+│   ├── Validation: Compare HD rate with current rate
+│   └── Error: "HD rate not applied to eligible leave"
+└── VR_CONSECUTIVE_LEAVE_CHECK
+    ├── Description: Identify consecutive eligible leave periods
+    ├── Validation: Check for consecutive leave without breaks
+    └── Error: "Consecutive leave not properly identified"
+```
+
+### 9. Payroll Configuration Metadata
+
+#### 9.1 Payroll Period Configuration
+```
+Payroll Period Configuration
+├── PayrollPeriod
+│   ├── periodType: Monthly
+│   ├── periodStartDate
+│   ├── periodEndDate
+│   └── cutOffDate
+├── PayrollSchema
+│   ├── schemaId: ZHD_LEAVE
+│   ├── description: Higher Duties Leave Enhancement Schema
+│   └── operations: [HD Rate Check, Leave Rate Calculation, Flag Generation]
+└── PayrollOperation
+    ├── operationId: ZHD_LEAVE_RATE
+    ├── operationType: Rate Calculation
+    ├── priority: 100
+    └── dependentOperations: [Leave Processing, HD Processing]
+```
+
+### 10. Custom Enhancement Metadata
+
+#### 10.1 Custom Processing Classes
+```
+Custom Processing Classes
+├── PC_HD_LEAVE_ELIGIBILITY
+│   ├── className: ZCL_HD_LEAVE_ELIGIBILITY
+│   ├── description: Check leave type eligibility for HD rate
+│   ├── inputParameters: [leaveType, employeeId]
+│   └── outputParameters: [isEligible, hdRateToApply]
+├── PC_HD_RATE_CALCULATION
+│   ├── className: ZCL_HD_RATE_CALCULATION
+│   ├── description: Calculate HD inclusive rate
+│   ├── inputParameters: [baseRate, hdRate, hdEndDate, leaveStart]
+│   └── outputParameters: [hdInclusiveRate, effectiveDate]
+└── PC_CONSECUTIVE_LEAVE_CHECK
+    ├── className: ZCL_CONSECUTIVE_LEAVE_CHECK
+    ├── description: Check for consecutive eligible leave
+    ├── inputParameters: [leaveSequence, workSchedule]
+    └── outputParameters: [isConsecutive, consecutiveDays]
+```
+
+### 11. Security and Permission Metadata
+
+#### 11.1 Role-Based Access Control
+```
+Security Configuration
+├── Role: Payroll_HD_Leave_Admin
+│   ├── Permissions: [Read HD Data, Process HD Leave, Maintain Flags]
+│   └── Restrictions: Payroll Administrator Only
+├── Role: Time_Off_HD_Specialist
+│   ├── Permissions: [View HD Leave Flags, Approve HD Leave]
+│   └── Restrictions: Time Off Team Only
+└── Role: Payroll_Processor
+    ├── Permissions: [Execute HD Leave Enhancement, Query HD Rates]
+    └── Restrictions: Payroll Processing Team Only
+```
+
+### 12. Data Quality and Validation Metadata
+
+#### 12.1 Data Validation Rules
+```
+Data Quality Rules
+├── DQ_HD_LEAVE_ALIGNMENT
+│   ├── Description: Validate HD and leave date alignment
+│   ├── Validation: HD end date <= Leave start date + 1 working day
+│   └── Severity: Error
+├── DQ_RATE_CONSISTENCY
+│   ├── Description: Ensure rate consistency across HD periods
+│   ├── Validation: HD rate matches compensation data
+│   └── Severity: Warning
+└── DQ_CONSECUTIVE_LEAVE
+    ├── Description: Validate consecutive leave without breaks
+    ├── Validation: No non-eligible leave between eligible leave
+    └── Severity: Error
+```
+
+### 13. Audit and Compliance Metadata
+
+#### 13.1 Audit Trail Configuration
+```
+Audit Configuration
+├── Audit Object: HD_Leave_Payment
+│   ├── Fields Tracked: [employeeId, leaveType, hdRate, appliedRate, processedDate]
+│   ├── Trigger: On Leave Payment Processing
+│   └── Retention: 7 years
+├── Audit Object: HD_Rate_Change
+│   ├── Fields Tracked: [employeeId, oldRate, newRate, changeReason]
+│   ├── Trigger: On HD Rate Modification
+│   └── Retention: 7 years
+└── Audit Object: Consecutive_Leave
+    ├── Fields Tracked: [employeeId, leaveSequence, consecutiveFlag, validationResult]
+    ├── Trigger: On Leave Sequence Processing
+    └── Retention: 7 years
+```
+
+### 14. Metadata Summary and Dependencies
+
+#### 14.1 Critical Dependencies
+- **EC Time Off** → **EC Payroll** (Leave data transfer)
+- **Higher Duties Infotype** → **Payroll Enhancement** (Rate calculation)
+- **Work Schedule** → **Leave Processing** (Break day validation)
+- **Custom MDF Objects** → **Payroll Operations** (Flag and rate storage)
+
+#### 14.2 Enhancement Impact Areas
+- Payroll schema modifications
+- Time Off integration extensions
+- Custom MDF object implementations
+- Business rule configurations
+- Integration mapping updates
+
+This metadata extraction provides the comprehensive foundation for implementing the E026 Higher Duties and Leave Rate Inclusive enhancement in SAP SuccessFactors, ensuring compliance with the Queensland Department of Education's Higher Duties directive.

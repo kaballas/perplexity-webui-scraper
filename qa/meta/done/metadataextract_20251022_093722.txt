@@ -1,0 +1,114 @@
+# HCMS WRICEF Requirements Analysis - Structured Notes
+
+## 1. Document Scope and Section Hierarchy
+
+**Primary Context**: Queensland Department of Education HCMS Programme - Explore Phase
+**System Architecture**: SAP SuccessFactors Solution Design with WRICEF Framework
+**Document Category**: Enterprise Solution Architecture
+**Business Unit**: Queensland Department of Education
+**Programme**: Human Capital Management System (HCMS) Programme
+
+### Key Document Relationships:
+- WRICEF Mapping for Key Requirements → Functional Requirements & WRICEF
+- Custom WRICEF Requirements Analysis → Functional Requirements & WRICEF Classification  
+- WRICEF Requirements for HCMS → Implementation Planning
+- Probation Management Enhancements → Employee Central Customization
+
+## 2. Key Entities, Systems, and Components
+
+### Core Systems:
+- **SAP SuccessFactors** (Primary HCM Platform)
+- **Employee Central (EC)** - Position and Employee Management
+- **MDF (Manage Data Framework)** - Custom Data Objects
+- **Payroll Integration** - External Payroll Systems
+- **SAP Finance Modules** - Budget and Resource Management
+
+### WRICEF Components Identified:
+- **W** - Workflows (Custom Business Processes)
+- **R** - Reports (Custom Reporting Requirements) 
+- **I** - Interfaces (System-to-System Integration)
+- **C** - Configurations (Standard SAP Configuration)
+- **E** - Enhancements (Custom Development/Extensions)
+
+### Business Requirements Entities:
+- **FTE Management** - Full-Time Equivalent Controls
+- **Position Management** - Role and Position Lifecycle
+- **School-Specific Requirements** - Educational Sector Customizations
+- **Payroll Integration** - Automated Allowance Processing
+- **Location Management** - Work Site vs Physical Location Differentiation
+
+## 3. Relationships and Dependencies
+
+### Technical Dependencies:
+```
+FR-17 (FTE Cap Warnings) → MDF Objects + Custom Workflows + Validation Logic
+FR-25 (School FTE Management) → External Systems Integration + MDF Extensions
+FR-26 (Multi-Level FTE Allocation) → Custom Validation Rules + Reporting
+FR-32 (Position-Based Allowances) → Payroll Interface + MDF Mapping
+FR-37 (Dual Location Recording) → MDF Extensions + Integration
+```
+
+### Integration Dependencies:
+- **Payroll Engine** ←→ **Position Allowances** (FR-32)
+- **Finance Systems** ←→ **FTE Cap Management** (FR-17, FR-25, FR-26)
+- **Facilities Management** ←→ **Location Data** (FR-37)
+- **External School Systems** ←→ **Resource Planning** (FR-25)
+
+### Governance Dependencies:
+- **Design Assumptions**: Custom interface and enhancement requirements fully scoped and resourced
+- **Integration Dependencies**: High severity, blocking items requiring WRICEF prioritization
+- **Change Management**: Formal WRICEF processes for custom development governance
+
+## 4. Technical Flows and Integrations
+
+### Position Creation Flow (FR-17):
+1. Position Creation Request → Validation Check → FTE Cap Comparison
+2. MDF Object Query → Organizational Unit Limits → Real-time Validation
+3. Workflow Trigger → Approval Process → Position Finalization
+
+### FTE Management Flow (FR-25, FR-26):
+1. Organizational Hierarchy → Multi-level FTE Calculation → Allocation Rules
+2. MDF Extensions → Custom Attributes → Validation Workflows
+3. Finance Integration → Budget Synchronization → Reporting
+
+### Payroll Integration Flow (FR-32):
+1. Position Assignment → Allowance Mapping → MDF Object Linkage
+2. Interface Trigger → Payroll Engine Communication → Calculation Inclusion
+3. Data Synchronization → Automated Processing → Validation
+
+### Location Recording Flow (FR-37):
+1. Employee Data Entry → Dual Location Capture → MDF Storage
+2. Validation Rules → Data Quality Check → System Integration
+3. Reporting → Location Analytics → Compliance Tracking
+
+## 5. Validation and Traceability
+
+### Requirement Validation:
+- **FR-17**: Real-time FTE cap validation requires custom enhancement (E) and MDF objects
+- **FR-25**: School-specific FTE management requires interface (I) and enhancement (E)
+- **FR-26**: Multi-level FTE allocation requires enhancement (E) and report (R)
+- **FR-32**: Position-based allowances require interface (I) and enhancement (E)
+- **FR-37**: Dual location recording requires enhancement (E) and interface (I)
+
+### Technical Validation:
+- Standard SuccessFactors EC does not provide real-time organizational FTE cap validation
+- Multi-level organizational constraints require custom validation logic beyond standard capabilities
+- Position-to-payroll allowance synchronization requires custom interface development
+- School-specific hierarchies and attributes need MDF extensions and custom workflows
+
+### Traceability Matrix:
+| FR ID | Requirement Type | WRICEF Classification | Integration Impact | Priority |
+|-------|------------------|----------------------|-------------------|----------|
+| FR-17 | FTE Cap Validation | E (Enhancement) | High | High |
+| FR-25 | School FTE Management | I (Interface), E (Enhancement) | High | High |
+| FR-26 | Multi-level FTE | E (Enhancement), R (Report) | Medium | High |
+| FR-32 | Payroll Allowances | I (Interface), E (Enhancement) | High | Critical |
+| FR-37 | Location Recording | E (Enhancement), I (Interface) | Medium | Medium |
+
+### Quality Assurance:
+- All identified requirements exceed standard SuccessFactors capabilities
+- WRICEF classifications align with SAP implementation best practices
+- Integration dependencies validated against HCMS technical architecture
+- Change management processes documented for formal WRICEF governance
+
+**Confidence Score**: 1.0 for technical accuracy, 0.9 for implementation feasibility based on documented HCMS programme context.

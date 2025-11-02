@@ -1,0 +1,186 @@
+# SAP SuccessFactors Metadata Extraction Report
+## School Holiday Calendar Custom Table Implementation
+
+### Executive Summary
+This metadata extraction report details the custom table structure required for the Queensland Department of Education's School Holiday Calendar implementation in Employee Central Payroll (ECP). The analysis reveals a comprehensive data model requiring custom table creation in the customer name range to support payroll calculations, service periods, and vacation payments.
+
+---
+
+## 1. Custom Table Metadata Definition
+
+### Primary Custom Table: School Holiday Calendar
+**Table Purpose**: Store Queensland DoE-specific school calendar data for payroll calculations and service period management
+
+**Table Location**: SAP Customer Name Range (ECP)
+
+**Data Classification**: Payroll Configuration Extension
+
+### Field Definitions and Properties
+
+#### 1.1 Core Calendar Fields
+| Field Name | Data Type | Length | Description | Key Field | Required |
+|------------|-----------|---------|-------------|-----------|----------|
+| `calendarYear` | Integer | 4 | Calendar Year for Terms | Yes | Yes |
+| `schoolType` | String | 20 | School Type (6 Week/7 Week/Detention Centre) | Yes | Yes |
+| `schoolYearStartDate` | Date | - | 1st Day of the School Year | No | Yes |
+| `schoolYearEndDate` | Date | - | Last Day of the School Year | No | Yes |
+
+#### 1.2 Term-Specific Fields
+| Field Name | Data Type | Length | Description | Required | Validation |
+|------------|-----------|--------|-------------|----------|------------|
+| `term1StartDate` | Date | - | 1st Day of Term 1 | Yes | Must be within school year |
+| `term1EndDate` | Date | - | Last Day of Term 1 | Yes | Must be after start date |
+| `term1Days` | Integer | - | Number of School Days in Term 1 | Yes | Positive integer |
+| `term2StartDate` | Date | - | 1st Day of Term 2 | Yes | Must be within school year |
+| `term2EndDate` | Date | - | Last Day of Term 2 | Yes | Must be after start date |
+| `term2Days` | Integer | - | Number of School Days in Term 2 | Yes | Positive integer |
+| `term3StartDate` | Date | - | 1st Day of Term 3 | Yes | Must be within school year |
+| `term3EndDate` | Date | - | Last Day of Term 3 | Yes | Must be after start date |
+| `term3Days` | Integer | - | Number of School Days in Term 3 | Yes | Positive integer |
+| `term4StartDate` | Date | - | 1st Day of Term 4 | Yes | Must be within school year |
+| `term4EndDate` | Date | - | Last Day of Term 4 | Yes | Must be after start date |
+| `term4Days` | Integer | - | Number of School Days in Term 4 | Yes | Positive integer |
+
+#### 1.3 Vacation and Payment Fields
+| Field Name | Data Type | Length | Description | Required | Validation |
+|------------|-----------|--------|-------------|----------|------------|
+| `summerVacationStartDate` | Date | - | 1st Day of Summer Vacation | Yes | Must be after school year end |
+| `summerVacationEndDate` | Date | - | Last Day of Summer Vacation | Yes | Must be after start date |
+| `summerVacationPaymentDate` | Date | - | Vacation Payment Processing Date | Yes | Must be within vacation period |
+| `summerVacationEntitlement` | Integer | - | Vacation Days Entitlement | Yes | Positive integer (28 for 6/7 week) |
+| `totalSchoolDays` | Integer | - | Total School Days for the Year | Yes | Positive integer |
+
+---
+
+## 2. Secondary School Day Information Table
+
+### Table Purpose
+Store daily school day classifications for payroll processing
+
+### Field Definitions
+| Field Name | Data Type | Length | Description | Key Field | Required |
+|------------|-----------|--------|-------------|-----------|----------|
+| `date` | Date | - | Day of School Year | Yes | Yes |
+| `is6WeekSchoolDay` | Boolean | - | 6 Week School Day Indicator | No | Yes |
+| `is7WeekSchoolDay` | Boolean | - | 7 Week School Day Indicator | No | Yes |
+
+---
+
+## 3. Foundation Object Relationships
+
+### 3.1 Integration Dependencies
+- **Payroll Calendar Integration**: Custom table data drives payroll calendar calculations
+- **Day Class Configuration**: School day indicators support day class derivations
+- **Service Period Calculations**: Term dates impact service period tracking
+- **Payment Processing**: Vacation dates trigger automated payment schedules
+
+### 3.2 Data Flow Relationships
+```
+School Holiday Calendar Table → Payroll Processing Engine → Payment Calculations
+School Day Info Table → Day Class Determination → Payroll Calendar Updates
+```
+
+---
+
+## 4. Picklist and Validation Metadata
+
+### 4.1 School Type Picklist Values
+- **6 Week School**
+- **7 Week School** 
+- **Detention Centre**
+
+### 4.2 Validation Rules
+| Rule Name | Field | Condition | Error Message |
+|-----------|-------|-----------|---------------|
+| SchoolYearDateRange | All Term Dates | Must fall within schoolYearStartDate and schoolYearEndDate | "Term dates must be within school year range" |
+| SequentialTerms | Term End/Start Dates | Term N+1 start must be after Term N end | "Terms must not overlap and maintain chronological order" |
+| PositiveDays | All Days Fields | Must be positive integers | "Day counts must be positive values" |
+| VacationTiming | Vacation Dates | Must be after school year end | "Vacation period must follow school year" |
+
+---
+
+## 5. MDF Object Configuration
+
+### 5.1 Custom MDF Objects Required
+- **SchoolHolidayCalendar**: Primary calendar data structure
+- **SchoolDayClassification**: Daily school day indicators
+
+### 5.2 Field Properties
+- **Effective Dating**: Not required (static calendar data)
+- **Multi-tenant Support**: Customer-specific implementation
+- **Audit Trail**: Required for data governance
+- **Security**: Payroll-restricted access level
+
+---
+
+## 6. Integration Mapping Metadata
+
+### 6.1 Source System Integration
+- **Data Source**: Queensland DoE Calendar Management System
+- **Update Frequency**: Annual (when calendar confirmed)
+- **Load Process**: Periodical payroll process integration
+
+### 6.2 Target System Integration
+- **Destination**: Employee Central Payroll (ECP)
+- **Processing Engine**: Payroll calculation engine
+- **Dependent Processes**: Salary calculations, vacation payments, service periods
+
+---
+
+## 7. Security and Permission Metadata
+
+### 7.1 Role-Based Access Control
+- **Payroll Administrator**: Full CRUD access to calendar data
+- **Payroll Specialist**: Read-only access for calculations
+- **System Integration**: Read/Write access for automated updates
+
+### 7.2 Data Privacy Considerations
+- **Classification**: Internal Business Data
+- **Retention**: Historical calendar data maintained for 7 years
+- **Encryption**: Standard ECP data encryption applied
+
+---
+
+## 8. Workflow and Business Rule Metadata
+
+### 8.1 Business Rules
+- **Calendar Validation**: Automatic validation of date ranges and business logic
+- **Payment Triggers**: Vacation payment dates automatically generate payment processes
+- **Service Calculation**: Term dates drive service period calculations
+
+### 8.2 Workflow Requirements
+- **Approval Process**: Calendar updates require payroll manager approval
+- **Notification System**: Changes notify dependent payroll processes
+- **Error Handling**: Invalid calendar data triggers manual intervention
+
+---
+
+## 9. Performance and Optimization Metadata
+
+### 9.1 Indexing Strategy
+- **Primary Index**: calendarYear, schoolType
+- **Secondary Index**: schoolYearStartDate, schoolYearEndDate
+- **Lookup Index**: Date-based queries for daily operations
+
+### 9.2 Data Volume Projections
+- **Records per Year**: ~100 records (1 per school type per year)
+- **Historical Retention**: 3 years forward visibility (2 years in advance + current)
+- **Daily Lookup Records**: ~365 records per year for daily classifications
+
+---
+
+## 10. Implementation Recommendations
+
+### 10.1 Technical Implementation
+1. **Custom Table Creation**: Implement in SAP customer name range in ECP
+2. **Data Validation**: Implement comprehensive validation rules
+3. **Integration Framework**: Establish automated update processes
+4. **Testing Strategy**: Validate all calculation scenarios with real calendar data
+
+### 10.2 Governance Requirements
+1. **Data Ownership**: Establish clear ownership for calendar maintenance
+2. **Update Process**: Define annual calendar update workflow
+3. **Change Management**: Plan for calendar modifications during school year
+4. **Backup Strategy**: Ensure calendar data backup and recovery procedures
+
+This metadata extraction provides the comprehensive foundation for implementing the Queensland DoE School Holiday Calendar in SAP SuccessFactors ECP, ensuring proper payroll integration and service period management.

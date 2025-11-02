@@ -1,3 +1,7 @@
+# Local modules
+from .logger import get_logger
+
+
 class ModelBase:
     """Base class for all models"""
 
@@ -6,10 +10,14 @@ class ModelBase:
 
     @classmethod
     def _get_identifier(cls) -> str:
+        logger = get_logger()
+        logger.debug(f"Model {cls.__name__} returning identifier: {cls._identifier}")
         return cls._identifier
 
     @classmethod
     def _get_mode(cls) -> str:
+        logger = get_logger()
+        logger.debug(f"Model {cls.__name__} returning mode: {cls._mode}")
         return cls._mode
 
 
@@ -25,13 +33,13 @@ class ModelType:
     class Best(ModelBase):
         """Selects the best model for each query"""
 
-        _identifier = "pplx_pro"
+        _identifier = "claude2"
         _mode = "copilot"
 
     class Sonar(ModelBase):
         """Perplexity's fast model"""
 
-        _identifier = "experimental"
+        _identifier = "claude37sonnetthinking"
         _mode = "copilot"
 
     class Claude40Sonnet(ModelBase):

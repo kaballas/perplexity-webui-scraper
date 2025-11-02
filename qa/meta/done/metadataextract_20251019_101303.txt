@@ -1,0 +1,326 @@
+# SAP SuccessFactors Onboarding 2H 2025 Metadata Extraction Report
+
+## Executive Summary
+This comprehensive metadata extraction analyzes critical onboarding issues identified in the 2H 2025 Preview Release, focusing on Custom MDF objects, e-signature workflows, and candidate initiation processes. The analysis covers system configurations, object dependencies, and permission frameworks affecting the Queensland Department of Education HCMS implementation.
+
+## 1. Core MDF Objects Affected
+
+### 1.1 Custom MDF Objects - Rehire Limitation
+```
+Object: ONB2DataCollectionConfig (Generic MDF Object)
+├── External Code: DEFAULT_DATA_COLLECTION_CONFIG
+├── Key Fields: 
+│   ├── dataCollectionConfigId (String, Required)
+│   ├── uiItemList (String, Multi-value)
+│   ├── businessRule (String, Reference)
+│   └── visibilityCondition (String, Formula)
+├── Relationships:
+│   ├── ONB2_DataCollectionConfigSelect (Business Rule)
+│   └── Custom Task Linkage Configuration
+└── Temporal Management: Not applicable for configuration objects
+```
+
+**Field Properties:**
+- **dataCollectionConfigId**: String(100), Required, Unique Identifier
+- **uiItemList**: String(255), Multi-value, References UI Configuration Items
+- **businessRule**: String(100), Reference to Business Rule Objects
+- **visibilityCondition**: String(500), Formula Field for Conditional Display
+
+### 1.2 E-Signature Template Configuration Objects
+```
+Object: Document Template Configuration
+├── Template Types: PDF, XDP
+├── Field Definitions:
+│   ├── DocuSignSignHere (Signature Field)
+│   │   ├── Width: 52.92mm (Standardized)
+│   │   ├── Height: 7.76mm (Standardized)
+│   │   └── COSArray Configuration (Fixed null issue)
+│   └── DocuSignDateSigned (Date Field)
+│       ├── Width: 52.92mm (Standardized)
+│       ├── Height: 7.76mm (Standardized)
+│       └── COSArray Configuration (Fixed null issue)
+└── Integration: Admin Center > Maintain Onboarding and Offboarding Document Templates
+```
+
+## 2. Business Process Engine (BPE) Objects
+
+### 2.1 BPE Service User Configuration
+```
+Permission Group: OnboardingBPEServiceUser
+├── Core Permissions:
+│   ├── Manage Hires (Add New User, Rehire)
+│   ├── Process Management
+│   ├── SFAPI Retrieve Candidate
+│   ├── OData API Candidate Export
+│   └── Administrate Onboarding Content
+├── Target Population: External Onboarding User
+└── Scope: Everyone (External Onboarding User)
+```
+
+**Permission Metadata:**
+- **Manage Hires**: Enables user creation and rehire processes
+- **Process Management**: Controls BPE workflow execution
+- **SFAPI Retrieve Candidate**: API access for candidate data retrieval
+- **OData API Candidate Export**: OData endpoint access for candidate data
+- **Administrate Onboarding Content**: Administrative access to onboarding configurations
+
+### 2.2 Process Variant Manager Objects
+```
+Object: OnboardingProcessVariant
+├── Primary New Hire Tasks (Standard/Custom Task Association)
+├── Secondary New Hire Tasks (Independent Block Configuration)
+├── Document Flow Blocks (Event-Triggered Coordination)
+└── Process Trigger Conditions (Business Rule Dependencies)
+```
+
+## 3. Integration and API Metadata
+
+### 3.1 OData API Endpoints
+```
+API: SFAPI Retrieve Candidate
+├── Endpoint: /odata/v2/Candidate
+├── Required Permissions: SFAPI Retrieve Candidate
+├── Integration: Recruiting-to-Onboarding
+└── Dependencies: OData API Candidate Export
+
+API: OData API Candidate Export
+├── Endpoint: /odata/v2/OnboardingCandidate
+├── Required Permissions: OData API Candidate Export
+└── Integration: BPE Service User Access
+```
+
+**API Field Definitions:**
+- **Candidate Entity**: 
+  - candidateId (String, Primary Key)
+  - firstName, lastName (String, Required)
+  - email (String, Unique)
+  - status (String, Picklist)
+
+### 3.2 Platform Feature Settings
+```
+Feature: Business Process Engine
+├── Configuration: Provisioning > Company Settings
+├── Dependencies: Employee Central V2 (Required even without EC license)
+├── UI Integration: BPE in UI
+└── Intelligent Services: Upgrade Center activation
+
+Feature: Dynamic Group (DG) Filters
+├── Object: Onboarding or Offboarding Process Trigger
+├── Permissions: External User Role-Based Access
+└── Configuration: Narrowed-down List Access
+```
+
+## 4. Permission and Role Metadata
+
+### 4.1 External User Permissions
+```
+Role: External Onboarding User
+├── DG Filter Configuration:
+│   ├── Onboarding Process Trigger Permissions
+│   ├── Offboarding Process Trigger Permissions
+│   └── Narrowed-down List Access (Rehire Verification)
+├── Permission Group: SAP_ONB2_RehireCoordinator
+└── ToDo Tile Visibility: Rehire Verification Workflows
+```
+
+**Permission Matrix:**
+| Permission | Scope | Access Level | Target Population |
+|------------|-------|--------------|-------------------|
+| Onboarding Process Trigger | External User | Read/Write | External Onboarding User |
+| Offboarding Process Trigger | External User | Read/Write | External Onboarding User |
+| SAP_ONB2_RehireCoordinator | Rehire Verification | View/Action | Rehire Coordinators |
+
+### 4.2 Advanced Permissions
+```
+Permission: Process Management
+├── Function: BPE Process Monitoring
+├── Access Level: Service User Required
+└── Dependencies: OnboardingBPEServiceUser Group
+
+Permission: Administrate Onboarding Content
+├── Function: Document Template Management
+├── Access Level: Admin Center Configuration
+└── Dependencies: Document Flow Configuration
+```
+
+## 5. Document Flow Configuration Metadata
+
+### 5.1 Three-Step Process Architecture
+```
+Step 1: PDF/XDP Form Creation
+├── Template Format: PDF, XDP
+├── Field Mapping: Signature and Date Fields
+└── Validation: Dimensional Requirements (52.92mm x 7.76mm)
+
+Step 2: Field Mapping and Signature Assignment
+├── DocuSign Integration: SignHere and DateSigned fields
+├── Field Area Array: COSArray Configuration
+└── Error Handling: ServerErrorException Prevention
+
+Step 3: Assign Forms Business Rule
+├── Configuration: Onboarding Section
+├── Process Variant: Step Condition Logic
+└── Form Assignment: Business Rule Scenarios
+```
+
+**Document Template Field Properties:**
+- **DocuSignSignHere**: 
+  - Type: Signature Field
+  - Width: 52.92mm (Standard)
+  - Height: 7.76mm (Standard)
+  - COSArray: Configured to prevent null values
+
+## 6. Custom Task Configuration Objects
+
+### 6.1 Task Linkage Metadata
+```
+Object: Custom Task Configuration
+├── Admin Center Linkage: Custom MDF Task Visibility
+├── UI Item Configuration: Multiple List Support
+├── Business Rule Control: ONB2_DataCollectionConfigSelect
+└── Rehire Population Targeting: Specific UI Configurations
+```
+
+**Task Configuration Properties:**
+- **Task Name**: String(100), Required
+- **Description**: Text(500), Optional
+- **Visibility Rule**: String(255), Business Rule Reference
+- **Target Population**: String(100), Dynamic Group Reference
+
+## 7. System Configuration Dependencies
+
+### 7.1 Platform Requirements
+```
+System: Employee Central V2
+├── Requirement: Even without EC license
+├── Integration: BPE Service User Access
+└── Dependency: Business Process Engine Enablement
+
+System: Intelligent Services
+├── Configuration: Upgrade Center (Not Provisioning)
+├── Integration: Intelligent Workflow
+└── Dependency: BPE Enablement
+```
+
+## 8. Audit and Compliance Metadata
+
+### 8.1 Audit Trail Requirements
+```
+Object: Custom Data Collection Process Flow
+├── Compensating Controls: Custom MDF Rehire Limitations
+├── Documentation: Business Rule Configurations
+└── Compliance: Queensland DoE HCMS Requirements
+
+Object: E-Signature Failure Logs
+├── Network Tab Error Logs: Retention Requirements
+├── Template Version History: Change Management
+└── Compliance Validation: Document Template Standards
+```
+
+**Audit Trail Fields:**
+- **Process ID**: String(50), Unique Process Identifier
+- **Timestamp**: DateTime, Process Execution Time
+- **User ID**: String(50), Executing User
+- **Action**: String(100), Process Action Type
+- **Result**: String(50), Success/Failure Status
+
+## 9. Error Handling and Validation Metadata
+
+### 9.1 Server Error Configuration
+```
+Error: ServerErrorException
+├── Root Cause: Null COSArray fieldAreaArray
+├── Field: DocuSignSignHere/DocuSignDateSigned
+├── Solution: Standardized Dimensions (52.92mm x 7.76mm)
+└── Validation: Network Developer Tools Verification
+```
+
+**Error Handling Properties:**
+- **Error Code**: String(50), System Error Code
+- **Error Message**: Text(500), Detailed Error Description
+- **Field Area Array**: COSArray, Configured Array Reference
+- **Dimension Validation**: Boolean, Dimension Compliance Check
+
+## 10. Picklist Metadata
+
+### 10.1 Onboarding Status Picklists
+```
+Picklist: ONB2_OnboardingStatus
+├── Values: 
+│   ├── INITIATED
+│   ├── IN_PROGRESS
+│   ├── COMPLETED
+│   └── CANCELLED
+└── Usage: Onboarding Process Tracking
+```
+
+### 10.2 Document Template Type Picklists
+```
+Picklist: ONB2_DocumentTemplateType
+├── Values:
+│   ├── PDF
+│   ├── XDP
+│   └── DOCX
+└── Usage: Template Format Specification
+```
+
+## 11. Workflow and Business Rule Metadata
+
+### 11.1 ONB2_DataCollectionConfigSelect Business Rule
+```
+Rule: ONB2_DataCollectionConfigSelect
+├── Trigger: Data Collection Configuration
+├── Logic: UI Item List Selection Based on Population
+├── Output: Configured UI Item List
+└── Dependencies: ONB2DataCollectionConfig MDF Object
+```
+
+**Business Rule Properties:**
+- **Rule Name**: String(100), Unique Identifier
+- **Trigger Event**: String(50), Process Trigger
+- **Logic Type**: String(50), Formula/Condition
+- **Output Format**: String(255), Result Configuration
+
+## 12. Integration Mapping Metadata
+
+### 12.1 Recruiting-to-Onboarding Integration
+```
+Mapping: RecruitingCandidateToOnboardee
+├── Source: SFAPI Candidate Entity
+├── Target: OnboardingCandidate Entity
+├── Fields: 
+│   ├── candidateId → onboardeeId
+│   ├── firstName → firstName
+│   ├── lastName → lastName
+│   └── email → email
+└── Validation: Data Type and Format Compliance
+```
+
+## 13. Security and Permission Metadata
+
+### 13.1 Service User Account Configuration
+```
+User: OnboardingBPEServiceUser
+├── Account Type: Service Account
+├── Permissions: 
+│   ├── Process Management
+│   ├── API Access (SFAPI, OData)
+│   └── Content Administration
+└── Scope: System-Level Operations
+```
+
+## 14. Metadata Summary for Implementation
+
+### 14.1 Critical Configuration Items
+- **Document Template Dimensions**: 52.92mm x 7.76mm standard
+- **BPE Service User Permissions**: Complete permission set validation
+- **Custom MDF Workaround**: ONB2DataCollectionConfig deployment
+- **Process Variant Manager**: Task association architecture
+
+### 14.2 Risk Mitigation Metadata
+- **Priority 1**: E-signature template validation
+- **Priority 2**: Custom Data Collection fallback workflows
+- **Priority 3**: BPE Service User permission audit
+- **Priority 4**: Regression testing framework implementation
+
+This comprehensive metadata extraction provides the foundation for addressing the 2H 2025 Preview Release issues while maintaining system integrity and compliance for the Queensland Department of Education HCMS Programme.

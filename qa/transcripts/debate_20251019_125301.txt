@@ -1,0 +1,1577 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 12:53:02
+Topic: Teacher Transfer Process
+The teacher transfer process will be implemented using BTP and will not be part of the SF RCM standard
+solution. This decision is based on the complexity and policy-driven nature of teacher transfers, which
+Page | 177
+require multi-dimensional eligibility, regional matching, and service-based prioritisation that cannot be
+effectively supported through standard RCM configuration. Key reasons include:
+􀍻 RCM does not support dynamic vacancy-candidate matching based on service duration, region,
+and preference logic.
+􀍻 Transfer workflows involve bidirectional approvals (from both source and target schools), which
+exceed the capabilities of standard route maps.
+􀍻 Internal-facing transfer portals and dashboards are not natively available in RCM
+Instead, the Queensland Department of Education will manage teacher transfers via a custom solution on
+SAP Business Technology Platform (BTP E011), leveraging flexible development tools and tight
+integration with EC and RCM for downstream activities.
+
+
+Page | 228
+E011 – EOI for TEACHER TRANSFER / TEACHER AIDES + TRANSFER
+POINTS CALCULATION & REPORTING
+A teacher's transfer points are calculated in consideration of their service in the last 10 calendar years with
+the department, inclusive of the current school year. As each year of service is completed, a teacher's
+accrued points total is increased by the level of transfer points which their current location attracts but is
+also decreased by the number of points received for the year of service 10 years earlier.
+The Teacher Transfer Points Summary Report and the Teacher Transfer Points Detail Report will be
+developed to support the annual teacher transfer process that is managed by staff in Regional Offices and
+coordinated by Human Resources, Central Office.
+The Teacher Transfer Points Summary Report and the Teacher Transfer Points Detail Report will enable
+Regional HR Consultants to view the position and transfer point accrual details, summarised by year, for a
+specified employee within their Organisational Units and provide the flexibility to export the output.
+The Teacher Transfer Points Detail Report will enable Regional HR Consultants to view the total transfer
+point balance and the daily service and accrual details for the specified employee.
+Current State
+Transfer Application Process
+The teacher transfer system is accessed through their My HR system and supports teachers who wish to
+move to different schools. Transfer requests are guided by specific eligibility criteria, including minimum
+service periods. Unlike other roles, transfer jobs are not advertised locally.
+Teachers provide detailed application data such as preferred locations, service history, and teaching
+areas, which is then used for matching against vacancies.
+Applications that are unsuccessful automatically roll over to the following year unless withdrawn or
+updated by the teacher. At year-end, teachers are prompted to confirm whether they want their
+application to remain active.
+As Is Process in DoE
+􀁸 Designed to support ongoing applications and placements year-round.
+􀁸 Teachers can now apply and be placed anytime.
+􀁸 However, this has proven disruptive to principals when teachers leave mid-year.
+􀁸 Not all vacancies are listed through the teacher recruitment system.
+􀁸 Despite centralisation, bulk placements are still managed by regions using principal-led panels.
+Key Elements of the Process
+The transfer process can be broken down into three key phases:
+􀁸 Request Process – Submission of transfer application.
+Page | 229
+􀁸 Identification Process – Matching teachers to potential vacancies.
+􀁸 Selection Process – Evaluation and placement decision.
+System and Technical Details
+􀁸 All transfer activity is managed through the TSS teacher transfer system, which is separate from
+Springboard.
+􀁸 Teachers apply to one unified talent pool across the state but can select multiple preferred
+regions.
+􀁸 The system closes briefly each year, during which HR manually uploads applications into new
+requisitions. An annual advertisement process also occurs during this time.
+Future State - Out of The Box
+The Teacher Transfer process is an entirely DoE specific requirement that cannot be met through the
+standard product.
+Enhancement Considerations
+Whilst predominately a Teacher process, the design needs to cater for Non-Teaching positions such as
+Teacher Aides.
+Furthermore, the confirmation of a Transfer window or period needs to be clarified for the final design, i.e.
+whether this process of expressing an interest to relocate is done once a year – at then at specific times or
+is a process that can be engaged in at any time of the school year.
+For the accurate calculation of the transfer points, the following should be considered:
+􀁸 Accrual Calculation: Points accrue based on transfer rating levels and years of continuous
+service, proportioned by workdays in a school year. The accrual is limited to the last ten years of
+service.
+􀁸 Transfer Rating Levels: When no transfer rating is assigned, a default level of 1 is applied. If a
+rating is reduced, the higher previous rating applies for up to three years.
+􀁸 Service Types and Leave: Part-time service accrues points at full-time rates; temporary
+engagements count as continuous service if breaks do not exceed 60 school days; unpaid leave
+over one month generally excludes accrual except for the first three months of workers’
+compensation leave.
+􀁸 Special Cases: Transfer points reset to zero upon first preference transfers under specified
+conditions and upon formal separation from the Department. Reemployment after separation
+does not count previous points.
+Page | 230
+􀁸 Accelerated Points: Schools with transfer ratings 3 to 7 have accelerated point accrual after
+specific years of service, with rules for movements between schools affecting the accelerated
+year count.
+Contractual Considerations
+Transfers do not result in a new employment contract. They are treated as location changes, with all
+contractual terms remaining unchanged. Selection steps and transfer status are tracked within the system.
+Current Challenges and Discussion Points
+􀁸 A significant number (50%) of applications come from teachers wanting to move within their own
+region.
+􀁸 There’s an ongoing need to improve prioritisation for teachers with rural or remote service.
+􀁸 One key focus is quickly placing these priority teachers in preferred locations.
+Historic Data
+As 10-year History will be required the design will need to consider connection to HR Resource Group for
+the pre SuccessFactors history. Additionally, the assumption is that the calculation of Transfer Points
+needs to occur in HR Resource Group otherwise all the data to support the last 10 years would need to
+be migrated as part of the Cutover.
+As such, the design of the BTP App will focus on the user interface and consider the calculation of Transfer
+Points out of scope.
+Reporting
+In addition to the Expression Of Interest App, there should be a Teacher Transfer Details Report that
+displays the total transfer point accrued at the end of the calendar year and the daily accrual details
+including school transfer rating and accelerated accrual details, for an employee and provide the
+flexibility to export the output.
+The Teacher Transfer Points Detail Report will enable Regional HR Consultants to view the total transfer
+point accrued and the daily service accrual details for a specified employee.
+The Teacher Transfer Points Detail Report will be triggered from the BTP App, but retrieve the necessary
+data from HR Resource Group.
+Enhancement Design
+Employee Central
+From the Employee Central Home Page, a BTP Application will be accessed by 3 distinct personas:
+Employee (Teacher / Teacher Aide)
+􀁸 ESS Expression of Interest to relocate
+Page | 231
+􀁸 Can be Region, School or Multiple Schools
+􀁸 Reason for moving (e.g. Compassionate / Hardship etc)
+􀁸 Declare Family Dependents
+HR / Internal Recruitment
+􀁸 Review Talent Pool interested in relocating
+􀁸 Run the Teacher Transfer Details Report
+􀁸 Action Transfer Status
+􀁸 Add details of relocation expenses (Air / Rail / Road / Ship etc.)
+Principal / Business Development Manager
+􀁸 Review Talent Pool interested in relocating to their school location
+􀁸 Action Preference to Hire / Accept employee
+
+TV: Report/Enhancement** - This involves calculating eligibility criteria (Teacher Transfer Rating TR4-TR7) and determining reward payment amounts. *BTP E011 Integration** logic to:
+   - Calculate Teacher Transfer Ratings based on Queensland DoE-specific criteria
+   - Integrate with SuccessFactors Compensation via APIs
+   - Trigger payment calculations based on eligibility criteria
+   - Handle the conditional logic for Beginning Teacher payments
+TV : Core
+- Transfer Point Calculation: Accurately calculate transfer points based on location ratings (1-7 scale) and service duration
+- Eligibility Management: Determine teacher eligibility for transfer applications based on service years and point requirements
+- Historical Data Management: Maintain 10-year rolling service history for accurate point calculations
+- Application Workflow: Manage end-to-end transfer application process with multi-level approvals
+- Data Integrity: Ensure consistent and accurate transfer point calculations across all locations
+
+TV : Functional
+- RQ-TP-001: System must calculate transfer points based on location rating and days of service
+- RQ-TP-002: System must maintain 10-year historical service records
+- RQ-TP-003: System must support transfer application submission and approval workflows
+- RQ-TP-004: System must enforce continuous service rules with 60-day break tolerance
+- RQ-TP-005: System must provide real-time eligibility validation for transfer applications
+Max Rounds: 80
+First Speaker: hugging
+================================================================================
+
+================================================================================
+Round 1 - MetadataExtract
+================================================================================
+# SAP SuccessFactors Metadata Extraction Report: Teacher Transfer Points System
+
+## Executive Summary
+This metadata extraction focuses on the Teacher Transfer Points system within the Queensland Department of Education's HCMS program, specifically analyzing the BTP (Business Technology Platform) application for teacher transfers and the underlying data structures required for transfer point calculations. The analysis covers the custom solution architecture bypassing standard RCM limitations.
+
+## Core Entity Analysis
+
+### Primary Foundation Objects
+
+#### FOCompany
+```
+Entity: FOCompany
+- Purpose: Organizational structure for transfer rating locations
+- Key Fields: 
+  - companyCode (String, 32, Primary Key)
+  - companyName (String, 255)
+  - transferRatingLevel (Integer, 1-7 scale)
+  - locationType (Picklist: URBAN, RURAL, REMOTE, METROPOLITAN)
+  - effectiveStartDate (Date)
+  - effectiveEndDate (Date)
+- Relationships: Linked to JobInfo, EmploymentInfo for location-based calculations
+- Validations: Transfer rating level must be between 1-7
+```
+
+#### FODepartment
+```
+Entity: FODepartment  
+- Purpose: School/Regional office structures
+- Key Fields:
+  - departmentCode (String, 32, Primary Key)
+  - departmentName (String, 255)
+  - transferRating (Integer, 1-7 scale)
+  - schoolType (Picklist: PRIMARY, SECONDARY, COMBINED, SPECIAL)
+  - regionCode (String, 16)
+  - effectiveStartDate (Date)
+  - effectiveEndDate (Date)
+- Relationships: Connected to employee assignments and transfer history
+- Validations: Transfer rating follows 1-7 Queensland DoE scale
+```
+
+#### JobInfo
+```
+Entity: JobInfo
+- Purpose: Employment assignment tracking for transfer point calculations
+- Key Fields:
+  - jobInfoId (String, 32, Primary Key)
+  - userId (String, 32, Foreign Key to User)
+  - startDate (Date)
+  - endDate (Date)
+  - company (String, 32, Foreign Key to FOCompany)
+  - department (String, 32, Foreign Key to FODepartment)
+  - transferRatingLevel (Integer, 1-7 inherited from company/department)
+  - workDaysCount (Integer)
+  - partTimeFactor (Decimal, 0.1-1.0)
+- Relationships: Links employee to location for service calculation
+- Validations: End date must be >= start date, work days calculated from service period
+```
+
+### Custom MDF Objects for Transfer Points
+
+#### TransferPointsHistory (Custom MDF)
+```
+Entity: TransferPointsHistory
+- Purpose: Historical transfer point tracking for 10-year rolling window
+- Key Fields:
+  - externalCode (String, 32, Primary Key)
+  - userId (String, 32, Foreign Key to User)
+  - calendarYear (Integer, YYYY)
+  - yearStartDate (Date)
+  - yearEndDate (Date)
+  - totalPointsAccrued (Decimal, 2 decimal places)
+  - dailyAccrualDetails (String, 4000) - JSON format
+  - serviceDays (Integer)
+  - transferRatingApplied (Integer, 1-7)
+  - acceleratedAccrualFlag (Boolean)
+  - effectiveStartDate (Date)
+  - effectiveEndDate (Date)
+- Validations: Points cannot exceed maximum for rating level, 10-year retention policy
+- Security: HR and Regional Consultants access only
+```
+
+#### TransferApplication (Custom MDF)
+```
+Entity: TransferApplication
+- Purpose: Transfer request and application management
+- Key Fields:
+  - externalCode (String, 32, Primary Key)
+  - userId (String, 32, Foreign Key to User)
+  - applicationDate (Date)
+  - transferType (Picklist: PRIORITY, REQUESTED, EXCEPTION)
+  - currentTotalPoints (Decimal, 2 decimal places)
+  - requestedRegion (String, 32, Foreign Key to FOCompany)
+  - requestedSchools (String, 1000) - Multi-value picklist
+  - reasonForTransfer (Picklist: COMPASSIONATE, HARDSHIP, CAREER, FAMILY)
+  - familyDependents (Integer)
+  - applicationStatus (Picklist: DRAFT, SUBMITTED, APPROVED, REJECTED, WITHDRAWN)
+  - transferStatus (Picklist: PENDING, APPROVED, COMPLETED, CANCELLED)
+  - effectiveTransferDate (Date)
+  - sourceSchool (String, 32, Foreign Key to FODepartment)
+  - targetSchool (String, 32, Foreign Key to FODepartment)
+  - approvalRequiredFromSource (Boolean)
+  - approvalRequiredFromTarget (Boolean)
+  - sourceApprovalStatus (Picklist: PENDING, APPROVED, REJECTED)
+  - targetApprovalStatus (Picklist: PENDING, APPROVED, REJECTED)
+- Validations: Minimum service period check, points eligibility validation
+- Workflow: Bi-directional approval process
+```
+
+#### TransferRatingMatrix (Custom MDF)
+```
+Entity: TransferRatingMatrix
+- Purpose: Transfer rating level definitions and rules
+- Key Fields:
+  - externalCode (String, 32, Primary Key)
+  - locationType (Picklist: URBAN, RURAL, REMOTE, METROPOLITAN)
+  - baseRating (Integer, 1-7)
+  - acceleratedAfterYears (Integer)
+  - maxPointsPerYear (Decimal)
+  - acceleratedMultiplier (Decimal, 1.0-2.0)
+  - ratingEffectiveDate (Date)
+  - ratingEndDate (Date)
+  - description (String, 500)
+- Validations: Rating must be 1-7, accelerated years must be positive
+- Business Rules: Higher ratings apply for 3 years after reduction
+```
+
+### Picklist Definitions
+
+#### Transfer Type Picklist
+```
+Picklist: transferType
+- Values:
+  - PRIORITY: "Priority Transfer"
+  - REQUESTED: "Requested Transfer" 
+  - EXCEPTION: "Exception Transfer"
+- Usage: TransferApplication.transferType
+- Validation: Required field
+```
+
+#### Reason for Transfer Picklist
+```
+Picklist: reasonForTransfer
+- Values:
+  - COMPASSIONATE: "Compassionate/Hardship"
+  - CAREER: "Career Development"
+  - FAMILY: "Family Reasons"
+  - HEALTH: "Health Reasons"
+  - SAFETY: "Safety Concerns"
+- Usage: TransferApplication.reasonForTransfer
+- Validation: Required for application submission
+```
+
+#### Application Status Picklist
+```
+Picklist: applicationStatus
+- Values:
+  - DRAFT: "Draft"
+  - SUBMITTED: "Submitted"
+  - APPROVED: "Approved"
+  - REJECTED: "Rejected"
+  - WITHDRAWN: "Withdrawn"
+- Usage: TransferApplication.applicationStatus
+- Workflow: Status transitions governed by approval process
+```
+
+#### Approval Status Picklist
+```
+Picklist: approvalStatus
+- Values:
+  - PENDING: "Pending"
+  - APPROVED: "Approved"
+  - REJECTED: "Rejected"
+- Usage: TransferApplication.sourceApprovalStatus, TransferApplication.targetApprovalStatus
+- Workflow: Bi-directional approval requirement
+```
+
+### Integration Metadata
+
+#### BTP-EC Integration Points
+```
+Integration: BTP_to_EC_Transfer_Data
+- Source: BTP Application
+- Target: Employee Central
+- Objects: TransferApplication, TransferPointsHistory
+- Frequency: Real-time for applications, daily for point calculations
+- Method: OData API
+- Security: OAuth 2.0 authentication
+- Error Handling: Retry logic with 3 attempts, dead letter queue
+```
+
+#### HR Resource Group Integration
+```
+Integration: EC_to_HRRG_Transfer_History
+- Source: Employee Central
+- Target: HR Resource Group (Historical Data)
+- Objects: TransferPointsHistory (10-year history)
+- Frequency: Batch daily
+- Method: SAP Integration Suite
+- Data Flow: Historical service data for calculation validation
+```
+
+### Security and Permission Metadata
+
+#### Field-Level Security
+```
+Security Profile: TransferPointsAdmin
+- Access Level: Read/Write
+- Objects: TransferPointsHistory, TransferApplication, TransferRatingMatrix
+- Users: HR Administrators, Regional Consultants
+- Permissions: Full CRUD operations
+
+Security Profile: TransferPointsView
+- Access Level: Read-only
+- Objects: TransferPointsHistory, TransferApplication
+- Users: Principals, Managers
+- Permissions: View own and subordinate transfer data
+```
+
+#### Role-Based Access Control
+```
+Role: TeacherTransferUser
+- Permissions: Submit transfer applications, view own points
+- Scope: Own user data only
+- Access: ESS portal
+
+Role: RegionalHRConsultant
+- Permissions: View applications, run reports, manage approvals
+- Scope: Regional organizational units
+- Access: MSS portal, BTP application
+
+Role: Principal
+- Permissions: Review applications for school, approve/reject
+- Scope: School-specific
+- Access: MSS portal
+```
+
+### Workflow Configuration Metadata
+
+#### Transfer Application Workflow
+```
+Workflow: TransferApplicationWF
+- Initiator: Employee (Teacher/Teacher Aide)
+- Steps:
+  1. Application Submission (Employee)
+  2. Eligibility Validation (System)
+  3. Source School Approval (Principal)
+  4. Target School Approval (Principal) 
+  5. HR Review (Regional Consultant)
+  6. Final Approval (HR Administrator)
+- Conditions: Points eligibility, service requirements
+- Notifications: Email to all stakeholders at each step
+```
+
+### Report and Dashboard Metadata
+
+#### Teacher Transfer Points Summary Report
+```
+Report: TransferPointsSummary
+- Purpose: Summarize transfer points by employee and year
+- Fields: Employee details, points by year, total points
+- Filters: Organizational unit, employee, date range
+- Output: PDF/Excel export capability
+- Access: Regional HR Consultants
+```
+
+#### Teacher Transfer Points Detail Report
+```
+Report: TransferPointsDetail
+- Purpose: Detailed daily accrual and service tracking
+- Fields: Daily service, accrual details, rating levels
+- Filters: Employee, date range
+- Source: HR Resource Group for historical data
+- Output: Detailed Excel export
+- Access: HR and Regional Consultants
+```
+
+### Data Validation Rules
+
+#### Service Continuity Validation
+```
+Rule: ContinuousServiceCheck
+- Logic: Breaks > 60 school days reset continuity
+- Trigger: JobInfo end date change
+- Action: Recalculate transfer points from break date
+- Exception: Unpaid leave < 1 month maintains continuity
+```
+
+#### Transfer Rating Validation
+```
+Rule: TransferRatingValidation
+- Logic: Apply rating 1-7 scale with acceleration rules
+- Trigger: Department change in JobInfo
+- Action: Calculate points based on new rating
+- Exception: Previous higher rating applies for 3 years after reduction
+```
+
+### Business Rules for Point Calculation
+
+#### Accrual Calculation Logic
+```
+Rule: TransferPointAccrual
+- Formula: (Days of Service / Total School Days) * Rating Level
+- Time Frame: Last 10 calendar years
+- Reset: Upon first preference transfer under specified conditions
+- Maximum: Capped by rating level maximum points per year
+```
+
+#### Accelerated Accrual Rules
+```
+Rule: AcceleratedPointAccrual
+- Trigger: Schools with rating 3-7 after specific service years
+- Rate: Multiplier applied to standard accrual
+- Tracking: Separate counter for accelerated year calculation
+- Validation: Movement between schools affects acceleration counter
+```
+
+This metadata extraction provides the comprehensive data architecture foundation for implementing the teacher transfer points system within SAP SuccessFactors Employee Central, ensuring proper tracking of the 10-year service history and accurate transfer point calculations as required by the Queensland Department of Education.
+
+================================================================================
+Round 2 - FunctionalSpec
+================================================================================
+# Functional Specifications and Requirements Analysis
+## Teacher Transfer Points System - SAP SuccessFactors Implementation
+
+### Executive Summary
+This document provides comprehensive functional specifications for the Queensland Department of Education's Teacher Transfer Points System implemented within SAP SuccessFactors Employee Central. The solution addresses the complex requirements for transfer point calculation, eligibility validation, and approval workflows while maintaining 10-year historical data tracking and integration with external BTP applications.
+
+### 1. Business Requirements Analysis
+
+#### 1.1 Core Business Objectives
+- **Transfer Point Calculation**: Implement automated calculation of transfer points based on 10-year rolling service history with location-specific ratings (1-7 scale)
+- **Eligibility Management**: Validate transfer eligibility based on service continuity, point thresholds, and organizational requirements
+- **Approval Workflow**: Establish bi-directional approval processes involving source and target schools
+- **Historical Data Maintenance**: Preserve 10-year transfer point history with accurate daily accrual tracking
+- **Compliance Reporting**: Generate reports for HR, Regional Consultants, and Principals with appropriate security controls
+
+#### 1.2 Functional Requirements Overview
+- **Data Management**: Foundation objects for location ratings, department structures, and employment history
+- **Custom MDF Objects**: Transfer points history, application management, and rating matrix configuration
+- **Integration Services**: BTP-EC data synchronization and historical data integration
+- **Workflow Automation**: Multi-step approval processes with conditional routing
+- **Reporting Capabilities**: Summary and detailed reports with export functionality
+- **Security Controls**: Role-based access with field-level security
+
+### 2. System Architecture and Data Model
+
+#### 2.1 Foundation Object Specifications
+
+**FOCompany Entity**
+```
+Purpose: Organizational structure for transfer rating locations
+Key Configuration:
+- companyCode: Primary identifier with unique constraint
+- transferRatingLevel: Integer field (1-7) with validation rule
+- locationType: Picklist (URBAN, RURAL, REMOTE, METROPOLITAN)
+- Effective dating: Support for historical location rating changes
+Validation Rules:
+- Transfer rating must be between 1-7
+- Location type required field validation
+```
+
+**FODepartment Entity**
+```
+Purpose: School and regional office structures
+Key Configuration:
+- departmentCode: Primary identifier with unique constraint
+- transferRating: Integer field (1-7) with inheritance from company
+- schoolType: Picklist (PRIMARY, SECONDARY, COMBINED, SPECIAL)
+- regionCode: Reference to organizational hierarchy
+Validation Rules:
+- Transfer rating follows Queensland DoE 1-7 scale
+- School type required field validation
+```
+
+#### 2.2 Custom MDF Object Specifications
+
+**TransferPointsHistory Object**
+```
+Business Purpose: Historical transfer point tracking for 10-year window
+Field Configuration:
+- externalCode: Primary key with auto-generation
+- userId: Foreign key reference to User object
+- calendarYear: Integer field for year-based queries
+- totalPointsAccrued: Decimal (2 places) for precise calculations
+- dailyAccrualDetails: JSON field for detailed breakdown
+- serviceDays: Integer for daily calculation tracking
+- transferRatingApplied: Integer reference to rating level
+- acceleratedAccrualFlag: Boolean for special calculation rules
+Security Configuration:
+- HR and Regional Consultants access only
+- Read-only for historical data after 30 days
+Validation Rules:
+- Points cannot exceed maximum for rating level
+- 10-year retention policy enforcement
+```
+
+**TransferApplication Object**
+```
+Business Purpose: Transfer request and application management
+Field Configuration:
+- Application workflow tracking fields
+- Multi-value picklist for requested schools
+- Bi-directional approval status fields
+- Service and point eligibility validation
+Workflow Integration:
+- Source and target school approval requirements
+- Conditional routing based on transfer type
+Validation Rules:
+- Minimum service period check (60 school days)
+- Points eligibility validation against current total
+- Effective date validation (future-dated transfers)
+```
+
+### 3. Business Process Specifications
+
+#### 3.1 Transfer Point Calculation Process
+
+**Daily Accrual Logic**
+```
+Input Parameters:
+- Employee service period (startDate to endDate)
+- Location transfer rating (1-7 scale)
+- Part-time factor (0.1-1.0)
+- School calendar days calculation
+Processing Logic:
+- Calculate daily accrual = (Rating Level / Total School Days) * Part-time Factor
+- Accumulate points for each service day
+- Apply accelerated accrual multiplier for eligible schools
+- Maintain separate counters for standard and accelerated points
+Output: Daily accrual details stored in JSON format
+```
+
+**Service Continuity Rules**
+```
+Continuity Maintenance:
+- Unpaid leave < 30 days: Continuity maintained
+- Breaks > 60 school days: Reset continuity counter
+- Transfer between locations: Maintain continuous service
+- School closure/opening: Special handling for continuity
+Reset Conditions:
+- First preference transfer under specified conditions
+- Break in service exceeding 60 school days
+- Administrative decision override
+```
+
+#### 3.2 Transfer Application Workflow Process
+
+**Workflow Configuration**
+```
+Initiator: Employee (Teacher/Teacher Aide)
+Approval Chain:
+1. Application Submission (Employee ESS portal)
+2. Eligibility Validation (System automated check)
+3. Source School Approval (Principal approval required)
+4. Target School Approval (Principal approval required)
+5. HR Review (Regional Consultant validation)
+6. Final Approval (HR Administrator)
+Conditional Logic:
+- Priority transfers: Expedited approval path
+- Exception transfers: Additional validation steps
+- Multi-school requests: Parallel approval routing
+```
+
+**Approval Status Management**
+```
+Bi-directional Approval Requirements:
+- Source school: Verify employee availability
+- Target school: Confirm position availability
+- Approval status tracking: PENDING, APPROVED, REJECTED
+- Notification triggers: Email to all stakeholders
+- Timeout handling: Automatic escalation after 14 days
+```
+
+### 4. Integration Requirements
+
+#### 4.1 BTP-EC Integration Specifications
+
+**Data Synchronization**
+```
+Integration Type: Real-time OData API
+Source: BTP Transfer Application
+Target: Employee Central MDF Objects
+Objects Transferred:
+- TransferApplication: Application submission and status updates
+- TransferPointsHistory: Historical point calculations
+Frequency: Real-time for applications, daily batch for point updates
+Security: OAuth 2.0 authentication with role-based access
+Error Handling: Retry logic with 3 attempts, dead letter queue
+Monitoring: Integration health checks and alerting
+```
+
+#### 4.2 Historical Data Integration
+
+**HR Resource Group Integration**
+```
+Data Flow: EC to HRRG for historical validation
+Objects: TransferPointsHistory with 10-year retention
+Frequency: Daily batch processing
+Method: SAP Integration Suite with error handling
+Data Validation: Cross-reference historical calculations
+Archive Process: 10-year rolling window maintenance
+```
+
+### 5. Security and Authorization Requirements
+
+#### 5.1 Role-Based Access Control
+
+**TeacherTransferUser Role**
+```
+Permissions: Submit transfer applications, view own points
+Scope: Own user data only
+Access Method: ESS portal
+Field Restrictions: No access to other employee data
+Function Limitations: Cannot approve or modify other applications
+```
+
+**RegionalHRConsultant Role**
+```
+Permissions: View applications, run reports, manage approvals
+Scope: Regional organizational units
+Access Method: MSS portal, BTP application
+Special Permissions: Override validation rules, manage exceptions
+Reporting Access: All transfer-related reports and exports
+```
+
+**Principal Role**
+```
+Permissions: Review applications for school, approve/reject
+Scope: School-specific applications only
+Access Method: MSS portal with school-based filtering
+Approval Authority: Source and target school approval rights
+Notification Settings: Email alerts for pending applications
+```
+
+#### 5.2 Field-Level Security
+
+**TransferPointsAdmin Profile**
+```
+Access Level: Full CRUD operations
+Objects: All transfer-related MDF objects
+User Group: HR Administrators, Regional Consultants
+Audit Requirements: All changes logged with user identification
+```
+
+**TransferPointsView Profile**
+```
+Access Level: Read-only access
+Objects: Historical data and current applications
+User Group: Principals, Managers
+Scope Limitation: Own school/region only
+Export Restrictions: No bulk export capability
+```
+
+### 6. Reporting and Analytics Requirements
+
+#### 6.1 Standard Reports
+
+**Transfer Points Summary Report**
+```
+Purpose: Employee transfer point summary and calculation verification
+Fields: Employee details, points by year, total points, rating levels
+Filters: Organizational unit, employee, date range
+Output Formats: PDF, Excel with formatting
+Access Control: Regional HR Consultants and above
+Refresh Frequency: Real-time data access
+```
+
+**Transfer Points Detail Report**
+```
+Purpose: Detailed daily accrual and service tracking
+Fields: Daily service records, accrual calculations, rating changes
+Source: Historical data from HR Resource Group
+Output: Detailed Excel with pivot table capability
+Access Control: HR and Regional Consultants only
+Historical Depth: 10-year rolling window
+```
+
+#### 6.2 Dashboard Requirements
+
+**Manager Dashboard**
+```
+Components: Pending applications, approval status, reporting
+Filters: Organizational hierarchy, time periods
+Visualizations: Status charts, approval timelines
+Refresh Rate: Real-time for critical data
+Mobile Access: Responsive design for mobile devices
+```
+
+**HR Dashboard**
+```
+Components: Application volumes, approval rates, compliance metrics
+Filters: Regional, school, time-based filters
+Visualizations: Trend analysis, exception reporting
+Export Capability: Scheduled report generation
+Alert System: Compliance and deadline notifications
+```
+
+### 7. Configuration and Customization Analysis
+
+#### 7.1 Configuration vs. Customization Decisions
+
+**Standard SAP SuccessFactors Configuration**
+- Foundation objects (FOCompany, FODepartment) - Standard configuration
+- Basic workflow framework - Standard SAP workflow tools
+- Standard picklist management - Out-of-the-box functionality
+- Basic reporting - Standard SuccessFactors reporting tools
+
+**Custom Development Requirements**
+- TransferPointsHistory MDF object - Custom development required
+- TransferApplication MDF object - Custom development required
+- TransferRatingMatrix MDF object - Custom development required
+- BTP integration services - Custom integration development
+- Advanced calculation logic - Custom business rules
+
+#### 7.2 Business Rule Configuration
+
+**Transfer Rating Matrix Rules**
+```
+Configuration Method: Custom MDF object with business rules
+Maintenance: HR Administrator access for rating updates
+Validation: Rating level must be 1-7 scale
+Business Logic: Accelerated accrual after specific service years
+Exception Handling: Previous higher rating applies for 3 years
+```
+
+**Eligibility Validation Rules**
+```
+Minimum Service: 60 school days continuous service
+Point Thresholds: Based on current transfer rating
+Service Continuity: Break detection and continuity reset
+Administrative Override: Manual eligibility adjustment capability
+```
+
+### 8. Testing and Quality Assurance Requirements
+
+#### 8.1 Unit Testing Scenarios
+
+**Calculation Logic Testing**
+```
+Test Cases:
+- Daily accrual calculations with various part-time factors
+- Service continuity scenarios with breaks and leaves
+- Accelerated accrual trigger conditions
+- Historical data validation and import processes
+- Multi-year calculation accuracy verification
+```
+
+**Workflow Testing**
+```
+Test Cases:
+- Complete approval workflow execution
+- Conditional routing based on transfer type
+- Approval timeout and escalation scenarios
+- Error handling and recovery procedures
+- Notification delivery and receipt verification
+```
+
+#### 8.2 Integration Testing
+
+**BTP-EC Integration Testing**
+```
+Scenarios:
+- Real-time data synchronization accuracy
+- Error handling and retry logic
+- Performance under load conditions
+- Security authentication validation
+- Data integrity checks and validation
+```
+
+**Historical Data Integration Testing**
+```
+Scenarios:
+- Batch processing performance
+- Data validation and cross-reference
+- Archive and retention policy enforcement
+- Error recovery and data correction
+- Historical accuracy verification
+```
+
+### 9. Performance and Scalability Requirements
+
+#### 9.1 System Performance Specifications
+
+**Response Time Requirements**
+- Application submission: < 2 seconds
+- Point calculation display: < 3 seconds
+- Workflow approval: < 1 second
+- Report generation: < 10 seconds for standard reports
+- Historical data queries: < 15 seconds for 10-year data
+
+**Concurrency Requirements**
+- Simultaneous users: 500+ concurrent users
+- Peak load handling: 2x normal load capacity
+- Batch processing: Off-peak scheduling for heavy operations
+- Database optimization: Indexing for historical queries
+
+#### 9.2 Data Volume Management
+
+**Historical Data Retention**
+- 10-year rolling window maintenance
+- Archive strategy for older data
+- Query optimization for historical periods
+- Backup and recovery procedures for historical data
+
+**Performance Optimization**
+- Caching strategies for frequently accessed data
+- Index optimization for search operations
+- Batch processing for historical calculations
+- Data partitioning for large historical datasets
+
+### 10. Implementation and Deployment Plan
+
+#### 10.1 Phased Implementation Approach
+
+**Phase 1: Foundation Setup**
+- Foundation object configuration
+- Basic MDF object creation
+- Security role definition and assignment
+- Initial data migration for historical records
+
+**Phase 2: Core Functionality**
+- Transfer point calculation implementation
+- Workflow configuration and testing
+- BTP integration development and testing
+- User training for core processes
+
+**Phase 3: Advanced Features**
+- Reporting and dashboard deployment
+- Historical data integration
+- Advanced business rule implementation
+- Comprehensive testing and validation
+
+**Phase 4: Go-Live and Support**
+- Production deployment
+- User acceptance testing
+- Go-live support and monitoring
+- Post-deployment optimization
+
+This functional specification provides the comprehensive framework for implementing the Teacher Transfer Points System within SAP SuccessFactors, ensuring all business requirements are met while maintaining system performance, security, and scalability requirements.
+
+================================================================================
+Round 3 - MetadataExtract
+================================================================================
+# SAP SuccessFactors Metadata Extraction Report: Teacher Transfer Points System
+
+## Executive Summary
+This metadata extraction focuses on the Queensland Department of Education's Teacher Transfer Points system, analyzing the custom BTP (Business Technology Platform) application integrated with SuccessFactors Employee Central. The analysis covers the comprehensive data architecture required for transfer point calculations, eligibility management, and approval workflows that exceed standard RCM capabilities.
+
+## Core Foundation Object Metadata
+
+### FOCompany - Transfer Rating Locations
+```
+Entity: FOCompany
+Purpose: Organizational structure for transfer rating locations
+API Endpoint: /odata/v2/FOCompany
+Effective Dating: Yes
+Key Fields:
+  - companyCode (String, 32, Primary Key, Required)
+    - Unique identifier for organizational units
+    - Validation: Alphanumeric, max 32 characters
+    - Security: Read/Write for Admin, Read for Regional HR
+  - companyName (String, 255, Required)
+    - Display name for the organizational unit
+    - Validation: Text field, max 255 characters
+  - transferRatingLevel (Integer, Range: 1-7, Required)
+    - Queensland DoE specific rating scale
+    - Validation: Numeric range 1-7 only
+    - Business Rule: Cannot exceed 7, minimum 1
+  - locationType (Picklist: URBAN|METROPOLITAN|RURAL|REMOTE, Required)
+    - Geographic classification affecting transfer points
+    - Validation: Fixed values only
+  - effectiveStartDate (Date, Required)
+    - Effective dating for rating changes
+    - Validation: Cannot be future date
+  - effectiveEndDate (Date, Optional)
+    - End date for effective dating
+    - Validation: Must be >= start date or null
+  - createdDate (DateTime, System Generated)
+    - Timestamp for record creation
+  - lastModifiedDateTime (DateTime, System Generated)
+    - Timestamp for last modification
+
+Relationships:
+  - One-to-Many: JobInfo (via company field)
+  - Many-to-Many: TransferApplication (via requestedRegion)
+  - Inheritance: Department transfer ratings from company
+
+Security Permissions:
+  - HR Admin: Full CRUD access
+  - Regional HR: Read-only access
+  - Principal: Read access to assigned regions
+```
+
+### FODepartment - School Structures
+```
+Entity: FODepartment
+Purpose: School and regional office structures with transfer ratings
+API Endpoint: /odata/v2/FODepartment
+Effective Dating: Yes
+Key Fields:
+  - departmentCode (String, 32, Primary Key, Required)
+    - Unique identifier for departments/schools
+    - Validation: Alphanumeric, max 32 characters
+  - departmentName (String, 255, Required)
+    - Display name of the department/school
+  - transferRating (Integer, Range: 1-7, Required)
+    - School-specific transfer rating
+    - Validation: Numeric range 1-7, defaults to company rating
+  - schoolType (Picklist: PRIMARY|SECONDARY|COMBINED|SPECIAL, Required)
+    - Educational level classification
+  - regionCode (String, 16, Required)
+    - Geographic region reference
+    - Validation: Must exist in FOCompany
+  - effectiveStartDate (Date, Required)
+  - effectiveEndDate (Date, Optional)
+  - createdDate (DateTime, System Generated)
+  - lastModifiedDateTime (DateTime, System Generated)
+
+Relationships:
+  - One-to-Many: JobInfo (via department field)
+  - Many-to-Many: TransferApplication (via source/target school)
+  - Parent: FOCompany (via regionCode)
+
+Security Permissions:
+  - HR Admin: Full CRUD access
+  - Regional HR: Read/Write for regional departments
+  - Principal: Read access to own school, Write for applications
+```
+
+### JobInfo - Employment Assignment Tracking
+```
+Entity: JobInfo
+Purpose: Employment assignment tracking for transfer point calculations
+API Endpoint: /odata/v2/JobInfo
+Effective Dating: Yes
+Key Fields:
+  - jobInfoId (String, 32, Primary Key, Auto-generated)
+    - Unique identifier for job assignment
+  - userId (String, 32, Foreign Key, Required)
+    - Reference to employee user
+    - Validation: Must exist in User object
+  - startDate (Date, Required)
+    - Assignment start date
+    - Validation: Cannot be future date
+  - endDate (Date, Optional)
+    - Assignment end date
+    - Validation: Must be >= start date or null
+  - company (String, 32, Foreign Key, Required)
+    - Reference to FOCompany
+    - Validation: Must exist in FOCompany
+  - department (String, 32, Foreign Key, Required)
+    - Reference to FODepartment
+    - Validation: Must exist in FODepartment
+  - transferRatingLevel (Integer, Range: 1-7, System Generated)
+    - Rating inherited from company/department
+    - Calculation: Updated when company/dept changes
+  - workDaysCount (Integer, Default: 0)
+    - Total work days in assignment
+    - Calculation: Based on school calendar
+  - partTimeFactor (Decimal, Range: 0.1-1.0, Default: 1.0)
+    - Part-time employment factor
+    - Validation: Decimal between 0.1 and 1.0
+  - isContinuousService (Boolean, Default: true)
+    - Flag for service continuity tracking
+    - Calculation: Based on service gap analysis
+  - effectiveStartDate (Date, Required)
+  - effectiveEndDate (Date, Optional)
+  - createdDate (DateTime, System Generated)
+  - lastModifiedDateTime (DateTime, System Generated)
+
+Business Rules:
+  - Service continuity validation (60 school day breaks)
+  - Transfer rating inheritance from department/company
+  - Work days calculation based on school calendar
+
+Relationships:
+  - Many-to-One: User (via userId)
+  - Many-to-One: FOCompany (via company)
+  - Many-to-One: FODepartment (via department)
+
+Security Permissions:
+  - HR Admin: Full CRUD access
+  - Regional HR: Read/Write access
+  - Employee: Read-only access to own records
+```
+
+## Custom MDF Object Metadata
+
+### TransferPointsHistory - Historical Point Tracking
+```
+Entity: TransferPointsHistory
+Purpose: Historical transfer point tracking for 10-year rolling window
+API Endpoint: /odata/v2/TransferPointsHistory
+Effective Dating: Yes
+Object Type: MDF (Master Data Framework)
+Key Fields:
+  - externalCode (String, 32, Primary Key, Auto-generated)
+    - Unique identifier for history record
+    - Pattern: TPH_{userId}_{year}
+  - userId (String, 32, Foreign Key, Required)
+    - Reference to employee user
+    - Validation: Must exist in User object
+  - calendarYear (Integer, Required)
+    - Calendar year for point calculation
+    - Validation: 4-digit year format
+  - yearStartDate (Date, Required)
+    - Start date of calendar year
+    - Validation: January 1st of calendarYear
+  - yearEndDate (Date, Required)
+    - End date of calendar year
+    - Validation: December 31st of calendarYear
+  - totalPointsAccrued (Decimal, 10,2, Required)
+    - Total transfer points for the year
+    - Calculation: Sum of daily accruals
+    - Validation: Non-negative decimal
+  - dailyAccrualDetails (String, 4000, JSON Format)
+    - Detailed daily calculation breakdown
+    - Format: JSON array of daily records
+    - Structure: {date, rating, days, points, accelerated}
+  - serviceDays (Integer, Required)
+    - Total service days in the year
+    - Calculation: Working days in assignment
+  - transferRatingApplied (Integer, Range: 1-7, Required)
+    - Rating level applied for calculations
+    - Validation: 1-7 range
+  - acceleratedAccrualFlag (Boolean, Default: false)
+    - Flag for accelerated point accrual
+    - Calculation: Based on school rating and service years
+  - acceleratedYearsCount (Integer, Default: 0)
+    - Years of accelerated accrual eligibility
+    - Calculation: Based on service duration
+  - pointsResetReason (String, 255, Optional)
+    - Reason for point reset (if applicable)
+    - Validation: Predefined reasons only
+  - effectiveStartDate (Date, Required)
+  - effectiveEndDate (Date, Optional)
+  - createdDate (DateTime, System Generated)
+  - lastModifiedDateTime (DateTime, System Generated)
+
+Business Rules:
+  - 10-year retention policy enforcement
+  - Points calculation validation (max per rating level)
+  - Historical data integrity checks
+  - Daily accrual validation and consistency
+
+Validation Rules:
+  - totalPointsAccrued: Must be >= 0
+  - serviceDays: Must be >= 0 and <= 365
+  - transferRatingApplied: Must be 1-7
+  - dailyAccrualDetails: Valid JSON format required
+
+Security Permissions:
+  - HR Admin: Full CRUD access
+  - Regional HR Consultant: Read/Write access
+  - Employee: Read-only access to own records
+  - Principal: No access to historical data
+
+Field Security:
+  - dailyAccrualDetails: HR and above only
+  - pointsResetReason: HR Admin only
+```
+
+### TransferApplication - Transfer Request Management
+```
+Entity: TransferApplication
+Purpose: Transfer request and application management
+API Endpoint: /odata/v2/TransferApplication
+Effective Dating: No
+Object Type: MDF (Master Data Framework)
+Key Fields:
+  - externalCode (String, 32, Primary Key, Auto-generated)
+    - Unique identifier for transfer application
+    - Pattern: TA_{userId}_{timestamp}
+  - userId (String, 32, Foreign Key, Required)
+    - Reference to employee user
+    - Validation: Must exist in User object
+  - applicationDate (Date, System Generated)
+    - Date application was submitted
+    - Default: Current date
+  - transferType (Picklist: PRIORITY|REQUESTED|EXCEPTION|BULK, Required)
+    - Type of transfer request
+    - Validation: Fixed values only
+  - currentTotalPoints (Decimal, 10,2, System Generated)
+    - Current transfer points at application time
+    - Calculation: From TransferPointsHistory
+  - requestedRegion (String, 32, Foreign Key, Optional)
+    - Preferred region for transfer
+    - Validation: Must exist in FOCompany
+  - requestedSchools (String, 1000, Multi-value)
+    - Comma-separated list of preferred schools
+    - Validation: Must exist in FODepartment
+  - reasonForTransfer (Picklist: COMPASSIONATE|HARDSHIP|CAREER|FAMILY|PERSONAL|RETIREMENT, Required)
+    - Reason for requesting transfer
+    - Validation: Predefined values only
+  - familyDependents (Integer, Range: 0-10, Default: 0)
+    - Number of family dependents
+    - Validation: 0-10 range
+  - applicationStatus (Picklist: DRAFT|SUBMITTED|APPROVED|REJECTED|WITHDRAWN|PENDING_REVIEW, Default: DRAFT)
+    - Current status of application
+    - Validation: Sequential status changes only
+  - transferStatus (Picklist: PENDING|APPROVED|COMPLETED|CANCELLED|ON_HOLD, Default: PENDING)
+    - Transfer action status
+    - Validation: Based on approval status
+  - effectiveTransferDate (Date, Optional)
+    - Target date for transfer completion
+    - Validation: Future date required
+  - sourceSchool (String, 32, Foreign Key, Required)
+    - Current school assignment
+    - Validation: Must exist in FODepartment
+  - targetSchool (String, 32, Foreign Key, Optional)
+    - Approved target school
+    - Validation: Must exist in FODepartment
+  - approvalRequiredFromSource (Boolean, Default: true)
+    - Whether source school approval is required
+  - approvalRequiredFromTarget (Boolean, Default: true)
+    - Whether target school approval is required
+  - sourceApprovalStatus (Picklist: PENDING|APPROVED|REJECTED|NOT_REQUIRED, Default: PENDING)
+    - Approval status from source school
+  - targetApprovalStatus (Picklist: PENDING|APPROVED|REJECTED|NOT_REQUIRED, Default: PENDING)
+    - Approval status from target school
+  - sourceApprover (String, 32, Foreign Key, Optional)
+    - User who approved from source school
+  - targetApprover (String, 32, Foreign Key, Optional)
+    - User who approved from target school
+  - approvalDate (DateTime, Optional)
+    - Date of final approval
+  - rejectionReason (String, 500, Optional)
+    - Reason for application rejection
+  - serviceYearsAtCurrentLocation (Decimal, 5,2, System Generated)
+    - Years of service at current location
+    - Calculation: From JobInfo
+  - priorityScore (Decimal, 5,2, System Generated)
+    - Calculated priority score
+    - Calculation: Based on points, service, and priority factors
+  - createdDate (DateTime, System Generated)
+  - lastModifiedDateTime (DateTime, System Generated)
+
+Business Rules:
+  - Minimum service period validation (60 school days)
+  - Point eligibility validation
+  - Bi-directional approval requirements
+  - Status transition validation
+  - Effective date validation (future-dated transfers)
+
+Validation Rules:
+  - requestedSchools: Must exist in FODepartment
+  - effectiveTransferDate: Must be future date if specified
+  - familyDependents: 0-10 range validation
+  - applicationStatus: Sequential transitions only
+
+Security Permissions:
+  - Employee: CRUD access to own applications
+  - Principal: Read access to applications for their school, Write for approvals
+  - Regional HR: Full access to regional applications
+  - HR Admin: Full access to all applications
+
+Field Security:
+  - currentTotalPoints: Read-only for employees
+  - priorityScore: HR and above only
+  - rejectionReason: HR and above only
+```
+
+### TransferRatingMatrix - Rating Configuration
+```
+Entity: TransferRatingMatrix
+Purpose: Configuration matrix for transfer rating calculations
+API Endpoint: /odata/v2/TransferRatingMatrix
+Effective Dating: Yes
+Object Type: MDF (Master Data Framework)
+Key Fields:
+  - externalCode (String, 32, Primary Key, Auto-generated)
+    - Unique identifier for rating matrix record
+    - Pattern: TRM_{ratingLevel}_{effectiveDate}
+  - ratingLevel (Integer, Range: 1-7, Required)
+    - Transfer rating level (1-7 scale)
+    - Validation: 1-7 range only
+  - ratingDescription (String, 255, Required)
+    - Description of the rating level
+  - maxPointsPerYear (Decimal, 5,2, Required)
+    - Maximum points achievable per year
+    - Validation: Positive decimal value
+  - acceleratedAfterYears (Integer, Default: 0)
+    - Years of service after which acceleration applies
+    - Validation: Non-negative integer
+  - accelerationMultiplier (Decimal, 3,2, Default: 1.0)
+    - Multiplier for accelerated accrual
+    - Validation: >= 1.0
+  - isPriorityRating (Boolean, Default: false)
+    - Flag for priority transfer consideration
+  - effectiveStartDate (Date, Required)
+    - Start date for rating configuration
+    - Validation: Cannot be future date
+  - effectiveEndDate (Date, Optional)
+    - End date for rating configuration
+    - Validation: >= start date or null
+  - createdDate (DateTime, System Generated)
+  - lastModifiedDateTime (DateTime, System Generated)
+
+Business Rules:
+  - Rating level validation (1-7 scale)
+  - Acceleration rules based on rating level
+  - Effective dating validation
+  - Configuration inheritance rules
+
+Security Permissions:
+  - HR Admin: Full CRUD access
+  - System: Read-only access for calculations
+```
+
+## Picklist Metadata
+
+### Transfer Application Status Picklist
+```
+Picklist: transferApplicationStatus
+Purpose: Status values for transfer applications
+Values:
+  - DRAFT: Application is being prepared
+  - SUBMITTED: Application submitted for review
+  - APPROVED: Application approved by all parties
+  - REJECTED: Application rejected
+  - WITHDRAWN: Application withdrawn by employee
+  - PENDING_REVIEW: Awaiting HR review
+Validation: Sequential status transitions enforced
+Security: All users can view values
+```
+
+### Transfer Reason Picklist
+```
+Picklist: transferReason
+Purpose: Reasons for requesting transfer
+Values:
+  - COMPASSIONATE: Compassionate grounds
+  - HARDSHIP: Hardship circumstances
+  - CAREER: Career development
+  - FAMILY: Family reasons
+  - PERSONAL: Personal reasons
+  - RETIREMENT: Retirement transfer
+Security: All users can view values
+```
+
+### Location Type Picklist
+```
+Picklist: locationType
+Purpose: Geographic classification of locations
+Values:
+  - URBAN: Urban location
+  - METROPOLITAN: Metropolitan area
+  - RURAL: Rural location
+  - REMOTE: Remote location
+Security: All users can view values
+```
+
+## Business Rule Metadata
+
+### TransferPointAccrualRule
+```
+Rule Name: TransferPointAccrualRule
+Purpose: Calculate daily transfer point accrual
+Trigger: JobInfo update (startDate, endDate, company, department)
+Logic:
+  IF JobInfo.endDate IS NULL OR JobInfo.endDate >= TODAY
+    THEN calculate daily accrual based on current rating
+  ELSE calculate accrual for completed period only
+Calculation:
+  dailyAccrual = (ratingLevel / totalSchoolDays) * partTimeFactor
+  totalPoints = SUM(dailyAccrual for each service day)
+Validation: Points cannot exceed maximum for rating level
+Security: System-generated, no user access
+```
+
+### ServiceContinuityRule
+```
+Rule Name: ServiceContinuityRule
+Purpose: Validate continuous service requirements
+Trigger: JobInfo end date change
+Logic:
+  IF breakInService > 60 school days
+    THEN reset continuity counter
+    ELSE maintain continuous service
+Exception: Unpaid leave < 30 days maintains continuity
+Validation: Check for breaks exceeding 60 school days
+Security: System-generated, no user access
+```
+
+### TransferEligibilityRule
+```
+Rule Name: TransferEligibilityRule
+Purpose: Validate transfer eligibility requirements
+Trigger: TransferApplication submission
+Logic:
+  IF serviceDays < 60 school days
+    THEN reject with insufficient service
+  ELSE IF currentPoints < minimumRequired
+    THEN reject with insufficient points
+  ELSE approve eligibility
+Validation: Minimum service and points requirements
+Security: Applied during application submission
+```
+
+## Integration Metadata
+
+### BTP-EC Integration Configuration
+```
+Integration Type: Real-time OData API
+Source System: BTP Application (E011)
+Target System: SuccessFactors Employee Central
+Objects Transferred:
+  - TransferApplication: Application submission and status
+  - TransferPointsHistory: Historical point calculations
+Authentication: OAuth 2.0 with role-based access
+Frequency: Real-time for applications, daily batch for points
+Error Handling: Retry logic with 3 attempts, dead letter queue
+Monitoring: Integration health checks and alerting
+Security: Encrypted communication, role-based access control
+```
+
+### HR Resource Group Integration
+```
+Integration Type: Batch processing
+Source System: HR Resource Group
+Target System: SuccessFactors EC
+Objects: TransferPointsHistory (historical data)
+Frequency: Daily batch processing
+Method: SAP Integration Suite
+Data Validation: Cross-reference historical calculations
+Archive Process: 10-year rolling window maintenance
+Security: Encrypted data transfer, audit logging
+```
+
+## Security Metadata
+
+### Role-Based Access Control
+
+#### TeacherTransferUser Role
+```
+Role Name: TeacherTransferUser
+Purpose: Basic transfer application access
+Permissions:
+  - Submit transfer applications
+  - View own transfer points
+  - View own application status
+Scope: Own user data only
+Access Method: ESS portal
+Field Restrictions: No access to other employee data
+Function Limitations: Cannot approve or modify other applications
+```
+
+#### RegionalHRConsultant Role
+```
+Role Name: RegionalHRConsultant
+Purpose: Regional transfer management
+Permissions:
+  - View applications in assigned regions
+  - Run transfer reports
+  - Manage transfer approvals
+  - Override validation rules (with approval)
+Scope: Regional organizational units
+Access Method: MSS portal, BTP application
+Special Permissions: Exception management
+Reporting Access: All transfer-related reports
+```
+
+#### Principal Role
+```
+Role Name: Principal
+Purpose: School-level transfer management
+Permissions:
+  - Review applications for assigned school
+  - Approve/reject transfer requests
+  - View school transfer metrics
+Scope: School-specific applications only
+Access Method: MSS portal with school filtering
+Approval Authority: Source/target school approvals
+Notification Settings: Email alerts for pending applications
+```
+
+### Field-Level Security Configuration
+```
+TransferPointsAdmin Profile:
+  - Access Level: Full CRUD operations
+  - Objects: All transfer-related MDF objects
+  - User Group: HR Administrators
+  - Audit Requirements: All changes logged
+
+TransferPointsView Profile:
+  - Access Level: Read-only access
+  - Objects: Historical data and applications
+  - User Group: Principals, Managers
+  - Scope Limitation: Own school/region only
+  - Export Restrictions: No bulk export capability
+```
+
+## Report Metadata
+
+### TransferPointsSummaryReport
+```
+Report Name: TransferPointsSummaryReport
+Purpose: Employee transfer point summary
+Fields: Employee details, points by year, total points, rating levels
+Filters: Organizational unit, employee, date range
+Output Formats: PDF, Excel with formatting
+Access Control: Regional HR Consultants and above
+Refresh Frequency: Real-time data access
+Security: Role-based access control
+```
+
+### TransferPointsDetailReport
+```
+Report Name: TransferPointsDetailReport
+Purpose: Detailed daily accrual and service tracking
+Fields: Daily service records, accrual calculations, rating changes
+Source: Historical data from HR Resource Group
+Output: Detailed Excel with pivot table capability
+Access Control: HR and Regional Consultants only
+Historical Depth: 10-year rolling window
+Security: Restricted access based on role
+```
+
+## Workflow Metadata
+
+### TransferApplicationWorkflow
+```
+Workflow Name: TransferApplicationWorkflow
+Purpose: Multi-step transfer application approval process
+Initiator: Employee (Teacher/Teacher Aide)
+Approval Chain:
+  1. Application Submission (Employee ESS portal)
+  2. Eligibility Validation (System automated check)
+  3. Source School Approval (Principal approval required)
+  4. Target School Approval (Principal approval required)
+  5. HR Review (Regional Consultant validation)
+  6. Final Approval (HR Administrator)
+Conditional Logic:
+  - Priority transfers: Expedited approval path
+  - Exception transfers: Additional validation steps
+  - Multi-school requests: Parallel approval routing
+Security: Role-based access at each approval step
+```
+
+### BiDirectionalApprovalProcess
+```
+Process Name: BiDirectionalApprovalProcess
+Purpose: Source and target school approval requirements
+Requirements:
+  - Source school: Verify employee availability
+  - Target school: Confirm position availability
+  - Approval status tracking: PENDING, APPROVED, REJECTED
+  - Notification triggers: Email to all stakeholders
+  - Timeout handling: Automatic escalation after 14 days
+Security: Principal access for their assigned schools only
+```
+
+## Performance and Scalability Metadata
+
+### System Performance Specifications
+```
+Response Time Requirements:
+  - Application submission: < 2 seconds
+  - Point calculation display: < 3 seconds
+  - Workflow approval: < 1 second
+  - Report generation: < 10 seconds for standard reports
+  - Historical data queries: < 15 seconds for 10-year data
+
+Concurrency Requirements:
+  - Simultaneous users: 500+ concurrent users
+  - Peak load handling: 2x normal load capacity
+  - Batch processing: Off-peak scheduling for heavy operations
+```
+
+### Data Volume Management
+```
+Historical Data Retention:
+  - 10-year rolling window maintenance
+  - Archive strategy for older data
+  - Query optimization for historical periods
+  - Backup and recovery procedures for historical data
+
+Performance Optimization:
+  - Caching strategies for frequently accessed data
+  - Index optimization for search operations
+  - Batch processing for historical calculations
+  - Data partitioning for large historical datasets
+```
+
+## Configuration Metadata
+
+### Custom MDF Object Dependencies
+```
+Dependency Chain:
+  TransferRatingMatrix -> TransferPointsHistory -> TransferApplication
+  FOCompany -> FODepartment -> JobInfo -> TransferPointsHistory
+  User -> JobInfo -> TransferPointsHistory -> TransferApplication
+
+Validation Dependencies:
+  - TransferApplication requires valid userId from User
+  - TransferPointsHistory requires valid userId from User
+  - JobInfo requires valid company from FOCompany
+  - JobInfo requires valid department from FODepartment
+```
+
+### Business Rule Dependencies
+```
+Rule Chain:
+  ServiceContinuityRule -> TransferPointAccrualRule -> TransferEligibilityRule
+  TransferRatingMatrix -> TransferPointAccrualRule
+  JobInfo changes -> All dependent rules
+
+Execution Order:
+  1. ServiceContinuityRule (first)
+  2. TransferPointAccrualRule (second)
+  3. TransferEligibilityRule (last)
+```
+
+This comprehensive metadata extraction provides the complete data architecture foundation for implementing the Queensland Department of Education's Teacher Transfer Points System within SAP SuccessFactors Employee Central, ensuring proper tracking of the 10-year service history and accurate transfer point calculations as required by the complex policy-driven transfer process.
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 3
+Total Characters: 49536

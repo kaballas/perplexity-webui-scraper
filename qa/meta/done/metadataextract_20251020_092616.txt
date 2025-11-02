@@ -1,0 +1,295 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Queensland Department of Education - Organizational Design System
+
+### Executive Summary
+This metadata extraction focuses on the organizational design requirements for the Queensland Department of Education, covering organizational units, jobs, positions, locations, and their relationships within SAP SuccessFactors Employee Central and Organizational Management modules.
+
+### 1. Core Organizational Data Objects
+
+#### 1.1 Organizational Unit Objects (FR-1 to FR-5)
+- **FOrganizationUnit** - Foundation object for organizational units
+  - **Key Fields**: 
+    - externalCode (Primary Key)
+    - name, description
+    - status (Active, Inactive, Planned)
+    - startDate, endDate (date-effective)
+    - parentId (hierarchical relationship)
+    - costCenter, locationId (FK to respective objects)
+    - headPositionId (FK to Position object)
+    - transferRating
+  - **Temporal Management**: Date-effective changes with effectiveStartDate/effectiveEndDate
+  - **Relationships**: Hierarchical parent-child, linked to positions, locations, cost centers
+
+- **OrganizationUnitMDF** - Master Data Framework extension object
+  - **Custom Fields**: 
+    - orgUnitType (Picklist: Department, Division, Region, School, Centre, Office, Branch, Business Unit)
+    - establishmentControl (Funded, Over-Establishment)
+    - fteCap (Maximum FTE allocation)
+  - **Temporal Management**: Date-effective custom attributes
+  - **Relationships**: Extension to FOrganizationUnit with additional attributes
+
+#### 1.2 Job Objects (FR-9 to FR-13)
+- **JobInfo** - Core job information object
+  - **Key Fields**:
+    - jobCode (Primary Key)
+    - jobTitle, jobDescription
+    - jobFamily, jobFunction
+    - jobRoleLevel1, jobRoleLevel2
+    - anzSCOCode, anzSCOName
+    - certifiedAgreement
+    - status (Active, Inactive, Planned)
+    - startDate, endDate (date-effective)
+  - **Temporal Management**: Date-effective job changes
+  - **Relationships**: Linked to positions, job families, classifications
+
+- **JobClassification** - Foundation object for job classifications
+  - **Key Fields**:
+    - externalCode (Primary Key)
+    - name, description
+    - jobFamilyId, jobFunctionId
+    - level, grade
+  - **Relationships**: Part of job architecture framework
+
+#### 1.3 Position Objects (FR-14 to FR-19)
+- **Position** - Core position object
+  - **Key Fields**:
+    - positionCode (Primary Key)
+    - positionTitle, locallyKnownAs
+    - jobCode (FK to JobInfo)
+    - reportsTo, supervisorPosition
+    - numberOfDirectReports
+    - budgetedFTE, actualFTE
+    - numberOfIncumbents, vacantFlag
+    - positionType (Picklist: Permanent, Temporary, Casual, Contractor)
+    - startDate, endDate (date-effective)
+    - fundingType
+    - departmentId, locationId, costCenterId (FK to respective objects)
+    - award, classification
+    - siteSpecificAllowance
+    - hrDelegation, financeDelegation
+    - identifiedPosition
+  - **Temporal Management**: Date-effective position changes
+  - **Relationships**: Links to jobs, organizational units, locations, cost centers, incumbents
+
+- **PositionMDF** - Master Data Framework extension for positions
+  - **Custom Fields**:
+    - roleDescription (Attachment field for role descriptions)
+    - concurrentEmploymentFlag
+    - establishmentControl
+  - **Relationships**: Extension to Position object with additional attributes
+
+#### 1.4 Location Objects (FR-34 to FR-36)
+- **Location** - Foundation object for locations
+  - **Key Fields**:
+    - externalCode (Primary Key)
+    - name, address
+    - locationContactDetails
+    - latitude, longitude
+    - status (Active, Inactive, Planned)
+    - startDate, endDate (date-effective)
+  - **Temporal Management**: Date-effective location changes
+  - **Relationships**: Linked to organizational units, positions, cost centers
+
+### 2. Temporal Data Management Metadata
+
+#### 2.1 Date-Effective Framework
+- **Effective Dating Objects**:
+  - All organizational objects support effective dating
+  - effectiveStartDate/effectiveEndDate fields
+  - Historical snapshot capabilities
+  - Future-dated changes support
+
+#### 2.2 Versioning and Change Management
+- **Change Tracking**:
+  - lastModifiedDateTime, createdDateTime
+  - lastModifiedBy, createdBy
+  - changeSequenceNumber
+  - auditTrail fields
+
+### 3. Hierarchical Relationship Metadata
+
+#### 3.1 Organizational Structure Relationships
+- **Parent-Child Relationships**:
+  - parentId field in FOrganizationUnit
+  - Hierarchical navigation capabilities
+  - Recursive relationship support
+  - Tree structure maintenance
+
+#### 3.2 Position Hierarchy Relationships
+- **Reporting Relationships**:
+  - reportsTo field in Position object
+  - supervisorPosition field
+  - numberOfDirectReports calculation field
+  - Organizational chart generation support
+
+### 4. Integration Metadata (FR-4)
+
+#### 4.1 CIS Integration Points
+- **Integration Objects**:
+  - OrganizationUnitImport (for CIS data import)
+  - JobImport (for job data from external systems)
+  - PositionImport (for position data synchronization)
+  - LocationImport (for location data from CIS)
+
+#### 4.2 Field Mapping Specifications
+- **CIS to SuccessFactors Field Mappings**:
+  - cis_org_id → externalCode (OrganizationUnit)
+  - cis_job_code → jobCode (JobInfo)
+  - cis_position_id → positionCode (Position)
+  - cis_location_code → externalCode (Location)
+
+### 5. Business Rule Metadata
+
+#### 5.1 FTE Cap Validation Rules (FR-17)
+- **Validation Logic**:
+  - Position FTE calculation
+  - Organizational unit FTE aggregation
+  - Warning generation when cap exceeded
+  - Real-time validation triggers
+
+#### 5.2 Concurrent Employment Rules (FR-20, FR-31)
+- **Concurrent Employment Validation**:
+  - Multiple position assignment validation
+  - Cost center conflict detection
+  - Funding type conflict checking
+  - Total FTE calculation across positions
+
+#### 5.3 Workflow Integration Rules (FR-28)
+- **Approval Workflow Triggers**:
+  - Position type = "Permanent" → JADE approval
+  - Position level = "SES" → Finance approval
+  - Funding type = "Self-funded" → School approval
+  - Workflow status tracking fields
+
+### 6. Picklist Metadata
+
+#### 6.1 Organizational Unit Type Picklist
+- **Picklist ID**: orgUnitType
+- **Values**: 
+  - DEPARTMENT: Department
+  - DIVISION: Division
+  - REGION: Region
+  - SCHOOL: School
+  - CENTRE: Centre
+  - OFFICE: Office
+  - BRANCH: Branch
+  - BUSINESS_UNIT: Business Unit
+
+#### 6.2 Position Type Picklist
+- **Picklist ID**: positionType
+- **Values**:
+  - PERMANENT: Permanent
+  - TEMPORARY: Temporary
+  - CASUAL: Casual
+  - CONTRACTOR: Contractor
+  - VOLUNTEER: Volunteer
+
+#### 6.3 Status Picklist (Common)
+- **Picklist ID**: status
+- **Values**:
+  - ACTIVE: Active
+  - INACTIVE: Inactive
+  - PLANNED: Planned
+  - PENDING_APPROVAL: Pending Approval
+
+### 7. Security and Permission Metadata
+
+#### 7.1 Role-Based Access Control
+- **Security Objects**:
+  - Position Management Role
+  - Organization Management Role
+  - Job Management Role
+  - Location Management Role
+
+#### 7.2 Field-Level Security
+- **Restricted Fields**:
+  - salary fields (payroll-sensitive)
+  - delegation fields (approval-sensitive)
+  - funding information (finance-sensitive)
+
+### 8. Reporting and Analytics Metadata
+
+#### 8.1 Organizational Reporting Objects
+- **Reportable Fields**:
+  - vacancyManagementReport (FR-37)
+  - occupancyManagementReport (FR-37)
+  - headcountFTEReport (FR-37)
+  - organizationalStructureReport (FR-37)
+  - establishmentManagementReport (FR-37)
+
+#### 8.2 Custom MDF Objects for Reporting
+- **OrgReportingMDF** - Custom reporting object
+  - **Fields**:
+    - reportDate
+    - headcountTotal
+    - vacantPositions
+    - filledPositions
+    - fteTotal
+    - establishmentCap
+    - complianceStatus
+
+### 9. API and Integration Metadata
+
+#### 9.1 OData Entity Names
+- **Organization Unit**: FOrganizationUnit
+- **Job Information**: JobInfo
+- **Position**: Position
+- **Location**: Location
+- **Job Classification**: JobClassification
+- **Cost Center**: FCostCenter
+
+#### 9.2 API Endpoints for Organizational Data
+- **GET /odata/v2/FOrganizationUnit** - Retrieve organizational units
+- **GET /odata/v2/JobInfo** - Retrieve job information
+- **GET /odata/v2/Position** - Retrieve positions
+- **GET /odata/v2/Location** - Retrieve locations
+- **POST /odata/v2/Position** - Create new positions
+- **PATCH /odata/v2/FOrganizationUnit** - Update organizational units
+
+### 10. Data Validation and Business Rules
+
+#### 10.1 Required Field Validation
+- **Organization Unit**: externalCode, name, orgUnitType, status
+- **Job**: jobCode, jobTitle, jobFamily, status
+- **Position**: positionCode, positionTitle, jobCode, status
+- **Location**: externalCode, name, address
+
+#### 10.2 Format Validation
+- **ID Fields**: Alphanumeric with specific length constraints
+- **Date Fields**: ISO 8601 format
+- **Decimal Fields**: FTE values with 2 decimal places maximum
+
+#### 10.3 Cross-Reference Validation
+- **Position to Job**: jobCode must exist in JobInfo
+- **Position to Org Unit**: departmentId must exist in FOrganizationUnit
+- **Position to Location**: locationId must exist in Location
+- **Position to Cost Center**: costCenterId must exist in FCostCenter
+
+### 11. Bulk Operations Metadata (FR-21, FR-22)
+
+#### 11.1 Bulk Import Objects
+- **PositionBulkImport** - Bulk position creation
+- **OrganizationUnitBulkImport** - Bulk org unit creation
+- **JobBulkImport** - Bulk job creation
+- **LocationBulkImport** - Bulk location creation
+
+#### 11.2 Bulk Operation Fields
+- **Batch ID**: For tracking bulk operations
+- **Operation Type**: Create, Update, Delete
+- **Status**: Processing, Completed, Error
+- **Error Details**: For failed records
+
+### 12. Custom Field Extensions
+
+#### 12.1 Organizational Unit Custom Fields
+- **transferRating** - Decimal field for transfer rating
+- **establishmentControl** - Picklist for funding control
+- **fteCap** - Maximum FTE allocation
+
+#### 12.2 Position Custom Fields
+- **locallyKnownAs** - Alternative position name
+- **siteSpecificAllowance** - Position-based allowance
+- **identifiedPosition** - Boolean for identified positions
+- **roleDescription** - Attachment field for role descriptions
+
+This metadata extraction provides comprehensive coverage of the organizational design requirements for the Queensland Department of Education, ensuring all functional requirements from FR-1 through FR-38 are supported by appropriate data objects, relationships, and business rules within the SAP SuccessFactors environment.

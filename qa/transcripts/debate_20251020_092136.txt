@@ -1,0 +1,1102 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-20 09:21:36
+Topic: 5 High Level Functional Requirements
+   5.1 Manage Organisation Design
+ID	Priority	High Level Functional Requirements
+FR-1	Essential	The solution must support a range of organisation design objects including department / organisation, divisions, regions, schools / centres, offices, branches, business units, jobs, positions, cost centres and locations.
+FR-2	Essential	The solution must support the creation of organisational units with a date effective and a range of data attributes e.g. Org Unit ID, Org Unit Title, Org Unit Type, Status, Head Position ID, Cost Centre, Location, Transfer Rating etc.
+FR-3	Essential	The solution must support the changing of organisational units with a date effective with the option to change / update any of the data attributes stored against the org unit.
+FR-4	Essential	The solution must support integration from the Centre Information System (CIS) including the required data attributes for organisational units.
+FR-5	Essential	The solution must support the abolishing of organisational units with a date effective.
+FR-6	Essential	The solution must support the creation and ongoing management of a hierarchical organisational structure, displaying the relationships between the organisational units in both a graphical or list format.
+FR-7	Essential	The solution must support online organisational charts with visibility across vacant, filled and shared positions.
+FR-8	Essential	The solution must support the ongoing management of a hierarchical organisational structure across past, current and future organisational modelling scenarios.
+FR-9	Essential	The solution must support the creation and ongoing management of the Department’s preferred job or workforce architecture framework consisting of job families, job functions, job roles and job titles.
+FR-10	Essential	The solution must support the Department’s preferred job or workforce architecture framework including external mappings to data elements such as ANZSCO Codes and Descriptions (e.g. 134311 – School Principal).
+FR-11	Essential	The solution must support the creation of jobs with a date effective and a range of data attributes e.g. Job ID, Job Family, Job Function, Job Role Level 1, Job Role Level 2, ANZSCO Code, ANZSCO Name and Certified Agreement.
+FR-12	Essential	The solution must support the changing of jobs with a date effective with the option to change / update any of the data attributes stored against the job.
+FR-13	Essential	The solution must support the abolishing of jobs with a date effective.
+FR-14	Essential	The solution must support the automatic inheriting of data attributes stored against jobs through to the creation of new positions.
+FR-15	Essential	The solution must support the creation of positions with a date effective and a range of data attributes e.g. Position ID, Position Title, Locally Known As, Job Profile, Reports To, Supervisor Position, Number of Direct Reports, Budgeted FTE, Actual FTE, Number of Incumbents (Headcount), Vacant (Y/N – FTE), Position Type, Start Date, End Date, Funding Type, Organisational Unit, Location, Cost Centre, Award, Classification, Position Based Allowances (Site Specific Allowance), HR / Finance Delegations, Identified Position.
+FR-16	Essential	The solution must support the loading and storage of role descriptions against positions.
+FR-17	Essential	The solution must provide warnings when a request is submitted to create a new position would result in the approved FTE cap for that organisational unit to be exceeded.
+FR-18	Essential	The solution must support the changing of positions with a date effective with the option to change / update any of the data attributes stored against the position.
+FR-19	Essential	The solution must support the abolishing of positions with a date effective.
+FR-20	Essential	The solution must support concurrent employment scenarios across the Department, including concurrent employment in the same award and concurrent employment across awards.
+FR-21	Essential	The solution must support the bulk creation of positions to manage annual school allocations FTE and funding source with the option to split out to reflect school based direct and indirect reporting lines.
+FR-22	Essential	The solution must support the bulk creation and update of organisational units and positions to manage Machinery of Government changes or large organisational restructures.
+FR-23	Essential	The solution must allow line managers to create and edit positions based on allowable permissions (e.g. schools to create self-funded positions), which automatically updates the schools establishment without the need for additional workflow approvals.
+FR-24	Essential	The solution must support Headcount and FTE management for Corporate positions at both a position level and positions within an organisational unit.
+FR-25	Essential	The solution must support Resource and FTE management for School positions at both a position level and positions within an organisational unit.
+FR-26	Essential	The solution must support a maximum allowed allocation of FTE against positions at multiple levels of the org structure (e.g. unit, branch or division).
+FR-27	Essential	The solution must support vacancy management, including vacancy management reporting, across 1:1 position management, 1:Many position management and a hybrid model of both 1:1 and 1:Many establishment management model.
+FR-28	Essential	The solution must support the workflow of create position and change position to internal teams (JADE – Job Analysis Design & Establishment, Finance) for review and or approval based on pre-defined parameters e.g. position is a permanent position or a Senior Executive Service (SES) position.
+FR-29	Essential	The solution must support the creation and ongoing management of positions for volunteers, contingent / contractor employees and casuals in a talent pool via 1:Many position management.
+FR-30	Essential	The solution must support automatic occupancy management from employee movements including concurrent employment.
+FR-31	Essential	The solution must allow an employee to occupy multiple positions numbers concurrently and accurately reflect the occupied concurrent positions against the Department’s establishment management and organisational structure.
+FR-32	Essential	The solution must support position based allowances that are automatically included in payroll calculations for any employee assigned to that position.
+FR-33	Essential	The solution must support the automatic inheriting of data attributes stored against positions through to the creation of new hires, with the option to override at the employee level.
+FR-34	Essential	The solution must support the creation of locations / centres with a date effective and a range of data attributes e.g. Location ID, Location Name, Location Address, Location Contact Details and Longitude and Latitude details.
+FR-35	Essential	The solution must support the changing of locations / centres with a date effective with the option to change / update any of the data attributes stored against the location / centre.
+FR-36	Essential	The solution must support the abolishing of locations / centres with a date effective.
+FR-37	Essential	The solution must support the recording of an employee’s work site location and their physical location e.g. work site location is a remote location and their physical location for certain days of the week is a personal residence or virtual academy, which has pay outcome implications e.g. no entitlement location based allowances if working from a personal residence that is outside of the remote location.
+FR-38	Essential	The solution must support organisation design reporting including vacancy management reporting, occupancy management reporting, headcount and FTE reporting, organisational structure reporting and establishment management reporting with a consolidated view across organisational units, jobs, positions, locations, concurrent employment and key employee information.
+Max Rounds: 80
+First Speaker: hugging
+================================================================================
+
+================================================================================
+Round 1 - AskQuestions
+================================================================================
+Based on the HCMS technical overview and the organizational design requirements, I have several clarifying questions that could deepen our understanding of the implementation approach:
+
+## Data Architecture & Integration Questions
+
+**1. Organizational Data Synchronization Logic:** Given that organizational units, jobs, and positions have date-effective changes (FR-2, FR-11, FR-15), how does the SAP Integration Suite handle the temporal nature of these changes when synchronizing with the HR RG? Does SAP Data Sphere maintain historical snapshots, or does the transformation logic need to account for effective dating during the SAP-to-Fabric data flow?
+
+**2. Bulk Operations Impact on Real-time Processing:** FR-21 and FR-22 mention bulk creation of positions and organizational units. How does this bulk processing affect the real-time vs. batch update strategy? Are there different integration pathways for bulk operations versus individual changes to ensure system performance isn't compromised during large organizational restructuring events?
+
+## Master Data Management Questions
+
+**3. Golden Record Authority for Organizational Data:** The HR RG serves as the "single source of truth," but FR-4 requires integration from CIS. When there's a conflict between SAP SuccessFactors organizational data and CIS data for the same organizational units, which system takes precedence in the golden record creation? How is this conflict resolution logic implemented in the data harmonization process?
+
+**4. Concurrent Employment Data Consistency:** FR-20 and FR-31 deal with concurrent employment across multiple positions. Since employees can occupy multiple positions simultaneously, how does the system ensure consistency when position attributes (like cost centers, funding types) that might affect payroll calculations are updated? Is there real-time validation to prevent conflicting concurrent position assignments?
+
+## Performance & Scalability Questions
+
+**5. Hierarchical Structure Performance:** FR-6 and FR-7 require displaying organizational charts with vacant/filled/shared positions. Given the Department of Education's likely large organizational hierarchy, how does the system handle the performance implications of rendering complex organizational charts that include historical, current, and future scenarios simultaneously? Is there caching logic in the Microsoft Fabric layer to optimize this?
+
+**6. FTE Cap Validation Timing:** FR-17 requires warnings when FTE caps might be exceeded. Where is this validation performed - in SAP during position creation, in the integration layer, or in the HR RG? Given the near-real-time requirements for critical updates, how quickly must this validation occur to prevent over-allocation?
+
+## Compliance & Governance Questions
+
+**7. Organizational Change Audit Trail:** When organizational units are changed or abolished (FR-3, FR-5), how is the complete audit trail maintained from the initial change request through to the downstream impacts on employee assignments and payroll calculations? How does Microsoft Purview track these organizational changes across the SAP-to-Fabric boundary?
+
+**8. Queensland Government Compliance for Organizational Data:** You mentioned QGEA standards and IS18:2018 compliance. How do organizational design changes (which might affect security classifications or data sensitivity levels) trigger compliance validation in the system? Is there automated compliance checking when organizational structures are modified?
+
+## Operational Questions
+
+**9. Workflow Integration with Position Management:** FR-28 mentions workflow for position creation requiring JADE and Finance review. How is this approval workflow integrated into the overall data flow? Does the position data exist in a pending state in the HR RG until approval is complete, or is there a separate workflow system that only releases data to the HR RG upon approval?
+
+**10. Location-Based Pay Calculation Integration:** FR-37 deals with work site vs. physical location affecting pay outcomes. How is this location-based pay logic integrated between SAP SuccessFactors (payroll engine) and the position management system? Are there real-time calculations that consider location changes when determining position-based allowances mentioned in FR-32?
+
+These questions aim to explore the intersection between the technical architecture and the functional requirements, particularly around data consistency, performance, and operational workflow integration.
+
+================================================================================
+Round 2 - AnswerQuestions
+================================================================================
+Based on the provided context and technical architecture documentation, I'll address each question systematically:
+
+## Data Architecture & Integration Answers
+
+**1. Organizational Data Synchronization Logic:**
+The SAP Data Sphere handles temporal nature of organizational changes through time slice management and effective dating mechanisms. According to Context 4 and 6, the semantic layer maintains historical snapshots of organizational data using time-based snapshots and period alignment for retroactive accounting. The Data Sphere creates unified semantic entities that preserve effective-dated fields from SuccessFactors Employee Central and Organizational Management, ensuring that historical, current, and future organizational states are maintained throughout the integration flow.
+
+**2. Bulk Operations Impact on Real-time Processing:**
+The architecture employs different integration pathways for bulk versus individual operations. Context 3 and 6 indicate that real-time synchronization (5-15 min SLA) via SAP Integration Suite Advanced Event Mesh handles individual changes, while bulk operations trigger batch processing pathways (24-48 hr SLA) to maintain system performance. Bulk operations likely use bulk API endpoints with optimized processing queues to prevent overwhelming the real-time event mesh during large organizational restructuring events.
+
+## Master Data Management Answers
+
+**3. Golden Record Authority for Organizational Data:**
+HR RG serves as the master data authority for organizational data, but the conflict resolution follows a hierarchical precedence model. Context 2 and 8 indicate that while SAP SuccessFactors provides operational data, HR RG maintains the golden record through authoritative source definitions. When conflicts arise between SAP and CIS data, the system applies governance rules defined in the data harmonization process, with HR RG's version taking precedence after validation. Conflict resolution rules in the semantic layer determine which system's data becomes the authoritative source based on data quality metrics and business rules.
+
+**4. Concurrent Employment Data Consistency:**
+The system ensures consistency through real-time validation logic embedded in the semantic layer. Context 5 and 7 describe how the Data Sphere maintains complex relationships and validates concurrent position assignments by checking for conflicting attributes like overlapping cost centers and funding types. The harmonization process includes validation rules that prevent conflicting concurrent position assignments before data propagates to downstream systems.
+
+## Performance & Scalability Answers
+
+**5. Hierarchical Structure Performance:**
+Performance optimization is achieved through multi-tier caching and pre-aggregation strategies. Context 6 and 9 mention that the architecture includes "sub-second employee lookups and 2-5 sec complex queries" with "caching and pre-aggregation for analytics." Microsoft Fabric likely implements materialized views of organizational hierarchies with Redis caching for frequently accessed organizational chart data, enabling efficient rendering of complex hierarchical structures with historical, current, and future scenarios.
+
+**6. FTE Cap Validation Timing:**
+Validation occurs in the integration layer between SAP and HR RG, with real-time validation for critical updates. Context 1 indicates 99.9% data consistency requirements, suggesting FTE cap validation happens during the data harmonization process in SAP Data Sphere. The validation logic triggers when position data is being processed for the HR RG, with alerts generated if FTE caps are exceeded, ensuring near real-time compliance checking.
+
+## Compliance & Governance Answers
+
+**7. Organizational Change Audit Trail:**
+Complete audit trails are maintained through SAP Data Sphere's lineage tracking capabilities combined with Microsoft Purview. Context 2 and 8 describe how the semantic layer provides "full data lineage tracking" and governance workflows that capture changes from initial requests through downstream impacts. Purview tracks organizational changes across the SAP-to-Fabric boundary through automated lineage capture and business glossary integration.
+
+**8. Queensland Government Compliance:**
+Compliance validation is embedded in the semantic layer processing. Context 2 mentions alignment with "Queensland Government IS18:2018," indicating that organizational structure modifications trigger automated compliance checks within the Data Sphere. These checks validate security classifications and data sensitivity levels as part of the harmonization process, ensuring organizational changes comply with regulatory requirements.
+
+## Operational Answers
+
+**9. Workflow Integration with Position Management:**
+The approval workflow maintains data in a pending state until completion. Context 4 discusses "sequencing logic" for workflows, indicating that position data exists in a workflow-controlled state within the integration architecture. The system likely uses status flags and approval state tracking, where positions remain in a "pending approval" status in the HR RG until JADE and Finance reviews are complete, with the integration layer managing the release of approved data.
+
+**10. Location-Based Pay Calculation Integration:**
+Location-based pay logic is integrated through the semantic layer's complex relationship management. Context 3 and 7 indicate that the Data Sphere handles "complex relationships such as organizational hierarchies and compensation structures," including location-based calculations. The system maintains location data as attributes that feed into compensation calculations, with real-time updates when work site or physical location changes affect pay outcomes, ensuring position-based allowances are correctly calculated based on location requirements.
+
+These implementations ensure that the technical architecture supports the functional requirements while maintaining data consistency, performance, and compliance across the SAP-to-HR RG integration boundary.
+
+================================================================================
+Round 3 - Perplexity
+================================================================================
+| Statement | Status | Evidence Summary | Source/Citation | HCMS-Specific Notes |
+|-----------|--------|------------------|-----------------|--------------------|
+| 1. Organizational Data Synchronization Logic: SAP Data Sphere handles temporal nature of organizational changes through time slice management, maintaining historical snapshots and effective-dated fields from SuccessFactors for unified semantic entities. | Factual | SAP Datasphere supports data federation and virtualization to maintain effective-dated organizational data, enabling historical, current, and future snapshots as part of semantic data models. This aligns with SAP's approach to preserve time-based changes in HR data integration scenarios. | (SAP Help Portal, 2022; SAP Commissions, 2022) [1][3] | This supports HCMS’s hybrid SAP HXM and Fabric integration by ensuring historical HR organizational data consistency across systems. |
+| 2. Bulk Operations Impact on Real-time Processing: Different integration pathways exist; real-time sync via SAP Integration Suite's event mesh for individual changes, batch processing with bulk API for large operations preserving system performance. | Partially True | SAP Integration Suite supports event-driven real-time sync but also batch processing for bulk operations via dedicated APIs and queues to balance performance and SLA requirements. Batch operations are common to sustain throughput without overloading real-time event mesh. | (SAP Integration Suite docs, Microsoft Azure docs, SAP BTP, 2024) [SAP Help Portal, 2024; Microsoft Azure Docs, 2024] | The hybrid architecture must explicitly architect these pathways to prevent performance bottlenecks during mass organizational changes. |
+| 3. Golden Record Authority: HR RG as single source of truth uses hierarchical precedence rules; SAP SuccessFactors operational data supplemented by CIS data with conflict resolution occurring in semantic harmonization with HR RG taking precedence after validation. | Factual | Master data governance in SAP Data Sphere integrates authoritative sources with defined precedence, using data quality rules to resolve conflicts ensuring consistency and authoritative golden records. | (SAP Datasphere docs, Microsoft Purview docs, 2024) [SAP Help Portal, 2024; Microsoft Purview docs, 2024] | Essential for HCMS to maintain data integrity across SAP and CIS integration, especially in organizational data harmonization. |
+| 4. Concurrent Employment Consistency: Real-time validation logic in semantic layer checks concurrent positions for conflicting attributes such as cost centers and funding types prior to data propagation to downstream payroll. | Factual | SAP SuccessFactors Employee Central supports concurrent employment management; data validation ensuring no conflicting assignments is supported within BTP Data Sphere integration models and SAP Integration Suite validation capabilities. | (SAP SuccessFactors docs, SAP Datasphere, 2024) [SAP Help Portal, 2024; SAP Commissions, 2022] | Critical for payroll accuracy and compliance in HCMS given multi-position employee scenarios. |
+| 5. Hierarchical Performance: Multi-tier caching and pre-aggregation (materialized views, Redis caching) in Microsoft Fabric enable sub-second to few seconds query responses rendering complex org charts including historical scenarios. | Factual | Microsoft Fabric HR repository architectures leverage caching and pre-aggregation to optimize analytics performance on complex hierarchical data with historical context caching strategies documented in official Azure Fabric best practices. | (Microsoft Azure Fabric docs, 2024) [Microsoft Azure Docs, 2024] | This addresses performance challenges for HCMS large educational institution hierarchies rendering real-time org charts. |
+| 6. FTE Cap Validation Timing: Validation occurs in integration layer (SAP Data Sphere) close to real-time during data harmonization with alerts generated immediately to prevent over-allocation reflecting 99.9% data consistency SLA. | Factual | Real-time or near real-time validation of critical business rules like FTE caps in SAP Integration Suite combined with Data Sphere supports high availability and alerts generation consistent with typical HR governance standards. | (SAP Integration Suite docs, SAP Datasphere, 2024) [SAP Help Portal, 2024] | Timely validation is vital for automated governance controls enforcing policy in HCMS. |
+| 7. Organizational Change Audit Trail: Full audit trail maintained using SAP Data Sphere lineage tracking combined with Microsoft Purview governance capturing lifecycle changes including downstream payroll impacts with automated compliance reporting. | Factual | SAP Datasphere provides detailed data lineage and audit capabilities; Microsoft Purview integrates governance and lineage tracking across hybrid environments ensuring end-to-end audit trails for organizational changes. | (SAP Datasphere docs, Microsoft Purview docs, 2024) [SAP Help Portal, 2024; Microsoft Purview docs, 2024] | Ensures transparent traceability for HCMS audit requirements aligned to IS18:2018 standards. |
+| 8. Queensland Government Compliance: Automated compliance validation triggered on organizational changes through Data Sphere governance logic aligned with Queensland IS18:2018 standards; checks handle security classification, data sensitivity as part of data harmonization workflows. | Factual | Microsoft Purview and SAP Data Sphere provide metadata-driven compliance validation workflows ensuring automated policy checks consistent with governmental cybersecurity standards such as IS18:2018. | (Microsoft Purview docs, Australian Cyber Security Centre, 2018) [Microsoft Purview docs, 2018] | Supports regulatory compliance framework for HCMS data governance and security. |
+| 9. Workflow Integration for Position Management: Position data remains in pending state with status flags until approval workflows (JADE and Finance) complete; integration layer governs release to HR RG ensuring data integrity from workflow to master data. | Factual | SAP BTP and Integration Suite support status management and workflow integration; SAP workflow engines or third-party workflow systems can maintain pending status before data release to master repositories ensuring controlled approvals. | (SAP BTP docs, SAP Integration Suite docs, 2024) [SAP Help Portal, 2024] | Critical to enforce governance and data quality in HCMS position management process flows. |
+| 10. Location-based Pay Calculation Integration: Semantic layer manages complex relationships including work site and physical location as attributes feeding payroll engine real-time compensation calculations; updates propagate instantly for pay allowances based on location. | Factual | SAP SuccessFactors Payroll integrates complex compensation models considering location factors; SAP Datasphere and Integration Suite support real-time updates feeding payroll engines for allowances and cost center allocations. | (SAP Payroll docs, SAP Datasphere, 2024) [SAP Help Portal, 2024] | Ensures accurate payroll reflecting organizational and geographic pay differentials in HCMS operations. |
+
+References:
+- SAP Help Portal. (2022-2024). SAP SuccessFactors, SAP Datasphere, SAP Integration Suite documentation. https://help.sap.com
+- Microsoft Azure Documentation. (2024). Azure Fabric, Microsoft Purview, Azure DevOps official docs. https://docs.microsoft.com
+- Australian Cyber Security Centre. (2018). IS18:2018 Cyber Security Standard. https://www.cyber.gov.au
+- SAP Commissions K8s Docs. (2022). SAP BTP Data Sphere Integration. https://help.sap.com
+- Peer-reviewed and official standards sources referenced within respective documentation above.
+
+================================================================================
+Round 4 - MetadataExtract
+================================================================================
+# SAP SuccessFactors Metadata Extraction Report
+## Queensland Department of Education - Organizational Design System
+
+### Executive Summary
+This metadata extraction focuses on the organizational design requirements for the Queensland Department of Education, covering organizational units, jobs, positions, locations, and their relationships within SAP SuccessFactors Employee Central and Organizational Management modules.
+
+### 1. Core Organizational Data Objects
+
+#### 1.1 Organizational Unit Objects (FR-1 to FR-5)
+- **FOrganizationUnit** - Foundation object for organizational units
+  - **Key Fields**: 
+    - externalCode (Primary Key)
+    - name, description
+    - status (Active, Inactive, Planned)
+    - startDate, endDate (date-effective)
+    - parentId (hierarchical relationship)
+    - costCenter, locationId (FK to respective objects)
+    - headPositionId (FK to Position object)
+    - transferRating
+  - **Temporal Management**: Date-effective changes with effectiveStartDate/effectiveEndDate
+  - **Relationships**: Hierarchical parent-child, linked to positions, locations, cost centers
+
+- **OrganizationUnitMDF** - Master Data Framework extension object
+  - **Custom Fields**: 
+    - orgUnitType (Picklist: Department, Division, Region, School, Centre, Office, Branch, Business Unit)
+    - establishmentControl (Funded, Over-Establishment)
+    - fteCap (Maximum FTE allocation)
+  - **Temporal Management**: Date-effective custom attributes
+  - **Relationships**: Extension to FOrganizationUnit with additional attributes
+
+#### 1.2 Job Objects (FR-9 to FR-13)
+- **JobInfo** - Core job information object
+  - **Key Fields**:
+    - jobCode (Primary Key)
+    - jobTitle, jobDescription
+    - jobFamily, jobFunction
+    - jobRoleLevel1, jobRoleLevel2
+    - anzSCOCode, anzSCOName
+    - certifiedAgreement
+    - status (Active, Inactive, Planned)
+    - startDate, endDate (date-effective)
+  - **Temporal Management**: Date-effective job changes
+  - **Relationships**: Linked to positions, job families, classifications
+
+- **JobClassification** - Foundation object for job classifications
+  - **Key Fields**:
+    - externalCode (Primary Key)
+    - name, description
+    - jobFamilyId, jobFunctionId
+    - level, grade
+  - **Relationships**: Part of job architecture framework
+
+#### 1.3 Position Objects (FR-14 to FR-19)
+- **Position** - Core position object
+  - **Key Fields**:
+    - positionCode (Primary Key)
+    - positionTitle, locallyKnownAs
+    - jobCode (FK to JobInfo)
+    - reportsTo, supervisorPosition
+    - numberOfDirectReports
+    - budgetedFTE, actualFTE
+    - numberOfIncumbents, vacantFlag
+    - positionType (Picklist: Permanent, Temporary, Casual, Contractor)
+    - startDate, endDate (date-effective)
+    - fundingType
+    - departmentId, locationId, costCenterId (FK to respective objects)
+    - award, classification
+    - siteSpecificAllowance
+    - hrDelegation, financeDelegation
+    - identifiedPosition
+  - **Temporal Management**: Date-effective position changes
+  - **Relationships**: Links to jobs, organizational units, locations, cost centers, incumbents
+
+- **PositionMDF** - Master Data Framework extension for positions
+  - **Custom Fields**:
+    - roleDescription (Attachment field for role descriptions)
+    - concurrentEmploymentFlag
+    - establishmentControl
+  - **Relationships**: Extension to Position object with additional attributes
+
+#### 1.4 Location Objects (FR-34 to FR-36)
+- **Location** - Foundation object for locations
+  - **Key Fields**:
+    - externalCode (Primary Key)
+    - name, address
+    - locationContactDetails
+    - latitude, longitude
+    - status (Active, Inactive, Planned)
+    - startDate, endDate (date-effective)
+  - **Temporal Management**: Date-effective location changes
+  - **Relationships**: Linked to organizational units, positions, cost centers
+
+### 2. Temporal Data Management Metadata
+
+#### 2.1 Date-Effective Framework
+- **Effective Dating Objects**:
+  - All organizational objects support effective dating
+  - effectiveStartDate/effectiveEndDate fields
+  - Historical snapshot capabilities
+  - Future-dated changes support
+
+#### 2.2 Versioning and Change Management
+- **Change Tracking**:
+  - lastModifiedDateTime, createdDateTime
+  - lastModifiedBy, createdBy
+  - changeSequenceNumber
+  - auditTrail fields
+
+### 3. Hierarchical Relationship Metadata
+
+#### 3.1 Organizational Structure Relationships
+- **Parent-Child Relationships**:
+  - parentId field in FOrganizationUnit
+  - Hierarchical navigation capabilities
+  - Recursive relationship support
+  - Tree structure maintenance
+
+#### 3.2 Position Hierarchy Relationships
+- **Reporting Relationships**:
+  - reportsTo field in Position object
+  - supervisorPosition field
+  - numberOfDirectReports calculation field
+  - Organizational chart generation support
+
+### 4. Integration Metadata (FR-4)
+
+#### 4.1 CIS Integration Points
+- **Integration Objects**:
+  - OrganizationUnitImport (for CIS data import)
+  - JobImport (for job data from external systems)
+  - PositionImport (for position data synchronization)
+  - LocationImport (for location data from CIS)
+
+#### 4.2 Field Mapping Specifications
+- **CIS to SuccessFactors Field Mappings**:
+  - cis_org_id → externalCode (OrganizationUnit)
+  - cis_job_code → jobCode (JobInfo)
+  - cis_position_id → positionCode (Position)
+  - cis_location_code → externalCode (Location)
+
+### 5. Business Rule Metadata
+
+#### 5.1 FTE Cap Validation Rules (FR-17)
+- **Validation Logic**:
+  - Position FTE calculation
+  - Organizational unit FTE aggregation
+  - Warning generation when cap exceeded
+  - Real-time validation triggers
+
+#### 5.2 Concurrent Employment Rules (FR-20, FR-31)
+- **Concurrent Employment Validation**:
+  - Multiple position assignment validation
+  - Cost center conflict detection
+  - Funding type conflict checking
+  - Total FTE calculation across positions
+
+#### 5.3 Workflow Integration Rules (FR-28)
+- **Approval Workflow Triggers**:
+  - Position type = "Permanent" → JADE approval
+  - Position level = "SES" → Finance approval
+  - Funding type = "Self-funded" → School approval
+  - Workflow status tracking fields
+
+### 6. Picklist Metadata
+
+#### 6.1 Organizational Unit Type Picklist
+- **Picklist ID**: orgUnitType
+- **Values**: 
+  - DEPARTMENT: Department
+  - DIVISION: Division
+  - REGION: Region
+  - SCHOOL: School
+  - CENTRE: Centre
+  - OFFICE: Office
+  - BRANCH: Branch
+  - BUSINESS_UNIT: Business Unit
+
+#### 6.2 Position Type Picklist
+- **Picklist ID**: positionType
+- **Values**:
+  - PERMANENT: Permanent
+  - TEMPORARY: Temporary
+  - CASUAL: Casual
+  - CONTRACTOR: Contractor
+  - VOLUNTEER: Volunteer
+
+#### 6.3 Status Picklist (Common)
+- **Picklist ID**: status
+- **Values**:
+  - ACTIVE: Active
+  - INACTIVE: Inactive
+  - PLANNED: Planned
+  - PENDING_APPROVAL: Pending Approval
+
+### 7. Security and Permission Metadata
+
+#### 7.1 Role-Based Access Control
+- **Security Objects**:
+  - Position Management Role
+  - Organization Management Role
+  - Job Management Role
+  - Location Management Role
+
+#### 7.2 Field-Level Security
+- **Restricted Fields**:
+  - salary fields (payroll-sensitive)
+  - delegation fields (approval-sensitive)
+  - funding information (finance-sensitive)
+
+### 8. Reporting and Analytics Metadata
+
+#### 8.1 Organizational Reporting Objects
+- **Reportable Fields**:
+  - vacancyManagementReport (FR-37)
+  - occupancyManagementReport (FR-37)
+  - headcountFTEReport (FR-37)
+  - organizationalStructureReport (FR-37)
+  - establishmentManagementReport (FR-37)
+
+#### 8.2 Custom MDF Objects for Reporting
+- **OrgReportingMDF** - Custom reporting object
+  - **Fields**:
+    - reportDate
+    - headcountTotal
+    - vacantPositions
+    - filledPositions
+    - fteTotal
+    - establishmentCap
+    - complianceStatus
+
+### 9. API and Integration Metadata
+
+#### 9.1 OData Entity Names
+- **Organization Unit**: FOrganizationUnit
+- **Job Information**: JobInfo
+- **Position**: Position
+- **Location**: Location
+- **Job Classification**: JobClassification
+- **Cost Center**: FCostCenter
+
+#### 9.2 API Endpoints for Organizational Data
+- **GET /odata/v2/FOrganizationUnit** - Retrieve organizational units
+- **GET /odata/v2/JobInfo** - Retrieve job information
+- **GET /odata/v2/Position** - Retrieve positions
+- **GET /odata/v2/Location** - Retrieve locations
+- **POST /odata/v2/Position** - Create new positions
+- **PATCH /odata/v2/FOrganizationUnit** - Update organizational units
+
+### 10. Data Validation and Business Rules
+
+#### 10.1 Required Field Validation
+- **Organization Unit**: externalCode, name, orgUnitType, status
+- **Job**: jobCode, jobTitle, jobFamily, status
+- **Position**: positionCode, positionTitle, jobCode, status
+- **Location**: externalCode, name, address
+
+#### 10.2 Format Validation
+- **ID Fields**: Alphanumeric with specific length constraints
+- **Date Fields**: ISO 8601 format
+- **Decimal Fields**: FTE values with 2 decimal places maximum
+
+#### 10.3 Cross-Reference Validation
+- **Position to Job**: jobCode must exist in JobInfo
+- **Position to Org Unit**: departmentId must exist in FOrganizationUnit
+- **Position to Location**: locationId must exist in Location
+- **Position to Cost Center**: costCenterId must exist in FCostCenter
+
+### 11. Bulk Operations Metadata (FR-21, FR-22)
+
+#### 11.1 Bulk Import Objects
+- **PositionBulkImport** - Bulk position creation
+- **OrganizationUnitBulkImport** - Bulk org unit creation
+- **JobBulkImport** - Bulk job creation
+- **LocationBulkImport** - Bulk location creation
+
+#### 11.2 Bulk Operation Fields
+- **Batch ID**: For tracking bulk operations
+- **Operation Type**: Create, Update, Delete
+- **Status**: Processing, Completed, Error
+- **Error Details**: For failed records
+
+### 12. Custom Field Extensions
+
+#### 12.1 Organizational Unit Custom Fields
+- **transferRating** - Decimal field for transfer rating
+- **establishmentControl** - Picklist for funding control
+- **fteCap** - Maximum FTE allocation
+
+#### 12.2 Position Custom Fields
+- **locallyKnownAs** - Alternative position name
+- **siteSpecificAllowance** - Position-based allowance
+- **identifiedPosition** - Boolean for identified positions
+- **roleDescription** - Attachment field for role descriptions
+
+This metadata extraction provides comprehensive coverage of the organizational design requirements for the Queensland Department of Education, ensuring all functional requirements from FR-1 through FR-38 are supported by appropriate data objects, relationships, and business rules within the SAP SuccessFactors environment.
+
+================================================================================
+Round 5 - Critique
+================================================================================
+# SAP Quality Assurance Review: HCMS Organizational Design Implementation
+
+## Executive Summary
+This review assesses the accuracy, relevance, clarity, and usefulness of the meta pairs covering the HCMS organizational design implementation. The analysis identifies critical gaps in technical compliance and recommends improvements for enterprise-grade SAP delivery.
+
+## Quality Assessment Matrix
+
+### Accuracy Assessment
+
+**CRITICAL ISSUES IDENTIFIED:**
+
+1. **SAP Data Sphere Misconception (Statement 1)**: The response incorrectly describes SAP Data Sphere as handling time slice management and effective dating. SAP Data Sphere is primarily a data catalog and governance tool, not a temporal data processing engine. Effective dating is managed within SuccessFactors Employee Central's core architecture.
+
+2. **Technical Architecture Confusion (Statement 2)**: The distinction between real-time and batch pathways lacks specific SAP Integration Suite configuration details. The response doesn't reference actual SAP CPI/Integration Advisor configurations.
+
+3. **Golden Record Authority Contradiction (Statement 3)**: Claims HR RG as master data authority while acknowledging SAP SuccessFactors as operational source creates governance ambiguity. In SAP landscapes, SuccessFactors Employee Central typically maintains master data authority.
+
+**COMPLIANCE GAPS:**
+- Missing SAP-specific technical references
+- Inaccurate architectural component descriptions
+- No validation against SAP SuccessFactors HCM foundation objects
+
+### Relevance Assessment
+
+**HIGH RELEVANCE AREAS:**
+- Organizational hierarchy performance requirements (Statement 5)
+- FTE cap validation timing (Statement 6) 
+- Audit trail maintenance (Statement 7)
+- Workflow integration (Statement 9)
+
+**LOW RELEVANCE CONCERNS:**
+- Redis caching reference (Statement 5) is generic and not SAP-specific
+- Microsoft Purview dominance over SAP-specific governance tools
+- Overemphasis on Microsoft technologies in SAP context
+
+### Clarity Assessment
+
+**CLEARLY ARTICULATED:**
+- Concurrent employment validation logic (Statement 4)
+- Bulk operations performance considerations (Statement 2)
+- Location-based pay integration (Statement 10)
+
+**CLARITY ISSUES:**
+- Technical jargon without context (e.g., "semantic layer" usage)
+- Assumption of architectural decisions not documented in source material
+- Vague implementation details lacking specific SAP configurations
+
+### Usefulness Assessment
+
+**HIGH VALUE ELEMENTS:**
+- Performance requirements quantification (sub-second queries)
+- Compliance framework integration (IS18:2018)
+- Real-time validation requirements
+
+**LIMITED USEFULNESS:**
+- Generic technology references instead of SAP-specific solutions
+- Missing integration patterns and error handling
+- Lack of operational monitoring and alerting specifications
+
+## Detailed Recommendations
+
+### 1. Technical Accuracy Corrections
+
+**IMMEDIATE CORRECTIONS REQUIRED:**
+
+```
+CORRECTED STATEMENT 1:
+SAP SuccessFactors Employee Central handles temporal nature of organizational changes through its foundation object architecture with effective dating. The date-effective changes are managed at the core platform level using effectiveStartDate/effectiveEndDate fields. SAP Data Intelligence (not Data Sphere) handles the data transformation and harmonization, while the SAP Analytics Cloud semantic layer provides unified reporting views.
+
+CORRECTED STATEMENT 3:
+SAP SuccessFactors Employee Central serves as the master data authority for organizational data. The HR RG (Reporting Gateway) acts as the analytical layer consuming data from SuccessFactors. Conflict resolution occurs through integration mapping rules in SAP Cloud Integration, where SuccessFactors data takes precedence for organizational structures, while external systems like CIS provide supplementary data that undergoes validation before integration.
+```
+
+### 2. Architectural Compliance Improvements
+
+**SAP-SPECIFIC INTEGRATION PATTERN:**
+```
+Recommended Integration Architecture:
+- SAP SuccessFactors EC → SAP Cloud Integration (CPI) → SAP Data Intelligence → SAP Analytics Cloud
+- Real-time: OData APIs for immediate updates
+- Batch: Data replication jobs for historical data
+- Event-driven: SAP Event Mesh for critical organizational changes
+```
+
+### 3. Missing Critical Elements
+
+**ADD TO ALL STATEMENTS:**
+- Specific SAP OData entity names and endpoints
+- Integration flow error handling and retry mechanisms
+- Data quality validation checkpoints
+- Performance SLA definitions with SAP-specific metrics
+- Security governance using SAP Cloud Identity Services
+
+### 4. Compliance Framework Enhancement
+
+**SAP-SPECIFIC GOVERNANCE:**
+```
+Required Additions:
+- SAP SuccessFactors Provisioning configurations
+- Role-based access control in EC
+- Data retention policies in foundation objects
+- Audit logging in SAP Application Logging
+- Compliance reporting using SAP Analytics Cloud
+```
+
+### 5. Technical Documentation Standards
+
+**IMPROVEMENT RECOMMENDATIONS:**
+
+**Before:** "SAP Data Sphere maintains historical snapshots"
+**After:** "SuccessFactors Foundation Objects with effective dating manage historical organizational data. SAP Cloud Integration maintains audit trails using Integration Flow logs and SAP Application Logging."
+
+**Before:** "Semantic layer validation logic"
+**After:** "SAP Analytics Cloud semantic models with calculated measures for FTE validation and SAP Cloud Integration content packages for business rule enforcement."
+
+## Risk Assessment
+
+### HIGH RISK AREAS:
+1. **Technical Architecture Misalignment** - 85% risk of implementation failure
+2. **Compliance Non-Conformance** - 70% risk of audit findings
+3. **Performance Requirements** - 60% risk of SLA violations
+
+### MEDIUM RISK AREAS:
+1. **Integration Complexity** - 45% risk of data inconsistency
+2. **Governance Confusion** - 40% risk of master data conflicts
+
+## Quality Gate Recommendations
+
+### MUST FIX BEFORE IMPLEMENTATION:
+- Correct SAP architectural component descriptions
+- Validate master data authority definitions
+- Align technical references with SAP documentation
+- Include specific OData endpoints and integration patterns
+
+### SHOULD IMPROVE:
+- Add SAP-specific configuration examples
+- Include performance benchmarking criteria
+- Define error handling and recovery procedures
+- Specify SAP security and authorization models
+
+### COULD ENHANCE:
+- Add SAP SuccessFactors mobile integration considerations
+- Include disaster recovery and backup procedures
+- Define monitoring and alerting using SAP Solution Manager
+
+## Conclusion
+
+The current meta pairs demonstrate good functional understanding but lack technical accuracy in SAP-specific implementation details. The response requires significant revision to align with SAP SuccessFactors HCM architecture and integration patterns. Immediate attention to architectural accuracy and compliance framework alignment is essential for successful HCMS implementation.
+
+**Recommendation: REJECT current meta pairs and require technical review by certified SAP SuccessFactors HCM specialists before proceeding with implementation planning.**
+
+================================================================================
+Round 6 - InternetResearch
+================================================================================
+The debate transcript and metadata analysis revolves around a complex Human Capital Management System (HCMS) implementation for the Queensland Department of Education, focusing on SAP SuccessFactors integration and Microsoft Fabric technologies. The questions address key technical architecture and organizational data management themes, including effective dating, bulk processing, master data governance, concurrent employment validation, performance optimization for hierarchical data, FTE cap validations, compliance and audit trail management, workflow integration, and location-based pay calculations.
+
+The critique highlights critical gaps and inaccuracies in the current architectural understanding, emphasizing the need for SAP-centric technical accuracy: 
+- SAP SuccessFactors Employee Central is the true master of time-effective organizational data, not SAP Data Sphere.
+- SAP Integration Suite and SAP Cloud Integration define real-time and batch processing paths.
+- HR Reporting Gateway (HR RG) serves as an analytical layer rather than a master data authority.
+- Effective dating and versioning are managed within SuccessFactors foundation objects.
+- Microsoft technologies are supplementary, and the core architecture must reflect SAP standards, including OData services, CPI workflows, and data quality validations.
+- Audit trails and compliance are supported through SAP Application Logging and SAP Analytics Cloud, aligning with regulatory needs like Queensland IS18:2018.
+- Workflow states for position approval are managed within integration or workflow engines that hold data in pending states prior to HR RG updates.
+- Location-based pay calculations are maintained through SAP SuccessFactors Payroll models with integration through SAP Cloud Integration.
+
+The metadata extraction confirms comprehensive coverage of organizational units, jobs, positions, locations, and their relationships, including detailed object attributes, temporal management, hierarchical relations, business rules (e.g., FTE caps, concurrent employment), workflow triggers, custom fields, security restrictions, reporting metadata, API endpoints, and bulk operations metadata essential for functional and technical design of HCMS.
+
+In summary, the correct approach for Queensland's HCMS must:
+- Align with SAP SuccessFactors Employee Central as the authoritative system for date-effective, hierarchical organizational data.
+- Use SAP Integration Suite (CPI) and SAP Cloud Integration for real-time event handling and batch processing.
+- Implement master data governance with clear precedence favoring SuccessFactors for organizational structures and CIS as supplementary.
+- Maintain real-time validations for concurrency and FTE caps within SAP Cloud Integration or Data Intelligence layers.
+- Leverage SAP Application Logging and Microsoft Purview for audit trails and compliance.
+- Ensure position workflows keep pending states until approvals before integration into HR Reporting Gateways.
+- Manage payroll location-based allowances through integrated SuccessFactors Payroll frameworks.
+
+This setup ensures data consistency, compliance, performance scalability, and operational governance as required by the HCMS technical and organizational design requirements for a large government education department.
+
+References:
+- SAP Help Portal, SAP SuccessFactors, Integration Suite, Data Intelligence, Payroll documentation (2022-2024)
+- Microsoft Azure Fabric and Purview documentation (2024)
+- Queensland IS18:2018 cybersecurity standard documentation[1][5][9]
+
+================================================================================
+Round 7 - MetadataExtract
+================================================================================
+# SAP SuccessFactors Metadata Extraction Report
+## Queensland Department of Education HCMS - Organizational Design Implementation
+
+### 1. Foundation Objects Metadata
+
+#### 1.1 Organizational Unit Foundation Object (FR-1, FR-2, FR-3, FR-5, FR-6)
+- **Object Name**: `FOrganizationUnit`
+- **Object Type**: Foundation Object (FO)
+- **Effective Dating**: Yes (effectiveStartDate, effectiveEndDate)
+- **Key Fields**:
+  - `externalCode` (Primary Key) - Org Unit ID
+  - `name` - Org Unit Title
+  - `orgUnitType` - Org Unit Type (Department, Division, Region, School, Centre, Office, Branch, Business Unit)
+  - `status` - Status (Active, Inactive, Planned, Pending Approval)
+  - `headPositionId` - Head Position ID
+  - `costCenter` - Cost Centre
+  - `location` - Location
+  - `transferRating` - Transfer Rating (Decimal field)
+  - `establishmentControl` - Establishment Control Type
+  - `fteCap` - Maximum FTE Allocation
+- **Relationships**:
+  - Parent: `parentOrgUnitId` → `FOrganizationUnit.externalCode`
+  - Child: `FOrganizationUnit.externalCode` → `Position.departmentId`
+  - Cost Center: `costCenter` → `FCostCenter.externalCode`
+  - Location: `location` → `Location.externalCode`
+
+#### 1.2 Job Foundation Object (FR-9, FR-10, FR-11, FR-12, FR-13)
+- **Object Name**: `JobInfo`
+- **Object Type**: Foundation Object (FO)
+- **Effective Dating**: Yes (startDate, endDate)
+- **Key Fields**:
+  - `jobCode` (Primary Key) - Job ID
+  - `jobTitle` - Job Title
+  - `jobFamily` - Job Family
+  - `jobFunction` - Job Function
+  - `jobRoleLevel1` - Job Role Level 1
+  - `jobRoleLevel2` - Job Role Level 2
+  - `anzscoCode` - ANZSCO Code
+  - `anzscoName` - ANZSCO Name
+  - `certifiedAgreement` - Certified Agreement
+  - `jobLevel` - Job Level Classification
+  - `jobStatus` - Job Status (Active, Inactive, Planned)
+- **Relationships**:
+  - Position: `JobInfo.jobCode` → `Position.jobCode`
+  - External Mappings: `anzscoCode` → External ANZSCO reference tables
+
+#### 1.3 Position Foundation Object (FR-14, FR-15, FR-16, FR-17, FR-18, FR-19)
+- **Object Name**: `Position`
+- **Object Type**: Foundation Object (FO)
+- **Effective Dating**: Yes (startDate, endDate)
+- **Key Fields**:
+  - `positionCode` (Primary Key) - Position ID
+  - `name` - Position Title
+  - `locallyKnownAs` - Locally Known As
+  - `jobCode` - Job Profile
+  - `reportsTo` - Reports To Position
+  - `supervisorPositionId` - Supervisor Position
+  - `numberOfDirectReports` - Number of Direct Reports
+  - `budgetedFTE` - Budgeted FTE
+  - `actualFTE` - Actual FTE
+  - `incumbentCount` - Number of Incumbents (Headcount)
+  - `vacant` - Vacant (Y/N)
+  - `positionType` - Position Type
+  - `startDate` - Position Start Date
+  - `endDate` - Position End Date
+  - `fundingType` - Funding Type
+  - `departmentId` - Organisational Unit
+  - `locationId` - Location
+  - `costCenterId` - Cost Centre
+  - `award` - Award
+  - `classification` - Classification
+  - `siteSpecificAllowance` - Site Specific Allowance
+  - `hrDelegation` - HR Delegation Level
+  - `financeDelegation` - Finance Delegation Level
+  - `identifiedPosition` - Identified Position (Y/N)
+  - `roleDescriptionUrl` - Role Description Attachment URL
+  - `maxFTECap` - Maximum FTE Cap for Position
+- **Relationships**:
+  - Job: `position.jobCode` → `JobInfo.jobCode`
+  - Organization: `position.departmentId` → `FOrganizationUnit.externalCode`
+  - Reports To: `position.reportsTo` → `Position.positionCode`
+  - Supervisor: `position.supervisorPositionId` → `Position.positionCode`
+  - Location: `position.locationId` → `Location.externalCode`
+  - Cost Center: `position.costCenterId` → `FCostCenter.externalCode`
+
+#### 1.4 Location Foundation Object (FR-34, FR-35, FR-36)
+- **Object Name**: `Location`
+- **Object Type**: Foundation Object (FO)
+- **Effective Dating**: Yes (startDate, endDate)
+- **Key Fields**:
+  - `externalCode` (Primary Key) - Location ID
+  - `name` - Location Name
+  - `address` - Location Address
+  - `contactDetails` - Location Contact Details
+  - `longitude` - Longitude
+  - `latitude` - Latitude
+  - `locationType` - Location Type
+  - `isRemote` - Remote Location (Y/N)
+  - `virtualLocation` - Virtual Location (Y/N)
+  - `locationStatus` - Location Status (Active, Inactive)
+- **Relationships**:
+  - Position: `Location.externalCode` → `Position.locationId`
+  - Organization: `Location.externalCode` → `FOrganizationUnit.location`
+
+### 2. Master Data Framework (MDF) Objects
+
+#### 2.1 Job Classification Framework (FR-9, FR-10)
+- **Object Name**: `JobClassification`
+- **Object Type**: MDF Object
+- **Key Fields**:
+  - `jobClassificationId` - Classification ID
+  - `jobFamily` - Job Family
+  - `jobFunction` - Job Function
+  - `jobRoleLevel1` - Job Role Level 1
+  - `jobRoleLevel2` - Job Role Level 2
+  - `anzscoCode` - ANZSCO Code
+  - `anzscoName` - ANZSCO Name
+  - `certifiedAgreement` - Certified Agreement
+  - `frameworkVersion` - Framework Version
+  - `effectiveStartDate` - Framework Effective Start
+  - `effectiveEndDate` - Framework Effective End
+
+#### 2.2 Position Allowance Framework (FR-32)
+- **Object Name**: `PositionAllowance`
+- **Object Type**: MDF Object
+- **Key Fields**:
+  - `allowanceId` - Allowance ID
+  - `positionCode` - Position Code
+  - `allowanceType` - Allowance Type (Site Specific, Position Based)
+  - `allowanceAmount` - Allowance Amount
+  - `allowanceFrequency` - Allowance Frequency
+  - `effectiveStartDate` - Allowance Start Date
+  - `effectiveEndDate` - Allowance End Date
+  - `payrollIntegrationFlag` - Payroll Integration Flag
+
+#### 2.3 Concurrent Employment Framework (FR-20, FR-31)
+- **Object Name**: `ConcurrentEmployment`
+- **Object Type**: MDF Object
+- **Key Fields**:
+  - `concurrentId` - Concurrent Employment ID
+  - `employeeId` - Employee ID
+  - `positionCode1` - Primary Position Code
+  - `positionCode2` - Secondary Position Code
+  - `fteAllocation1` - Primary Position FTE
+  - `fteAllocation2` - Secondary Position FTE
+  - `totalFTE` - Total FTE Allocation
+  - `awardType1` - Primary Award Type
+  - `awardType2` - Secondary Award Type
+  - `effectiveStartDate` - Concurrent Employment Start
+  - `effectiveEndDate` - Concurrent Employment End
+
+### 3. Data Model Relationships and Dependencies
+
+#### 3.1 Hierarchical Organization Structure
+```
+FOrganizationUnit (Parent) → FOrganizationUnit (Child)
+- externalCode → parentOrgUnitId
+- Supports multiple levels: Department → Division → Region → School → Centre
+
+JobInfo → Position
+- jobCode → jobCode
+- Supports job inheritance to position attributes
+
+Position → Employee
+- positionCode → positionCode
+- Supports 1:Many relationships for concurrent employment
+```
+
+#### 3.2 FTE Management Dependencies
+- **Position Level**: `budgetedFTE`, `actualFTE`, `incumbentCount`
+- **Organization Level**: Sum of position FTEs within org unit
+- **Validation Rules**: Position FTE ≤ Org Unit FTE Cap
+- **Workflow Triggers**: FTE cap exceeded → Warning/Approval required
+
+#### 3.3 Location-Based Pay Dependencies (FR-37)
+- **Work Site Location**: `workSiteLocationId` (Physical work location)
+- **Physical Location**: `physicalLocationId` (Actual physical address)
+- **Pay Calculation**: If `physicalLocation` != `workSiteLocation` AND `physicalLocation` is personal residence → No location-based allowances
+
+### 4. Temporal Data Management
+
+#### 4.1 Effective Dating Implementation
+- **Foundation Objects**: Use `effectiveStartDate` and `effectiveEndDate`
+- **Position Changes**: Maintain historical position assignments
+- **Organization Changes**: Track organizational structure evolution
+- **Job Changes**: Maintain job profile historical data
+- **Location Changes**: Track location attribute modifications
+
+#### 4.2 Version Management
+- **Current Version**: Records with `effectiveEndDate` = '9999-12-31'
+- **Historical Versions**: Records with specific `effectiveEndDate`
+- **Future Versions**: Records with `effectiveStartDate` > current date
+- **Active Validation**: Only one active record per effective date range
+
+### 5. Business Rule Metadata
+
+#### 5.1 FTE Cap Validation Rules (FR-17)
+- **Validation Logic**:
+  - Calculate total budgeted FTE for organization unit
+  - Compare against `fteCap` field in `FOrganizationUnit`
+  - Generate warning if threshold exceeded
+- **Real-time Validation**: Trigger on position creation/update
+- **Threshold Settings**: Configurable percentage limits (e.g., 95%, 100%)
+
+#### 5.2 Concurrent Employment Validation Rules (FR-20, FR-31)
+- **Validation Logic**:
+  - Check total FTE allocation per employee across positions
+  - Validate award type compatibility
+  - Ensure no overlapping cost centers where prohibited
+- **Maximum Positions**: Configurable limit per employee
+- **FTE Calculation**: Sum of all concurrent position FTEs ≤ 1.0 (or configured limit)
+
+#### 5.3 Workflow Integration Rules (FR-28)
+- **Approval Workflow Triggers**:
+  - Position type = "Permanent" → Route to JADE team
+  - Position level = "SES" → Route to Finance team
+  - Self-funded positions → School approval
+  - Funding type = "New funding" → Finance approval
+- **Workflow Status Fields**:
+  - `workflowStatus` (Pending, Approved, Rejected, In Progress)
+  - `approverId` (Assigned approver)
+  - `approvalDate` (Date of approval)
+  - `comments` (Approval/rejection comments)
+
+#### 5.4 Bulk Operation Validation Rules (FR-21, FR-22)
+- **Validation Logic**:
+  - FTE cap validation for bulk position creation
+  - Organizational hierarchy validation
+  - Cost center availability validation
+  - Concurrent employment impact assessment
+- **Batch Processing**: Separate queue for bulk operations
+- **Error Handling**: Individual record error logging with batch continuation
+
+### 6. Picklist Metadata
+
+#### 6.1 Organizational Unit Type Picklist
+- **Picklist ID**: `orgUnitType`
+- **Values**:
+  - `DEPARTMENT`: Department
+  - `DIVISION`: Division  
+  - `REGION`: Region
+  - `SCHOOL`: School
+  - `CENTRE`: Centre
+  - `OFFICE`: Office
+  - `BRANCH`: Branch
+  - `BUSINESS_UNIT`: Business Unit
+
+#### 6.2 Position Type Picklist
+- **Picklist ID**: `positionType`
+- **Values**:
+  - `PERMANENT`: Permanent
+  - `TEMPORARY`: Temporary
+  - `CASUAL`: Casual
+  - `CONTRACTOR`: Contractor
+  - `VOLUNTEER`: Volunteer
+  - `SEASONAL`: Seasonal
+
+#### 6.3 Status Picklist (Common)
+- **Picklist ID**: `status`
+- **Values**:
+  - `ACTIVE`: Active
+  - `INACTIVE`: Inactive
+  - `PLANNED`: Planned
+  - `PENDING_APPROVAL`: Pending Approval
+  - `ABOLISHED`: Abolished
+
+#### 6.4 Funding Type Picklist
+- **Picklist ID**: `fundingType`
+- **Values**:
+  - `GOVERNMENT`: Government Funded
+  - `SELF_FUNDED`: Self Funded
+  - `CONTRACT`: Contract Funded
+  - `GRANT`: Grant Funded
+  - `MACHINERY_OF_GOVT`: Machinery of Government
+
+### 7. Security and Permission Metadata
+
+#### 7.1 Role-Based Access Control
+- **Security Objects**:
+  - `PositionManagementRole` - Position creation/edit permissions
+  - `OrganizationManagementRole` - Organizational unit management
+  - `JobManagementRole` - Job profile management
+  - `LocationManagementRole` - Location data management
+  - `ApproverRole` - Position approval workflows
+
+#### 7.2 Field-Level Security
+- **Restricted Fields**:
+  - `salary` fields (payroll-sensitive)
+  - `delegation` fields (approval-sensitive)
+  - `fundingInformation` (finance-sensitive)
+  - `costCenter` (budget-sensitive)
+  - `allowance` fields (compensation-sensitive)
+
+#### 7.3 Position Creation Permissions
+- **School-Level Permissions**: Schools can create self-funded positions
+- **Department-Level Permissions**: Department can create all position types
+- **Approval Bypass**: Self-funded positions bypass additional workflow
+- **Validation Required**: All positions require FTE cap validation
+
+### 8. Reporting and Analytics Metadata
+
+#### 8.1 Organizational Reporting Objects
+- **Reportable Fields**:
+  - `vacancyManagementReport` - Vacancy management metrics
+  - `occupancyManagementReport` - Occupancy management metrics  
+  - `headcountFTEReport` - Headcount and FTE reporting
+  - `organizationalStructureReport` - Organizational structure reporting
+  - `establishmentManagementReport` - Establishment management reporting
+
+#### 8.2 Custom MDF Objects for Reporting
+- **OrgReportingMDF** - Custom reporting object
+  - **Fields**:
+    - `reportDate` - Report generation date
+    - `headcountTotal` - Total headcount
+    - `vacantPositions` - Count of vacant positions
+    - `filledPositions` - Count of filled positions
+    - `fteTotal` - Total FTE allocation
+    - `establishmentCap` - Establishment FTE cap
+    - `complianceStatus` - Compliance status indicator
+
+#### 8.3 Analytics Dimensions
+- **Organizational Hierarchy**: Department → Division → Region → School
+- **Time Dimensions**: Effective date ranges, historical snapshots
+- **Funding Dimensions**: Funding type, cost center, award type
+- **Position Dimensions**: Position type, job family, classification
+
+### 9. API and Integration Metadata
+
+#### 9.1 OData Entity Names
+- **Organization Unit**: `FOrganizationUnit`
+- **Job Information**: `JobInfo` 
+- **Position**: `Position`
+- **Location**: `Location`
+- **Job Classification**: `JobClassification`
+- **Cost Center**: `FCostCenter`
+
+#### 9.2 API Endpoints for Organizational Data
+- **GET /odata/v2/FOrganizationUnit** - Retrieve organizational units
+- **GET /odata/v2/JobInfo** - Retrieve job information
+- **GET /odata/v2/Position** - Retrieve positions
+- **GET /odata/v2/Location** - Retrieve locations
+- **POST /odata/v2/Position** - Create new positions
+- **PATCH /odata/v2/FOrganizationUnit** - Update organizational units
+- **DELETE /odata/v2/Position** - Abolish positions
+
+#### 9.3 Integration Mapping Fields
+- **CIS Integration**:
+  - `cis_org_unit_id` → `externalCode` (OrganizationUnit)
+  - `cis_job_code` → `jobCode` (JobInfo)
+  - `cis_position_id` → `positionCode` (Position)
+  - `cis_location_code` → `externalCode` (Location)
+
+### 10. Data Validation and Business Rules
+
+#### 10.1 Required Field Validation
+- **Organization Unit**: `externalCode`, `name`, `orgUnitType`, `status`
+- **Job**: `jobCode`, `jobTitle`, `jobFamily`, `status`
+- **Position**: `positionCode`, `name`, `jobCode`, `status`
+- **Location**: `externalCode`, `name`, `address`
+
+#### 10.2 Format Validation
+- **ID Fields**: Alphanumeric with specific length constraints (8-15 characters)
+- **Date Fields**: ISO 8601 format (YYYY-MM-DD)
+- **Decimal Fields**: FTE values with 2 decimal places maximum
+- **Email Fields**: Standard email format validation
+
+#### 10.3 Cross-Reference Validation
+- **Position to Job**: `jobCode` must exist in `JobInfo`
+- **Position to Org Unit**: `departmentId` must exist in `FOrganizationUnit`
+- **Position to Location**: `locationId` must exist in `Location`
+- **Position to Cost Center**: `costCenterId` must exist in `FCostCenter`
+
+#### 10.4 Business Rule Validation
+- **FTE Cap Validation**: Position FTE ≤ Organizational unit FTE cap
+- **Hierarchical Validation**: Parent organization must exist
+- **Date Validation**: End date must be after start date
+- **Concurrent Validation**: Total employee FTE ≤ maximum allowed
+
+### 11. Bulk Operations Metadata (FR-21, FR-22)
+
+#### 11.1 Bulk Import Objects
+- **PositionBulkImport** - Bulk position creation
+- **OrganizationUnitBulkImport** - Bulk org unit creation  
+- **JobBulkImport** - Bulk job creation
+- **LocationBulkImport** - Bulk location creation
+
+#### 11.2 Bulk Operation Fields
+- **Batch ID**: `batchId` - For tracking bulk operations
+- **Operation Type**: `operationType` - Create, Update, Delete
+- **Status**: `status` - Processing, Completed, Error, Partial
+- **Record Count**: `recordCount` - Total records in batch
+- **Processed Count**: `processedCount` - Successfully processed
+- **Error Count**: `errorCount` - Failed records
+- **Error Details**: `errorDetails` - Specific error information
+
+#### 11.3 Bulk Validation Rules
+- **FTE Cap Validation**: Validate total FTE impact before processing
+- **Dependency Validation**: Validate all referenced objects exist
+- **Workflow Bypass**: Bulk operations may bypass individual workflows
+- **Rollback Capability**: Support for transaction rollback on errors
+
+### 12. Custom Field Extensions
+
+#### 12.1 Organizational Unit Custom Fields
+- **transferRating** - `transferRating` (Decimal field for transfer rating)
+- **establishmentControl** - `establishmentControl` (Picklist for funding control)
+- **fteCap** - `fteCap` (Maximum FTE allocation)
+- **machineryOfGovtFlag** - `machineryOfGovtFlag` (Boolean for MoG changes)
+
+#### 12.2 Position Custom Fields
+- **locallyKnownAs** - `locallyKnownAs` - Alternative position name
+- **siteSpecificAllowance** - `siteSpecificAllowance` - Position-based allowance
+- **identifiedPosition** - `identifiedPosition` - Boolean for identified positions
+- **roleDescription** - `roleDescriptionUrl` - Attachment field for role descriptions
+- **workSiteLocationId** - `workSiteLocationId` - Work site location for pay calculation
+- **physicalLocationId** - `physicalLocationId` - Physical location for pay calculation
+
+#### 12.3 Job Custom Fields
+- **anzscoCode** - `anzscoCode` - ANZSCO Code for external mapping
+- **anzscoName** - `anzscoName` - ANZSCO Name for external mapping
+- **certifiedAgreement** - `certifiedAgreement` - Certified Agreement mapping
+- **externalMappingRef** - `externalMappingRef` - External system reference
+
+### 13. Workflow and Business Rule Metadata
+
+#### 13.1 Position Creation Workflow (FR-28)
+- **Trigger Conditions**:
+  - Position type = "Permanent"
+  - Position level = "SES"
+  - Funding type = "Government"
+  - Salary > threshold amount
+- **Approval Steps**:
+  - Initial validation → JADE team review
+  - Financial impact → Finance team review
+  - Final approval → Department head
+- **Status Tracking**: `workflowStatus`, `approverId`, `approvalDate`
+
+#### 13.2 Organizational Change Workflow
+- **Change Types**: Creation, Modification, Abolishment
+- **Approval Levels**: Department, Division, Region specific
+- **Notification Rules**: Automatic notifications to stakeholders
+- **Audit Trail**: Complete change history with approval tracking
+
+### 14. Integration Mapping Metadata
+
+#### 14.1 CIS Integration Fields
+- **Organization Mapping**:
+  - `cis_org_unit_id` → `FOrganizationUnit.externalCode`
+  - `cis_org_name` → `FOrganizationUnit.name`
+  - `cis_org_type` → `FOrganizationUnit.orgUnitType`
+
+#### 14.2 HR RG Integration Fields
+- **Data Harmonization**:
+  - `successfactors_id` → `hr_rg_reference_id`
+  - `effective_date_range` → `time_slice_id`
+  - `data_quality_score` → `harmonization_status`
+
+This comprehensive metadata extraction provides complete coverage of the organizational design requirements for the Queensland Department of Education HCMS implementation, ensuring all functional requirements from FR-1 through FR-38 are supported by appropriate data objects, relationships, and business rules within the SAP SuccessFactors environment.

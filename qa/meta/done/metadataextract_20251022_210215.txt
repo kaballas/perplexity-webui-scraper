@@ -1,0 +1,49 @@
+# Key Information Gaps for Enhanced Context
+
+## Integration Architecture Requirements
+- **Data Governance Strategy**: Golden record approach with HR RG (Microsoft Fabric) as single source of truth, BTP as read-only cache
+- **Synchronization Mechanism**: Event-driven sync using SAP Event Mesh between HR RG and BTP custom tables
+- **Change Management**: SAP Solution Manager integration for BTP extensions following same governance as core SuccessFactors modules
+- **Transport Management**: TMS integration for BTP application releases alongside SuccessFactors modules
+
+## Business Logic Complexity
+- **Concurrent Assignment Handling**: Employee-level logic with assignment-level granularity for award changes
+- **Cross-Assignment Balance Management**: Pro-rated conversion rules when only some assignments change
+- **Multi-Assignment Performance**: Bulk API calls vs individual assignment queries for employees with 5-10+ concurrent assignments
+- **Temporal Consistency**: Locking mechanisms and status indicators during award conversion processes
+
+## Performance & Scalability Specifications
+- **Response Time SLA**: <3 seconds for employee-level aggregated view
+- **Caching Strategy**: 15-minute TTL with on-demand refresh for assignment-level balances
+- **Load Testing Requirements**: Scenarios with 5-10 concurrent assignments per employee
+- **API Optimization**: Bulk call implementation instead of individual queries
+
+## Compliance & Security Requirements
+- **Data Residency**: BTP applications configured in Australian regions only (Sydney/Melbourne)
+- **IS18:2018 Compliance**: Data classification, encryption at rest/transit, access logging requirements
+- **Microsoft Purview Integration**: Metadata tagging for governance framework connection
+- **Audit Trail Requirements**: Comprehensive logging with user context and provenance tracking
+
+## Error Handling & Recovery
+- **Circuit Breaker Pattern**: For SuccessFactors API call management
+- **Fallback Strategies**: Cached data serving with stale data indicators during API outages
+- **Atomic Operations**: Database transaction implementation for award conversions
+- **Rollback Mechanisms**: Automatic state reversion on conversion failures
+
+## Queensland DoE Specific Requirements
+- **Academic Calendar Integration**: School holiday restrictions, term-based leave planning, teacher-specific patterns
+- **12-Month Projection Logic**: Business rule alignment with calendar year cycles vs. technical limitations
+- **Cutover Strategy**: Phased migration by employee category with parallel processing capability
+- **Historical Balance Validation**: Cross-validation protocols for 100K+ employee transition
+
+## Downstream System Integration
+- **Data Flow Architecture**: Complete chain from HR RG → SuccessFactors → BTP → ECP → CIS/IAM/Alloc8/SBS/OneSchool
+- **Real-time vs Batch Definitions**: System-specific update requirements and validation gates
+- **Data Quality Protocols**: Validation before downstream system pushes
+- **Monitoring Requirements**: End-to-end data flow health tracking
+
+## Operational & Governance Framework
+- **Testing Standards**: Unit, integration, UAT following SuccessFactors module standards
+- **Documentation Requirements**: SAP SolDoc integration with business requirement traceability
+- **Incident Response**: Monitoring, alerting, and operational procedures
+- **User Access Control**: Role-based governance with administrative override capabilities

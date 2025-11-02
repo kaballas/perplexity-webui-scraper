@@ -1,0 +1,224 @@
+# HCMS Technical Overview - Comprehensive Notes
+
+## 1. Document Scope and Section Hierarchy
+
+### Document Scope
+- **Program**: Human Capital Management Solution (HCMS) Program
+- **Organization**: Queensland Department of Education (DoE)
+- **Objective**: Replace 28-year-old legacy TSS (COBOL/Oracle) HR and payroll system
+- **Target**: Modern, cloud-first ecosystem leveraging SAP SuccessFactors and Microsoft Azure
+- **Timeline**: Production readiness November 2025, full enablement mid-2026
+
+### Section Hierarchy
+```
+1. Executive Summary
+2. Technical Architecture Overview
+3. Planned Cutover Strategy
+4. Testing Strategy (including PPRT)
+5. DevOps, CI/CD and Lifecycle Governance
+6. Security, Compliance and IPOLA Framework
+7. Risks and Mitigations
+8. Conclusion
+9. Core Technology Components (SAP & Azure)
+```
+
+## 2. Key Entities, Systems, and Components
+
+### Core Systems
+- **Legacy System**: TSS (COBOL/Oracle - 28 years old)
+- **New SAP Platform**: SuccessFactors (EC, ECP, Recruiting, Onboarding 2.0), Fieldglass, Build Apps, Signavio
+- **New Azure Platform**: Microsoft Fabric-based HR Resource Group (HR RG)
+
+### Foundational Pillars
+1. **SAP Platform**
+   - SuccessFactors (core HR and payroll operations)
+   - SAP BTP (IAS/IPS, Workflow/Extensibility, Event Mesh)
+   - SAP Integration Suite (CPI/IC for system connectivity)
+   - SAP Data Sphere (central data management and analytics)
+   - SAP ALM (Application Lifecycle Management)
+   - Extensions: Signavio, Build Apps, Joule, WalkMe
+
+2. **Microsoft Fabric Platform**
+   - HR Resource Group (HR RG) on Fabric
+   - Master Data Management (MDM) layer
+   - Single source of truth and golden record
+   - Medallion Architecture (Bronze/Silver/Gold)
+
+### Supporting Components
+- **Enterprise Data Platform (EDP)** under EQIP Program
+- **46+ downstream systems** (CIS, IAM, Alloc8, SBS, OneSchool, etc.)
+- **OpenText xECM** for SAP SuccessFactors document management
+- **OpenText InfoArchive** for long-term retention (Azure-hosted)
+- **Azure DevOps and SAP ALM** for unified lifecycle governance
+
+## 3. Relationships and Dependencies
+
+### Primary Relationships
+- **SAP ↔ Azure Integration**: SAP Integration Suite bridges to Microsoft Fabric
+- **HR RG as Central Hub**: Acts as authoritative data source to EDP and 46+ downstream systems
+- **Data Flow**: SAP Data Sphere → HR RG → Downstream systems
+
+### Dependency Matrix
+```
+SAP SuccessFactors → SAP Data Sphere → HR RG → EDP/Downstream Systems
+SAP Integration Suite ↔ Azure Data Hub
+SAP ALM ↔ Azure DevOps (unified DevOps model)
+```
+
+### Critical Dependencies
+- **Identity Management**: Ping Federation/Entra ID integration with SAP IAS/IPS
+- **Security**: Queensland Government IS18:2018 and IPOLA compliance
+- **Document Management**: OpenText xECM ↔ SAP SuccessFactors, InfoArchive for archiving
+- **DevOps Integration**: Unified pipeline across SAP and Azure platforms
+
+## 4. Technical Flows and Integrations
+
+### Data Flow Architecture
+```
+Source Systems → SAP Data Sphere → HR RG (Medallion: Bronze/Silver/Gold) → Downstream Systems
+```
+
+### Integration Patterns
+- **API-based integration** via SAP Integration Suite (CPI/IC)
+- **Real-time and batch processing** capabilities
+- **Medallion Architecture** implementation (bronze: raw, silver: cleansed, gold: business-ready)
+- **Azure DataHub** ingestion engine for data flows
+
+### Cutover Strategy Flow
+1. **Phase 1**: TSS → HR RG data migration
+2. **Phase 2**: Downstream systems transition from TSS to HR RG
+3. **Phase 3**: SAP operational systems go-live
+
+### Testing Flow
+- **Parallel Payroll Run Testing (PPRT)**: TSS vs SAP ECP comparison
+- **End-to-end reconciliation**: payslips, deductions, leave balances, GL entries, ATO submissions
+- **SAP ALM** manages PPRT linkage to Azure DevOps
+
+## 5. Validation and Traceability
+
+### Validation Points
+- **Proof of Concept Success**:
+  - 1,000 employee records ingested from TSS to HR RG
+  - 3,000+ tables ingested from TSS to Fabric
+  - Confirmed viability of Azure DevOps + Terraform approach
+
+### Traceability Framework
+- **SAP ALM ↔ Azure DevOps** integration for unified lifecycle management
+- **End-to-end test traceability** across both platforms
+- **Defect tracking** linked between systems
+- **Configuration management** across environments (Production, Pre-Production, Test, Development)
+
+### Compliance Validation
+- **Queensland Government IS18:2018** alignment
+- **IPOLA Act 2023** compliance
+- **QGEA-aligned security frameworks**
+- **Microsoft Purview** for data governance and lineage
+
+## 6. Structured Summary with Headings and Bullet Hierarchy
+
+### Executive Summary
+- **Legacy Replacement**: TSS (COBOL/Oracle) → SAP SuccessFactors + Microsoft Azure
+- **Dual-Pillar Architecture**: SAP for operations, Azure for data management
+- **Governance Model**: Unified DevOps across SAP and Azure platforms
+- **Security Framework**: IS18:2018 and IPOLA compliance
+- **Timeline**: November 2025 production, mid-2026 full enablement
+
+### Technical Architecture
+
+#### SAP Platform Components
+- **SuccessFactors Modules**:
+  - Employee Central (EC) - Core HR data
+  - Employee Central Payroll (ECP) - Payroll processing
+  - Recruiting and Onboarding 2.0
+- **SAP Business Technology Platform (BTP)**:
+  - Identity Authentication Service (IAS)
+  - Identity Provisioning Service (IPS)
+  - Workflow Management and Extensibility
+  - Event Mesh for event-driven architecture
+- **Integration Suite**: Cloud Platform Integration (CPI) and Integration Catalog (IC)
+- **Data Sphere**: Semantic modeling and data harmonization
+- **ALM**: Application Lifecycle Management for PPRT
+- **Extensions and Tools**:
+  - Fieldglass (contingent workforce)
+  - Build Apps (low-code development)
+  - Signavio (process modeling)
+  - Joule (AI assistant)
+  - WalkMe (user guidance)
+- **Content & Records Management**:
+  - OpenText xECM for SAP SuccessFactors
+  - OpenText InfoArchive for long-term retention
+
+#### Azure/Microsoft Fabric Components
+- **HR Resource Group (HR RG)**: Master data and golden record repository
+- **Microsoft Fabric**: Unified analytics platform with Medallion Architecture
+- **Azure Data Hub**: Data ingestion and processing engine
+- **Azure DevOps**: CI/CD pipeline management and test automation
+- **Infrastructure as Code**: Terraform for consistent provisioning
+- **Data Governance**: Microsoft Purview for lineage and classification
+- **Security Monitoring**: Splunk (current) / Microsoft Sentinel (future)
+
+### Implementation Strategy
+
+#### Cutover Timeline
+- **October 2025 - March 2026**: Phased production cutover
+- **November 2025**: HR RG production-ready
+- **Mid-2026**: Full SAP and downstream enablement
+
+#### Downstream System Migration
+- **Completed**: OneSchool reverse engineering
+- **In Progress**: CIS, IAM, Alloc8
+- **Not Started**: SBS, Computer for Teachers
+- **Total**: 46+ downstream systems requiring migration
+
+### Testing Strategy
+
+#### Parallel Payroll Run Testing (PPRT)
+- **Dual-platform execution**: TSS and SAP ECP simultaneously
+- **Comprehensive reconciliation**: All payroll outputs compared
+- **Governance assurance**: End-to-end traceability maintained
+- **SAP ALM integration**: Linked to Azure DevOps for unified tracking
+
+#### Environment Structure
+- **SAP Environments**: Production, Pre-Production (UAT), Training, Development (CMDEV)
+- **Azure Environments**: Production, Pre-Production, Test, Development
+- **Integration**: Single Sign-On (SSO) across all environments
+- **Change Management**: DoE Change Advisory Board (CAB) oversight
+
+### DevOps and Governance
+
+#### Unified Model
+- **Azure DevOps**: HR RG pipeline management and CI/CD
+- **SAP ALM**: SAP lifecycle governance and PPRT management
+- **Integration**: Cross-platform defect tracking and test evidence sharing
+
+#### Infrastructure Management
+- **Terraform**: Infrastructure-as-Code for consistent provisioning
+- **CI/CD**: Automated deployment pipelines across environments
+- **Environment Consistency**: Standardized configurations across all tiers
+
+### Security and Compliance
+
+#### Security Framework
+- **Identity Management**: Ping Federation/Entra ID with SAP IAS/IPS
+- **Access Control**: Role-Based Access Control (RBAC) and Multi-Factor Authentication (MFA)
+- **Data Governance**: Microsoft Purview for classification and lineage
+- **Security Monitoring**: Splunk (current) / Microsoft Sentinel (future) for logging/alerting
+
+#### Compliance Requirements
+- **IS18:2018**: Queensland Government security standard alignment
+- **IPOLA Act 2023**: Information Privacy and Other Legislation Amendment compliance
+- **Document Management**: xECM and InfoArchive integration for records retention
+- **Records Retention**: QGEA-aligned archival processes
+
+### Risk Management
+
+#### Key Risks and Mitigations
+- **Legacy Logic Loss**: COBOL rules reverse-engineered into Fabric Notebooks
+- **Data Divergence**: SAP Data Sphere as canonical modeling layer
+- **High-Impact Cutover**: Early HR RG implementation strategy
+- **Security Misconfiguration**: IPOLA alignment and Purview classifications
+- **Integration Complexity**: Standards-based hybrid model with Integration Suite
+- **Change Management**: DoE CAB oversight and structured approval processes
+
+### Integration Architecture Summary
+The HCMS program implements a sophisticated hybrid architecture where SAP SuccessFactors serves as the operational system of record while Microsoft Fabric-based HR RG functions as the master data management layer, creating a robust, scalable solution that meets the Queensland Department of Education's modernization requirements while maintaining compliance with government security and privacy standards.

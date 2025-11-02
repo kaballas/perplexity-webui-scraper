@@ -1,0 +1,196 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Known Issues and Application Errors Analysis
+
+### Executive Summary
+This metadata extraction focuses on analyzing known issues related to custom tasks, e-signatures, and onboarding initiation failures in the 2H 2025 Preview Release. The analysis covers error handling, workflow dependencies, and system configuration impacts on custom MDF objects and document flow processes.
+
+### 1. Core Metadata Objects Affected
+
+#### 1.1 MDF Objects (Custom Task Related)
+- **Custom MDF Object** - Used in custom task completion scenarios
+  - Temporal Management: Not specified for rehire scenarios
+  - Relationships: Linked to employment history and task completion records
+  - Key Fields: taskStatus, completionDate, responsiblePerson, employmentId
+  - Required for: Custom task re-submission and rehire processes
+
+#### 1.2 Document Flow Objects
+- **Document Flow Step** - E-signature and document processing
+  - Key Fields: documentStatus, signatureStatus, documentType, candidateId
+  - Temporal Management: Step completion tracking with timestamps
+  - Required for: E-signature workflows and document completion tracking
+
+#### 1.3 Onboarding Initiation Objects
+- **Onboarding Process** - New hire/onboarding initiation
+  - Key Fields: processStatus, candidateId, initiatedDate, businessProcessId
+  - Temporal Management: Process start/end date tracking
+  - Required for: Onboarding dashboard visibility and candidate tracking
+
+### 2. Workflow and Business Rule Metadata
+
+#### 2.1 Custom Task Workflows
+```
+Workflow Object: Custom Task Assignment
+- Business Rules: Task assignment logic for rehire scenarios
+- Dynamic Roles: ONB responsible person assignment
+- Approval Steps: Task completion verification
+- Event Triggers: Rehire with old employment detection
+```
+
+#### 2.2 E-Signature Business Rules
+```
+Business Rule: Assign Forms
+- Document Assignment: Custom PDF form mapping
+- Role Dependencies: External user permissions
+- Signature Validation: PFS integration requirements
+- Error Handling: "Click to Sign" failure scenarios
+```
+
+### 3. Picklist Metadata Dependencies
+
+#### 3.1 Task Status Picklists
+- **Task Status Values:**
+  - IN_PROGRESS
+  - COMPLETED
+  - ERROR
+  - RE_SUBMITTED
+
+#### 3.2 Document Status Picklists
+- **Document Status Values:**
+  - AWAITING_SIGNATURE
+  - SIGNED
+  - ERROR
+  - CANCELLED
+
+#### 3.3 Onboarding Status Picklists
+- **Process Status Values:**
+  - INITIATED
+  - IN_PROGRESS
+  - COMPLETED
+  - FAILED
+  - STUCK_IN_BPE
+
+### 4. Integration and Error Handling Metadata
+
+#### 4.1 Error Handling Configuration
+- **Application Error Types:**
+  - CUSTOM_TASK_ERROR
+  - E_SIGNATURE_ERROR
+  - SERVER_ERROR
+  - INITIATION_ERROR
+
+#### 4.2 External System Dependencies
+- **PFS Integration:**
+  - Authentication endpoints
+  - Document flow integration
+  - Signature validation APIs
+
+### 5. Security and Permission Metadata
+
+#### 5.1 Role-Based Permissions
+- **External User Roles:**
+  - Document signing permissions
+  - Task completion access
+  - Dashboard visibility rights
+
+- **Admin User Roles:**
+  - Task editing permissions
+  - Re-submission capabilities
+  - Process initiation rights
+
+#### 5.2 DG Filters (Issue Related)
+- **Dependency Filters:**
+  - External User Role Based Permission Groups
+  - Candidate filtering criteria
+  - Onboarding process triggers
+
+### 6. Temporal Data Management
+
+#### 6.1 Rehire Scenario Metadata
+- **Previous Employment Tracking:**
+  - employmentHistoryId
+  - previousTaskCompletionDate
+  - rehireDate
+  - taskReassignmentFlag
+
+#### 6.2 Process Timing
+- **BPE Job Management:**
+  - jobStartTime
+  - jobEndTime
+  - retryLogicEnabled
+  - timeoutThreshold
+
+### 7. API and Endpoint Metadata
+
+#### 7.1 OData Endpoints Affected
+```
+Custom Task API: /odata/v2/CustomTaskObject
+Document Flow API: /odata/v2/DocumentFlowStep
+Onboarding Process API: /odata/v2/OnboardingProcess
+```
+
+#### 7.2 Workflow APIs
+- Task assignment endpoints
+- Status update endpoints
+- Error logging endpoints
+
+### 8. Configuration Metadata
+
+#### 8.1 Business Process Engine (BPE) Configuration
+- **Job Status Tracking:**
+  - unfinished job detection
+  - retry logic configuration
+  - timeout settings
+
+#### 8.2 Form Assignment Configuration
+- **Custom PDF Form Mapping:**
+  - Form template references
+  - Assignment business rules
+  - Signature field definitions
+
+### 9. Known Issues Metadata Catalog
+
+| Issue ID | Component | Object Type | Impact Level | Status |
+|----------|-----------|-------------|--------------|---------|
+| 3669144 | LOD-SF-OBX-NHA | Custom MDF Task | High | Investigation |
+| 3668178 | LOD-SF-OBX-ESN | Document Flow | High | Investigation |
+| 3667207 | LOD-SF-OBX | Onboarding Process | Resolved | Fixed |
+
+### 10. Metadata Dependencies and Relationships
+
+#### 10.1 Cross-Object Relationships
+- EmploymentInfo → CustomTaskObject (via employmentId)
+- DocumentFlowStep → OnboardingProcess (via processId)
+- CustomTaskObject → DocumentFlowStep (via task-document link)
+
+#### 10.2 System Integration Points
+- PFS Integration → Document Flow (signature processing)
+- RCM Integration → Onboarding Process (candidate initiation)
+- DG Filters → External User Permissions (access control)
+
+### 11. Audit and Compliance Metadata
+
+#### 11.1 Audit Trail Requirements
+- Task completion logging
+- Document signing verification
+- Process initiation tracking
+- Error occurrence timestamps
+
+#### 11.2 Compliance Considerations
+- E-signature compliance requirements
+- Document retention policies
+- Process completion validation
+
+### 12. Performance and Monitoring Metadata
+
+#### 12.1 Performance Metrics
+- Task submission response times
+- Document signing completion rates
+- Onboarding initiation success rates
+- Error occurrence frequency
+
+#### 12.2 Monitoring Points
+- Application error logging
+- Process completion monitoring
+- Integration endpoint health checks
+
+This metadata extraction provides comprehensive coverage of the objects, relationships, and configurations affected by the known issues in the 2H 2025 Preview Release, supporting troubleshooting, remediation planning, and system stability improvements.

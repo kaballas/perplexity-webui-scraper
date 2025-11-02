@@ -1,0 +1,499 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Queensland Department of Education Recruitment System
+
+### Document Information
+- **Extraction Date**: 2024-01-15
+- **System Version**: SuccessFactors 2308
+- **Modules**: Recruiting Management (RCM), Employee Central (EC)
+- **Scope**: Requisition Management and Position Integration
+
+---
+
+## 1. Core Object Definitions
+
+### 1.1 JobRequisition Object (RCM)
+**Object Name**: JobRequisition  
+**API Endpoint**: `/odata/v2/JobRequisition`  
+**Description**: Core object for job requisition management supporting corporate and school-based hiring
+
+**Key Fields**:
+```
+- requisitionId (Edm.String, Key)
+- requisitionTitle (Edm.String, Required)
+- positionId (Edm.String, Foreign Key to Position)
+- status (Edm.String, Picklist: Open, Pending, Closed, Cancelled)
+- templateType (Edm.String, Picklist: Corporate, Teacher, EOI, Exception)
+- fteValue (Edm.Decimal, Range: 0.001 - 1.0)
+- creationDate (Edm.DateTime)
+- approvalStatus (Edm.String, Picklist: Pending, Approved, Rejected)
+- parentRequisitionId (Edm.String, For Evergreen-child relationships)
+- childRequisitionFlag (Edm.Boolean)
+- manualMovementFlag (Edm.Boolean)
+- customString1 (Edm.String, "Over-Establishment Reference")
+- customString2 (Edm.String, "ServiceNow Approval ID")
+- customString3 (Edm.String, "Justification Text")
+- customBoolean1 (Edm.Boolean, "Over-Establishment Flag")
+- customBoolean2 (Edm.Boolean, "Evergreen Pool Flag")
+```
+
+### 1.2 Position Object (EC)
+**Object Name**: Position  
+**API Endpoint**: `/odata/v2/Position`  
+**Description**: Employee Central position management object
+
+**Key Fields**:
+```
+- positionId (Edm.String, Key)
+- positionTitle (Edm.String)
+- status (Edm.String, Picklist: Active, Inactive, Vacant, Filled)
+- fte (Edm.Decimal, Range: 0.001 - 1.0)
+- jobCode (Edm.String, Foreign Key to Foundation.JobInfo)
+- department (Edm.String, Foreign Key to Foundation.Department)
+- establishmentControl (Edm.String, Picklist: Funded, Over-Establishment)
+- costCenter (Edm.String)
+- customString1 (Edm.String, "ServiceNow Approval Reference")
+- customBoolean1 (Edm.Boolean, "Over-Establishment Flag")
+- effectiveStartDate (Edm.DateTime)
+- effectiveEndDate (Edm.DateTime)
+```
+
+---
+
+## 2. Template Configuration Metadata
+
+### 2.1 Requisition Template Definitions
+
+#### Corporate/Region Job Requisition
+- **Template ID**: CORP_REQUISITION_001
+- **Use Case**: Non-school-based administrative, ICT, finance, policy roles
+- **Required Fields**: positionId, requisitionTitle, department, jobCode
+- **Approval Route**: Hiring Manager → Upline Manager → Corporate Recruitment
+- **Associated Objects**: Position, JobInfo, Department
+
+#### Teacher Job Requisition
+- **Template ID**: TEACHER_REQUISITION_001
+- **Use Case**: Specific classroom roles (e.g., "Cairns Maths Teacher")
+- **Required Fields**: positionId, requisitionTitle, teachingQualification, subjectArea
+- **Approval Route**: Principal → Regional HRBP → Endorser → School Delegate
+- **Associated Objects**: Position, TeachingQualification, SubjectArea
+
+#### Teacher Eligibility Job Requisition (Evergreen)
+- **Template ID**: EVERGREEN_TEACHER_001
+- **Use Case**: Continuous intake for teaching talent pool
+- **Required Fields**: requisitionTitle, qualificationCriteria, subjectAreas
+- **Approval Route**: Regional HRBP → Central Recruitment
+- **Special Properties**: childRequisitionFlag = true, manualMovementFlag = true
+
+#### Exception from Advertising Requisition
+- **Template ID**: EXCEPTION_REQUISITION_001
+- **Use Case**: Policy-based appointments (compassionate transfers, medical return)
+- **Required Fields**: justificationText, policyReference, approvalDocumentation
+- **Approval Route**: Senior Management → Policy Compliance
+- **Special Properties**: customBoolean2 = true (Bypass Advertisement)
+
+---
+
+## 3. Approval Workflow Metadata
+
+### 3.1 Route Map Configuration
+
+#### School-Based Approval Route (SCHOOL_ROUTE_001)
+```
+Step 1: Principal (Role: SchoolPrincipal)
+  - Condition: position.department CONTAINS 'School'
+  - Action: Approve/Deny/Delegate
+  - Timeout: 5 business days
+
+Step 2: Regional HR Business Partner (Role: RegionalHRBP)  
+  - Condition: Always
+  - Action: Approve/Deny/Request Changes
+  - Timeout: 3 business days
+
+Step 3: Endorser (Role: SchoolEndorser)
+  - Condition: IF position.establishmentControl = 'Over-Establishment' OR customBoolean1 = true
+  - Action: Approve/Reject
+  - Timeout: 3 business days
+
+Step 4: School Delegate (Role: SchoolDelegate)
+  - Condition: Always
+  - Action: Final Approval
+  - Timeout: 2 business days
+```
+
+#### Corporate Approval Route (CORP_ROUTE_001)
+```
+Step 1: Hiring Manager (Role: HiringManager)
+  - Condition: templateType IN ['CORP_REQUISITION_001', 'SUPPORT_REQUISITION_001']
+  - Action: Approve/Deny
+  - Timeout: 3 business days
+
+Step 2: Upline Manager (Role: UplineManager)
+  - Condition: Always
+  - Action: Approve/Deny
+  - Timeout: 2 business days
+
+Step 3: Corporate Recruitment (Role: CorporateRecruiter)
+  - Condition: Always
+  - Action: Process/Route
+  - Timeout: 1 business day
+```
+
+### 3.2 Role Definitions and Permissions
+
+#### SchoolEndorser Role
+- **Object Level Security**: JobRequisition (Read/Write on own school)
+- **Field Level Security**: approvalStatus (Write), customString3 (Write)
+- **Workflow Permissions**: Step 3 approval in school-based routes
+
+#### CorporateRecruiter Role
+- **Object Level Security**: JobRequisition (Read/Write all corporate)
+- **Field Level Security**: all recruitment fields
+- **Workflow Permissions**: Final step processing
+
+---
+
+## 4. Business Rule Metadata
+
+### 4.1 Position-Requisition Constraint Rule
+**Rule ID**: RCM_RULE_001  
+**Object**: JobRequisition  
+**Trigger**: Before Save (Create/Update)  
+**Condition**: 
+```
+IF (Position.Status = 'Vacant' AND 
+    COUNT(JobRequisition WHERE positionId = Position.positionId 
+          AND status IN ['Open','Pending']) > 0)
+THEN Block_Save
+```
+
+### 4.2 Over-Establishment Validation Rule
+**Rule ID**: RCM_RULE_002  
+**Object**: JobRequisition  
+**Trigger**: Before Save (Create)  
+**Condition**:
+```
+IF (Position.establishmentControl = 'Over-Establishment' AND
+    JobRequisition.customString2 ≠ 'ServiceNow_Approved')
+THEN Block_Save
+```
+
+### 4.3 FTE Split Validation Rule
+**Rule ID**: RCM_RULE_003  
+**Object**: JobRequisition  
+**Trigger**: Before Save (Create)  
+**Condition**:
+```
+IF (JobRequisition.fteValue < 1.0 AND 
+    Position.fteValue = 1.0 AND
+    COUNT(Position WHERE positionId = JobRequisition.positionId) > 1)
+THEN Validate_Total_FTE_Allocation
+```
+
+### 4.4 Template Selection Validation Rule
+**Rule ID**: RCM_RULE_004  
+**Object**: JobRequisition  
+**Trigger**: Before Save (Create)  
+**Condition**:
+```
+SWITCH(JobRequisition.templateType)
+  CASE 'TEACHER_ELIGIBILITY':
+    REQUIRE_FIELDS('qualificationCriteria', 'subjectAreas')
+    SET_FLAGS(childRequisitionFlag = true, manualMovementFlag = true)
+  CASE 'EXCEPTION_FROM_ADVERTISING':
+    REQUIRE_FIELDS('justificationText', 'policyReference')
+    SET_APPROVAL_ROUTE('EXCEPTION_ROUTE_001')
+```
+
+---
+
+## 5. Integration Mapping Metadata
+
+### 5.1 ServiceNow Integration Configuration
+
+#### ServiceNow Table Mapping
+```
+Source: ServiceNow.cmdb_ci_service (Over-Establishment Approval Table)
+Target: SuccessFactors.JobRequisition
+Mapping:
+  - service_now_approval_id → customString2
+  - approval_status → customString1
+  - risk_assessment_reference → customString3
+  - approval_date → customDate1
+```
+
+#### API Endpoint Configuration
+```
+Endpoint: https://yourinstance.service-now.com/api/now/table/cmdb_ci_service
+Authentication: OAuth 2.0 with ServiceNow integration user
+Headers: Content-Type: application/json
+Query: sysparm_query=approval_status=approved^active=true
+```
+
+### 5.2 Real-time Validation Endpoints
+```
+ServiceNow Status Check:
+  GET /api/now/table/sysapproval_approver?sysparm_query=state=approved^sys_id={approval_id}
+  Response: {"result": [{"state": "approved", "sys_id": "abc123"}]}
+
+SuccessFactors Validation:
+  POST /odata/v2/JobRequisition
+  Request Body: {"customString2": "SNOW_APPROVED_12345"}
+```
+
+---
+
+## 6. Picklist Definitions
+
+### 6.1 Requisition Status Picklist (RCM_PICKLIST_001)
+```
+Values:
+- Open: Active requisition ready for sourcing
+- Pending: Under approval workflow
+- Closed: Position filled successfully  
+- Cancelled: Requisition cancelled
+- On Hold: Temporarily suspended
+- Draft: Initial creation state
+```
+
+### 6.2 Template Type Picklist (RCM_PICKLIST_002)
+```
+Values:
+- Corporate/Region Job Requisition
+- School Based Classified Officer Job Requisition
+- Expression of Interest (EOI) Requisition
+- Exception from Advertising Requisition
+- School Support Job Requisition
+- Generic Job Requisition (Evergreen)
+- Teacher Eligibility Job Requisition (Evergreen)
+- Teacher Job Requisition
+```
+
+### 6.3 Approval Status Picklist (RCM_PICKLIST_003)
+```
+Values:
+- Pending: Awaiting approval
+- Approved: Approved by all required approvers
+- Rejected: Rejected by approver
+- Returned: Returned for changes
+- Cancelled: Approval process cancelled
+```
+
+---
+
+## 7. Workflow Configuration Metadata
+
+### 7.1 Evergreen to Specific Requisition Workflow
+**Workflow ID**: WF_EVERGREEN_001  
+**Trigger**: Candidate Status Change to "Job Ready"  
+**Process**:
+1. Query Evergreen Requisition pool
+2. Match candidate qualifications to specific requisitions
+3. Update candidate records with parentRequisitionId
+4. Send notification to recruiter for manual review
+5. Update child requisition status to "Ready for Screening"
+
+### 7.2 Approval Timeout Workflow
+**Workflow ID**: WF_TIMEOUT_001  
+**Trigger**: Approval Step Timeout  
+**Process**:
+1. Send escalation notification to next level approver
+2. Update approval history with timeout event
+3. Optionally reassign to backup approver
+4. Update requisition status to "Approval Delayed"
+
+---
+
+## 8. Security and Permission Metadata
+
+### 8.1 Field-Level Security
+```
+JobRequisition Object Permissions:
+- requisitionId: Read (All), Write (Recruiters, Managers)
+- approvalStatus: Read (Approvers), Write (Current Approver)
+- customString3 (Justification): Read (Compliance), Write (Senior Management)
+- salaryRange: Read (HR Only), Write (Compensation Team)
+```
+
+### 8.2 Object-Level Security
+```
+JobRequisition Access Control:
+- Corporate Roles: Full access to corporate requisitions
+- School Roles: Access limited by orgUnit hierarchy
+- Recruiter Roles: Access by recruitment team assignment
+- Manager Roles: Access to direct reports' requisitions
+```
+
+---
+
+## 9. Custom Field Definitions
+
+### 9.1 Custom String Fields
+```
+customString1: ServiceNow Approval Reference
+customString2: Over-Establishment Justification
+customString3: Exception Criteria Documentation
+customString4: Candidate Movement Notes
+customString5: Compliance Tracking ID
+```
+
+### 9.2 Custom Boolean Fields
+```
+customBoolean1: Over-Establishment Flag
+customBoolean2: Evergreen Pool Indicator
+customBoolean3: Manual Approval Required
+customBoolean4: Policy Exception Flag
+customBoolean5: Audit Required Flag
+```
+
+### 9.3 Custom Date Fields
+```
+customDate1: ServiceNow Approval Date
+customDate2: Position Vacancy Date
+customDate3: FTE Split End Date
+customDate4: Compliance Review Date
+customDate5: Audit Due Date
+```
+
+---
+
+## 10. Data Model Relationships
+
+### 10.1 Entity Relationship Diagram (Simplified)
+```
+Position (1) ←→ (M) JobRequisition
+JobRequisition (1) ←→ (M) Candidate
+JobRequisition (1) ←→ (M) ApprovalStep
+JobRequisition (M) ←→ (1) TemplateConfiguration
+Candidate (M) ←→ (M) EvergreenPool
+```
+
+### 10.2 Foreign Key Constraints
+```
+JobRequisition.positionId → Position.positionId (Required)
+JobRequisition.templateId → TemplateConfiguration.templateId (Required)
+JobRequisition.approvalRouteId → RouteConfiguration.routeId (Required)
+```
+
+---
+
+## 11. API Specifications
+
+### 11.1 OData API Endpoints
+```
+Job Requisition Operations:
+GET /odata/v2/JobRequisition - Retrieve requisitions
+POST /odata/v2/JobRequisition - Create requisition
+PUT /odata/v2/JobRequisition('{requisitionId}') - Update requisition
+DELETE /odata/v2/JobRequisition('{requisitionId}') - Delete requisition
+
+Position Operations:
+GET /odata/v2/Position - Retrieve positions
+GET /odata/v2/Position('{positionId}') - Retrieve specific position
+```
+
+### 11.2 API Authentication
+```
+Authentication: OAuth 2.0 Bearer Token
+Required Headers: Authorization: Bearer {token}
+Content-Type: application/json
+Accept: application/json
+```
+
+---
+
+## 12. Audit and Compliance Metadata
+
+### 12.1 Audit Trail Configuration
+```
+Audited Objects: JobRequisition, Position, ApprovalStep
+Audit Fields: 
+- lastModifiedBy
+- lastModifiedDate
+- changeReason
+- approvalHistory
+- statusChangeLog
+```
+
+### 12.2 Compliance Tracking
+```
+Required Compliance Fields:
+- complianceStatus: Track regulatory compliance
+- auditRequired: Flag for audit review
+- policyAdherence: Track policy compliance
+- approvalDocumentation: Store compliance documents
+```
+
+---
+
+## 13. Performance and Monitoring Metadata
+
+### 13.1 Performance Indicators
+```
+KPIs Tracked:
+- Time to Hire: From requisition creation to offer acceptance
+- Approval Cycle Time: Average approval workflow duration
+- Requisition Fill Rate: Percentage of requisitions filled
+- Evergreen Pool Utilization: Candidate movement efficiency
+```
+
+### 13.2 System Monitoring
+```
+Monitored Metrics:
+- API Response Times
+- Integration Health Status
+- Workflow Completion Rates
+- Data Integrity Checks
+```
+
+---
+
+## 14. Error Handling and Validation Rules
+
+### 14.1 Validation Error Codes
+```
+RCM_ERR_001: Position Requisition Constraint Violation
+RCM_ERR_002: ServiceNow Approval Validation Failed
+RCM_ERR_003: Template Configuration Error
+RCM_ERR_004: FTE Split Validation Error
+RCM_ERR_005: Approval Workflow Configuration Error
+```
+
+### 14.2 Error Handling Procedures
+```
+Error Recovery:
+- ServiceNow Integration Failure: Queue for retry, manual override option
+- Position Validation Error: Return to user with error message
+- Workflow Timeout: Escalate to backup approver
+- Data Integrity Error: Rollback transaction, log error
+```
+
+---
+
+## 15. Custom MDF Objects
+
+### 15.1 RecruitmentWorkflowConfiguration
+```
+Object Name: RecruitmentWorkflowConfiguration
+Fields:
+- workflowId (String, Key)
+- templateType (String)
+- approvalRoute (String)
+- requiredFields (String)
+- validationRules (String)
+- notificationSettings (String)
+```
+
+### 15.2 EvergreenPoolManagement
+```
+Object Name: EvergreenPoolManagement
+Fields:
+- poolId (String, Key)
+- requisitionId (String)
+- candidateId (String)
+- status (String)
+- jobReadyDate (DateTime)
+- movementNotes (String)
+- manualMovementFlag (Boolean)
+```
+
+This comprehensive metadata extraction provides the technical foundation for implementing and maintaining the Queensland Department of Education's SAP SuccessFactors recruitment system with proper governance, compliance, and operational efficiency.

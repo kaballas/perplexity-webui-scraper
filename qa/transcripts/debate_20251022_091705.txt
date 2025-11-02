@@ -1,0 +1,245 @@
+================================================================================
+Date: 2025-10-22 09:17:05
+TASK: hcms_technical_overview:
+  executive_summary: |
+    The Department of Education (DoE) is transforming its HR and payroll systems under the HCMS Program...
+    Key pillars:
+      - SAP HXM suite (SuccessFactors, BTP, Integration Suite, Data Sphere, ALM)
+      - Microsoft Fabric-based HR Resource Group (HR RG)
+    HR RG acts as the golden record, MDM layer, and authoritative data source for EDP integration.
+    The system follows a unified DevOps and IS18:2018/QGEA-aligned security framework.
+    The program has two phases: foundation and enablement (Oct 2025–Mar 2026).
+
+  technical_architecture_overview:
+    sap_platform:
+      core_modules:
+        - Employee Central
+        - Payroll
+        - Recruitment
+        - Onboarding
+      supporting_tools:
+        - SAP BTP
+        - Integration Suite
+        - Data Sphere
+        - ALM
+        - Build Apps
+        - Signavio
+        - Joule
+        - WalkMe
+      document_management:
+        - OpenText xECM for SAP SuccessFactors
+        - OpenText InfoArchive (Azure-based archival)
+    azure_platform:
+      hr_resource_group:
+        architecture_pattern: "Medallion (bronze, silver, gold)"
+        integration:
+          - 46 downstream systems
+          - Azure DataHub
+          - Dataflows
+          - Notebooks
+        governance:
+          - Microsoft Purview
+          - Splunk (current)
+          - Microsoft Sentinel (future)
+        automation: "Terraform + Azure DevOps pipelines"
+        delivery_partner: "Data#3 in collaboration with Microsoft"
+    governance_model: |
+      Unified SAP–Azure governance model:
+      - HR RG as master data repository
+      - SAP as system of record for transactional HR and payroll.
+
+  planned_cutover_strategy:
+    period: "Oct 2025 – Mar 2026"
+    description: |
+      Transition from legacy TSS to HR RG as the primary data source for all downstream systems.
+      Enables earlier interface stabilization and risk reduction.
+    proof_of_concept:
+      - "Ingestion of 1,000 employee records via DataHub into HR RG"
+      - "Ingestion of 3,000+ TSS tables (~4,000 total) into Fabric via on-prem gateway"
+    reverse_engineering_status:
+      - OneSchool: completed
+      - CIS: in_progress
+      - IAM: in_progress
+      - SBS: not_started
+      - Computer_for_Teachers: not_started
+      - Alloc8: in_progress
+
+  testing_strategy:
+    approach: |
+      Structured, risk-based testing: unit, SIT, UAT, and Parallel Payroll Run Testing (PPRT).
+      Governed by Design Authority and Project Control Group.
+    parallel_payroll_run_testing:
+      purpose: "Compare TSS and SAP ECP outputs for reconciliation."
+      artefacts:
+        - Test Summary Reports
+        - Variance Registers
+        - Defect Logs
+      tools:
+        - SAP ALM
+        - Azure DevOps
+    environments_overview: |
+      Production, Pre-Production (UAT), Training, Development, SIT for SAP, ServiceNow,
+      OneSchool, DataHub, SBS, MyHR, EFI—all integrated via SSO.
+
+  devops_and_lifecycle_governance:
+    unified_model: |
+      DevOps integration across SAP and Azure ensures consistent CI/CD and governance.
+    azure_devops:
+      responsibilities:
+        - Data ingestion and cleansing
+        - COBOL logic replication via notebooks
+        - Terraform-based provisioning
+    sap_alm:
+      responsibilities:
+        - Configuration and test management
+        - Transport control
+        - Traceability and defect linkage to Azure DevOps
+
+  security_compliance_ipola:
+    framework_alignment: "IS18:2018 and IPOLA Act 2023"
+    pillars:
+      identify: "Ping Federation / Entra ID / SAP IAS/IPS"
+      protect: "Encryption, RBAC, MFA"
+      observe_log: "Microsoft Purview, Splunk/Sentinel"
+      alert: "Anomaly detection, SAP BTP event monitoring"
+    document_compliance:
+      - OpenText xECM for SAP
+      - OpenText InfoArchive (Azure-hosted)
+
+  risks_and_mitigations:
+    - risk: "Loss of legacy COBOL payroll logic"
+      mitigation: "Reverse engineering into Fabric Notebooks"
+    - risk: "Data divergence between SAP and Azure"
+      mitigation: "Canonical modelling via SAP Data Sphere"
+    - risk: "High-impact cutover"
+      mitigation: "Early HR RG deployment before SAP go-live"
+    - risk: "Security misconfiguration"
+      mitigation: "Alignment with IPOLA and Purview classification"
+    - risk: "Integration complexity"
+      mitigation: "Layered hybrid model using SAP Integration Suite"
+
+  conclusion: |
+    The HCMS architecture merges SAP’s operational HR systems with Microsoft Fabric’s data backbone.
+    HR RG functions as the Department’s Golden Record, supporting operational and analytical needs.
+    Production readiness: Nov 2025. Full enablement: mid-2026.
+
+  core_technology_components:
+    sap_core_products:
+      - name: "SAP SuccessFactors (EC + ECP)"
+        function: "Core HR master data and payroll engine"
+      - name: "SAP Fieldglass"
+        function: "Contingent workforce and vendor management"
+      - name: "SAP Build Apps"
+        function: "Low-code HR app development"
+      - name: "SAP Signavio"
+        function: "Process modelling and workflow analysis"
+      - name: "SAP ECC6 / S4HANA Finance"
+        function: "Financial integration for payroll journals and cost centres"
+      - name: "SAP Joule"
+        function: "AI analytics and trend detection"
+      - name: "SAP WalkMe"
+        function: "Guided onboarding and adoption"
+      - name: "SAP BTP"
+        function: "Integration and extension framework"
+      - name: "SAP Integration Suite"
+        function: "API and data flow orchestration"
+      - name: "SAP Data Sphere"
+        function: "Data modelling and transformation for Fabric"
+      - name: "SAP ALM"
+        function: "Test management and change governance"
+      - name: "OpenText xECM for SAP"
+        function: "Document generation and storage"
+      - name: "OpenText InfoArchive"
+        function: "Azure-based archival of legacy HR data"
+
+    azure_fabric_components:
+      - name: "Microsoft Fabric"
+        purpose: "Unified analytics and HR RG hosting"
+      - name: "Azure Data Hub"
+        purpose: "Data ingestion from TSS and non-SAP systems"
+      - name: "Azure DevOps"
+        purpose: "CI/CD pipelines and test automation"
+      - name: "Terraform"
+        purpose: "Infrastructure-as-Code for Fabric provisioning"
+      - name: "Microsoft Purview"
+        purpose: "Data classification and lineage"
+      - name: "Splunk/Microsoft Sentinel"
+        purpose: "Security event monitoring and alerting"
+
+
+5 High Level Functional Requirements
+   5.1 Manage Organisation Design
+ID	Priority	High Level Functional Requirements	Comment	Big Rock/Enhancement
+FR-1	Essential	The solution must support a range of organisation design objects including department / organisation, divisions, regions, schools / centres, offices, branches, business units, jobs, positions, cost centres and locations.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-2	Essential	The solution must support the creation of organisational units with a date effective and a range of data attributes e.g. Org Unit ID, Org Unit Title, Org Unit Type, Status, Head Position ID, Cost Centre, Location, Transfer Rating etc.	Shippy - Foundation workbook/standard functionality meets this requirement	"TV: Payroll System Integration (ECP)
+- FR-2 Integration: Position and employee data feeds to payroll system
+- Data Mapping: Position data, salary information, allowances, FTE calculations
+- Frequency: 10 mins for position changes affecting pay
+"
+FR-3	Essential	The solution must support the changing of organisational units with a date effective with the option to change / update any of the data attributes stored against the org unit.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-4	Essential	The solution must support integration from the Centre Information System (CIS) including the required data attributes for organisational units.	Shippy - Design decisions in the foundation workbook state exisiting objects will be loaded from CIS/TSS, manual creation after that.	"TV : CIS (Corporate Information System) Integration
+- FR-1 Integration: Real-time employee data synchronisation between EC and CIS
+- Data Mapping: Employee personal data, organisational assignments, job information
+- Protocol: Real-time API-based integration via SAP CPI
+- Frequency: Event-driven (immediate upon EC data changes)
+"
+FR-5	Essential	The solution must support the abolishing of organisational units with a date effective.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-6	Essential	The solution must support the creation and ongoing management of a hierarchical organisational structure, displaying the relationships between the organisational units in both a graphical or list format.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-7	Essential	The solution must support online organisational charts with visibility across vacant, filled and shared positions.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-8	Essential	The solution must support the ongoing management of a hierarchical organisational structure across past, current and future organisational modelling scenarios.	Shippy - potential gap if wanting a separate tool for modelling unless other environments are used	TV : Enhancement (E) - For custom development using PeopleForms (Deloitte standard) to extend standard SuccessFactors OM capabilities , SuccessFactors OrgViewer will not satisfy the requirment.
+FR-9	Essential	The solution must support the creation and ongoing management of the Department’s preferred job or workforce architecture framework consisting of job families, job functions, job roles and job titles.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-10	Essential	The solution must support the Department’s preferred job or workforce architecture framework including external mappings to data elements such as ANZSCO Codes and Descriptions (e.g. 134311 – School Principal).	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-11	Essential	The solution must support the creation of jobs with a date effective and a range of data attributes e.g. Job ID, Job Family, Job Function, Job Role Level 1, Job Role Level 2, ANZSCO Code, ANZSCO Name and Certified Agreement.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-12	Essential	The solution must support the changing of jobs with a date effective with the option to change / update any of the data attributes stored against the job.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-13	Essential	The solution must support the abolishing of jobs with a date effective.	Shippy - Foundation workbook/standard functionality meets this requirement	"TV: Azure Active Directory Integration
+- Integration: EC - BTP - Azure
+- Data Mapping: User provisioning, role assignments, access permissions
+- Frequency: Real-time for user creation/changes
+"
+FR-14	Essential	The solution must support the automatic inheriting of data attributes stored against jobs through to the creation of new positions.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-15	Essential	The solution must support the creation of positions with a date effective and a range of data attributes e.g. Position ID, Position Title, Locally Known As, Job Profile, Reports To, Supervisor Position, Number of Direct Reports, Budgeted FTE, Actual FTE, Number of Incumbents (Headcount), Vacant (Y/N – FTE), Position Type, Start Date, End Date, Funding Type, Organisational Unit, Location, Cost Centre, Award, Classification, Position Based Allowances (Site Specific Allowance), HR / Finance Delegations, Identified Position.	Shippy - Position workbook/standard functionality meets this requirement
+FR-16	Essential	The solution must support the loading and storage of role descriptions against positions.	Shippy - Position/foundation workbook/standard functionality meets this requirement
+FR-17	Essential	The solution must provide warnings when a request is submitted to create a new position would result in the approved FTE cap for that organisational unit to be exceeded.	Shippy - not standard, the standard can put warnings on the position. The foundation workbook doesn't appear to have a field showing the FTE of an org unit either. 	"Enhancement - could extend or modify our custom position control functionality to include Org unit level FTE control
+TV : Enhancement (E). It involves extending the core success factors to incorporate organizational FTE validation during position creation, which the standard system does not natively support."
+FR-18	Essential	The solution must support the changing of positions with a date effective with the option to change / update any of the data attributes stored against the position.	Shippy - Position workbook/standard functionality meets this requirement	TV:Enhancement (E) - Position and Organisation Management Business Logic , Custom MDF objects and business rules development to handle complex concurrent employment scenarios, position-based allowance calculations, and automatic attribute inheritance with employee-level override capabilities.
+FR-19	Essential	The solution must support the abolishing of positions with a date effective.	Shippy - Position workbook/standard functionality meets this requirement
+FR-20	Essential	The solution must support concurrent employment scenarios across the Department, including concurrent employment in the same award and concurrent employment across awards.	Shippy - Position workbook/standard functionality meets this requirement
+FR-21	Essential	The solution must support the bulk creation of positions to manage annual school allocations FTE and funding source with the option to split out to reflect school based direct and indirect reporting lines.	Shippy - Requirement is unclear- but the fundamental ability to mass create positions is possible.
+FR-22	Essential	The solution must support the bulk creation and update of organisational units and positions to manage Machinery of Government changes or large organisational restructures.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-23	Essential	The solution must allow line managers to create and edit positions based on allowable permissions (e.g. schools to create self-funded positions), which automatically updates the schools establishment without the need for additional workflow approvals.	Shippy - Foundation workbook/standard functionality meets this requirement. This is controlled via RBPs
+FR-24	Essential	The solution must support Headcount and FTE management for Corporate positions at both a position level and positions within an organisational unit.	Shippy - More detail required here as to what the expectation is.
+FR-25	Essential	The solution must support Resource and FTE management for School positions at both a position level and positions within an organisational unit.	SAP will say this is standard however the standard functionality is limited. A custom solution will be required for this.	Big Rock
+FR-26	Essential	The solution must support a maximum allowed allocation of FTE against positions at multiple levels of the org structure (e.g. unit, branch or division).	Need to understand what this means. Relates to FR-17. The position itself will have a single maximum allocation. 	"Enhancement
+TV : "
+FR-27	Essential	The solution must support vacancy management, including vacancy management reporting, across 1:1 position management, 1:Many position management and a hybrid model of both 1:1 and 1:Many establishment management model.	Shippy - Position workbook/standard functionality meets this requirement
+FR-28	Essential	The solution must support the workflow of create position and change position to internal teams (JADE – Job Analysis Design & Establishment, Finance) for review and or approval based on pre-defined parameters e.g. position is a permanent position or a Senior Executive Service (SES) position.	Shippy - Position workbook/standard functionality meets this requirement
+FR-29	Essential	The solution must support the creation and ongoing management of positions for volunteers, contingent / contractor employees and casuals in a talent pool via 1:Many position management.	Shippy - Position workbook/standard functionality meets this requirement
+FR-30	Essential	The solution must support automatic occupancy management from employee movements including concurrent employment.	Shippy - Position workbook/standard functionality meets this requirement
+FR-31	Essential	The solution must allow an employee to occupy multiple positions numbers concurrently and accurately reflect the occupied concurrent positions against the Department’s establishment management and organisational structure.	Is this just CE or also Multiple Positions. I.e. will each position be dealt with as a separate employment or will they form a single employment.	Possible
+FR-32	Essential	The solution must support position based allowances that are automatically included in payroll calculations for any employee assigned to that position.	"Non-standard. Allowances are Award based not positiion based. Would require clarification of requirement.
+Shippy - in the workbooks it mentions a location/allowance based table which wouldstill not be standard but would be controllable via business rules and look ups rather than allowances on the position which would need complex CPI work. Note as well, the position work book  does not have allowances mentioned. "	Possible enhancement, however detail required as may be standard
+FR-33	Essential	The solution must support the automatic inheriting of data attributes stored against positions through to the creation of new hires, with the option to override at the employee level.	Shippy - Position workbook/standard functionality meets this requirement
+FR-34	Essential	The solution must support the creation of locations / centres with a date effective and a range of data attributes e.g. Location ID, Location Name, Location Address, Location Contact Details and Longitude and Latitude details.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-35	Essential	The solution must support the changing of locations / centres with a date effective with the option to change / update any of the data attributes stored against the location / centre.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-36	Essential	The solution must support the abolishing of locations / centres with a date effective.	Shippy - Foundation workbook/standard functionality meets this requirement
+FR-37	Essential	The solution must support the recording of an employee’s work site location and their physical location e.g. work site location is a remote location and their physical location for certain days of the week is a personal residence or virtual academy, which has pay outcome implications e.g. no entitlement location based allowances if working from a personal residence that is outside of the remote location.	"Location based allowances, how would we handle recording the location of the person per day in order to identify whether the allowances are paid or not
+Shippy - There is no field defined in the employee data workbook, which I believe is an omission as it would be to be on there to enable any logic for payments, or this could be claimed through timesheets? "	TV: Enhancement (E) - Location-Based Pay and Allowance,Custom enhancement to manage work site vs. physical location validation, remote work allowance calculations, and geographic coordinate integration for school-based establishment management.
+FR-38	Essential	The solution must support organisation design reporting including vacancy management reporting, occupancy management reporting, headcount and FTE reporting, organisational structure reporting and establishment management reporting with a consolidated view across organisational units, jobs, positions, locations, concurrent employment and key employee information.	Shippy - standard functionality/reporting meets this requirement
+
+
+TASK List the FR IDs and Titles only that Require a WRICEF
+================================================================================
+
+================================================================================
+Task 1
+================================================================================
+The empty page stretches before us like an untouched canvas. White space filled with possibility, waiting for the first mark to be made. The cursor blinks expectantly.
+
+What story shall we begin?
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 1
+Total Characters: 195

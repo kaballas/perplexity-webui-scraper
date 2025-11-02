@@ -1,0 +1,180 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Teacher & Teacher Aide Vacation Payment Enhancement
+
+### Executive Summary
+This metadata extraction report analyzes the Teacher and Teacher Aide Vacation Payment enhancements required for the Queensland Department of Education's HCMS implementation. The analysis covers custom MDF objects, payroll configurations, and integration dependencies for complex vacation payment scenarios.
+
+---
+
+## 1. MDF Object Definitions
+
+### Summer Vacation MDF Object (Employee Central Enhancement)
+- **Object Name**: `summerVacationPayment`
+- **Purpose**: Store projected vacation hours and eligibility calculations for employee self-service
+- **Key Fields**:
+  - `employeeId` (string) - Personnel Number (unique to work assignment)
+  - `effectiveStartDate` (date) - School Year Start
+  - `effectiveEndDate` (date) - School Year End
+  - `paymentType` (picklist) - Prorata/LSSP/LSOT derived values
+  - `paymentDate` (date) - Calculated payment date
+  - `paymentHours` (decimal) - School Hours calculation
+  - `schoolType` (picklist) - 6 or 7 Week School identifier
+  - `employmentType` (picklist) - Perm/Fixed Term/Casual
+  - `calcTimestamp` (datetime) - Date/Time Stamp for Retro processing
+
+### Teacher Vacation Payment Data Model
+- **Object Name**: `teacherVacationCalculation`
+- **Purpose**: Store vacation payment calculations and eligibility criteria
+- **Field Definitions**:
+  - `unpaidLeave` (boolean) - LWOP during Vacation flag
+  - `sickLeave` (boolean) - Sick Leave during Vacation flag
+  - `sickLeaveGreaterThan12Months` (boolean) - Extended sick leave indicator
+  - `sickLeaveResume` (boolean) - Sick Leave ends during Vacation
+  - `terminationDate` (date) - Employee termination date
+  - `stateHighSchoolIndicator` (boolean) - SHS in Term 4 and terminated
+  - `day1Current` (date) - Employed Day 1 current school year
+  - `day1Next` (date) - Employed Day 1 next school year
+  - `week3Current` (date) - Employed by Week 3 current year
+  - `week3Next` (date) - Employed by Week 3 next year
+  - `nineDayBreak` (boolean) - Break over 9 days exists
+  - `serviceDaysAccumulated` (integer) - School Days Service for Assignment
+  - `term4Service` (integer) - Service in Term 4 until last 2 weeks
+  - `workersComp` (boolean) - On Workers Comp over the Vacation
+  - `higherDutiesDays` (integer) - Eligible HD Days
+  - `higherDutiesHours` (decimal) - Eligible HD Hours
+  - `midYearPaidSum` (decimal) - Sum of Mid-Year Vacation Payments
+  - `schoolDaysTotal` (integer) - Total number of Days in School Year
+  - `currentFte` (decimal) - Current FTE % (0.0 to 1.0)
+  - `averageFte` (decimal) - Average FTE % (0.0 to 1.0)
+  - `secondedIndicator` (boolean) - On Secondment
+  - `suspendOnPay` (boolean) - On Pay Suspend
+  - `systemMessage` (string) - System messages
+  - `systemLoggedMessages` (string) - Logged messages
+
+---
+
+## 2. Picklist Metadata
+
+### Payment Type Picklist (`paymentType`)
+- **Values**:
+  - `PRORATA` - Prorata Summer Vacation
+  - `LSSP` - Lump Sum Summer Payment
+  - `LSOT` - Lump Sum On Termination
+
+### Employment Type Picklist (`employmentType`)
+- **Values**:
+  - `PERM` - Permanent
+  - `FIXED_TERM` - Fixed Term
+  - `CASUAL` - Casual
+
+### School Type Picklist (`schoolType`)
+- **Values**:
+  - `6_WEEK` - 6 Week School
+  - `7_WEEK` - 7 Week School
+
+---
+
+## 3. Payroll Integration Metadata
+
+### Custom Payroll Operation
+- **Operation Name**: `Z_TEACHER_VACATION_PAYMENT`
+- **Purpose**: Embedded vacation payment processing within ECP
+- **Processing Logic**: 
+  - Triggers during specific payroll periods (Summer Vacation start)
+  - Handles retrospective processing for service changes
+  - Processes different employee groups (Permanent/Fixed Term/Casual)
+  - Integrates with termination processing
+
+### Custom ECP Tables
+- **Table Name**: `Z_TEACHER_VACATION_CALC`
+- **Purpose**: Store calculation data to reduce processing time
+- **Key Fields**: Mirror MDF object fields for performance optimization
+
+---
+
+## 4. Integration Dependencies
+
+### BTP Extension Requirements
+- **Component**: Teacher Vacation Payment BTP Extension
+- **Integration Points**:
+  - EC to ECP data transfer
+  - Payroll operation execution
+  - Self-service data preview
+  - Termination processing integration
+
+### Data Elements for Processing
+- **Mid-Year Vacation**: Autumn, Winter, Spring breaks including school holidays, public holidays, Professional Development Days
+- **Summer Vacation**: December to January vacation period
+- **Service Calculations**: Continuous and non-continuous service tracking
+- **FTE Averaging**: Hours worked over school year calculations
+- **Leave Impact**: LWOP > 30 school days reduction logic
+
+---
+
+## 5. Configuration Metadata
+
+### Eligibility Rules Configuration
+- **Fixed Term Teachers**:
+  - Prorata: Full Year Employment, Partial Year Employment, State High School, Breaks in Service, Casual Supply Teaching
+  - LSSP: Complete > 100 days service, Work entire Semester 2
+  - LSOT: Not eligible for Prorata or LSSP with 10-day Term 4 requirement
+
+- **Permanent Teachers**:
+  - Service from Permanent Appointment
+  - Continuous fixed term service before permanent appointment
+  - Non-continuous fixed term service (breaks ≤ 9 school days)
+  - Casual Supply Teaching (for service calculations only)
+
+### Business Rules Metadata
+- **Leave Exclusions**: LWOP > 30 school days reduces payments
+- **FTE Impact**: Average FTE calculation based on hours worked
+- **Principal Processing**: Roster-based vacation payments (not pro-rated)
+- **Termination Scenarios**: LSOT with additional service requirements
+
+---
+
+## 6. Self-Service Enhancement Metadata
+
+### Employee Self-Service Portlet
+- **Name**: `Summer Vacation Hours Preview`
+- **Availability**: October onwards (configurable)
+- **Functionality**: Simulation of Summer Vacation Hours
+- **Access**: Home page tile configuration
+- **Data Source**: Summer Vacation MDF object
+
+---
+
+## 7. Special Considerations
+
+### Youth Detention Centre Exception
+- **Current State**: Manual workaround required
+- **Future State**: Different vacation schedule (55 days per year)
+- **Processing**: 4 weeks summer + remaining days as per rotation
+- **Integration**: Separate schedule from standard school calendar
+
+### Standard Job Model (SJM) for Teacher Aides
+- **Implementation**: Replaced previous ADO provisions
+- **Payment Structure**: 12.5% additional ordinary hours during term
+- **Deferral**: Hours used for vacation period payments (Easter, Winter, Spring)
+- **Summer Vacation**: Annual Leave (24 days) + SJM coverage
+
+---
+
+## 8. Metadata Relationships
+
+### Object Dependencies
+```
+Employee (EC) → Summer Vacation MDF Object → Payroll Calculation → BTP Extension
+Foundation Objects → Service Calculations → FTE Averaging → Payment Determination
+Picklist Values → Business Rule Processing → Payment Type Assignment
+```
+
+### Integration Flow
+1. EC stores employee data and projected vacation information
+2. MDF object enables self-service preview
+3. ECP performs calculation and payment processing
+4. BTP extension handles complex business rules
+5. Custom tables optimize performance
+6. Payroll operation manages retro processing
+
+This metadata extraction provides the foundation for implementing the complex vacation payment requirements for both teachers and teacher aides within the SAP SuccessFactors HCMS solution.

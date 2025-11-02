@@ -1,0 +1,260 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-21 07:26:08
+Topic: HCMS Technical Overview.
+1.
+Executive Summary
+The Department of Education (DoE) is delivering a comprehensive digital transformation of its HR and payroll platforms through the Human Capital Management Solution (HCMS) Program. The existing TSS platform, a 28-year-old COBOL and Oracle-based system, will be decommissioned and replaced by a modern, cloud-first ecosystem built around SAP’s Human Experience Management (HXM) suite and Microsoft Azure technologies.
+At the heart of the program are two foundational pillars. The first is the SAP platform, including SuccessFactors (for core HR and payroll), and a suite of tools such as SAP BTP, Integration Suite, Data Sphere, and ALM to support extension, orchestration, and lifecycle governance. The second is the Microsoft Fabric-based HCMS HR Resource Group (HR RG), designed as the Department’s single source of truth, golden record, and Master Data Management (MDM) layer for all HR and payroll data. HR RG will also act as the authoritative data source to the Department’s Enterprise Data Platform (EDP) under the EQIP Program, enabling strategic analytics and sending and distributing data to downstream data feeds .
+This architecture is governed by a unified DevOps model across SAP and Azure, aligned to the Department’s SDLC, and secured through Queensland Government’s IS18:2018 and QGEA-aligned security frameworks including IPOLA.
+The HCMS Program is structured into two phases, as illustrated in Figure 1 below.
+Figure 1.
+2.
+Technical Architecture Overview
+The HCMS Program adopts a hybrid architecture that combines SAP’s cloud-based Human Experience Management capabilities with Microsoft Azure’s advanced data integration and transformation services.
+On the SAP side, SuccessFactors provides the foundation for Employee Central, Payroll, Recruitment, and Onboarding. These modules are integrated through SAP’s Business Technology Platform (BTP), which enables API-based communication, secure identity federation, and extensibility across services. SAP Integration Suite provides the connectivity layer for exchanging data between SAP modules and external platforms such as Microsoft Fabric. SAP Data Sphere acts as a semantic and modelling layer for harmonising HR and payroll data from SuccessFactors, S/4HANA Finance, and Fieldglass before it is consumed by the Department’s HR RG. On the SAP side, SAP ALM (Application Lifecycle Management) governs test plans, change control, and release documentation, while Build Apps enables the development of custom low-code extensions for HR workflows. Additional SAP tools like Signavio support process analysis, and Joule delivers AI-assisted analytics and insight generation directly within the HR user experience. SAP WalkMe provides guided user experiences, onboarding flows, and digital adoption across the SAP platform.
+Document generation and storage are handled through OpenText Extended Enterprise Content Manager (xECM) for SAP SuccessFactors, ensuring compliance with employment records management, document generation, while OpenText InfoArchive deployed (future scope) in Azure provides long-term archiving and retention of historical HR and payroll documents, including those from decommissioned systems like TSS.
+On the Azure side, the Microsoft Fabric-based HR Resource Group (HR RG) forms the data backbone of the program. It is built upon the Medallion Architecture pattern, with bronze, silver, and gold layers for raw ingestion, cleansed staging, and business-ready datasets. The HR RG integrates with over 46 downstream systems and is being provisioned and automated using Terraform and Azure DevOps CI/CD pipelines. All data is ingested through Azure DataHub and transformed using Dataflows and Notebooks. Microsoft Purview governs data classification, lineage, and metadata, while Splunk(current)/Microsoft Sentinel (future) monitors audit trails and alerting. Data#3 (Microsoft certified partner) is responsible for delivering the full HR RG platform, which will be production-ready by November 2025 in collaboration with Microsoft.
+Together, SAP and Azure are integrated under a joint governance model where HR RG operates as the master data repository and authoritative broker of HR data, while SAP systems remain the operational systems of record for transactional HR and payroll processing.
+3.
+Planned Cutover Strategy (Oct 2025 – Mar 2026)
+Between October 2025 and March 2026, the HCMS Technical stream will conduct a phased production cutover, transitioning the current integration and transformation responsibilities from the legacy TSS system to the newly built HR RG platform. The HR RG will become the primary platform for interfacing with non-core downstream systems, replacing TSS as the primary system.
+This transition will allow all downstream systems including CIS, IAM, Alloc8, SBS, OneSchool, and others to source data directly from the HR RG rather than from
+TSS. Doing so simplifies the data architecture, reduces cutover risk, and enables earlier stabilisation of interfaces and testing environments. Most importantly, it allows the System Integrator (SI) to onboard into a stable and pre-tested platform without requiring a large-scale "big bang" SAP cutover to DoE ecosystem.
+From this point forward, HR RG will serve as the authoritative source of truth for HR data, integrating harmonised datasets from SAP via Data Sphere and SAP Integration Suite. This approach aligns to the program’s risk mitigation strategy and ensures early visibility and validation of downstream impacts.
+The HCMS Technical Team has successfully delivered a proof of concept (PoC) which demonstrated:
+•
+End-to-end ingestion of 1,000 employee records from TSS via DataHub into HR RG (Fabric)
+•
+Successful ingestion of 3,000+ tables (of ~4,000 total) from TSS into Fabric’s HR RG via On-Prem gateway (Power BI Gateway), now ready for transformation and mapping.
+This confirms the viability of using Azure DevOps + Terraform to drive ingestion, transformation, and CI/CD governance within the Fabric platform.
+Reverse engineering has been completed or is underway for the following high-impact systems:
+•
+OneSchool (completed)
+•
+Centre of Information System (CIS) (In progress)
+•
+Identity and Access Management (IAM) (In Progress)
+•
+School-Based Staffing (SBS) (Not started)
+•
+Computer for Teachers (Not started)
+•
+Alloc8 (In Progress)
+These are among the 46 downstream systems that will be transitioned to consume data from HR RG.
+4. Testing Strategy (Including Parallel Payroll Run Testing- PPRT)
+The HCMS Program has adopted a structured and risk-based testing strategy that encompasses unit testing, system integration testing (SIT), user acceptance testing (UAT), and a dedicated Parallel Payroll Run Testing (PPRT) Framework. All testing is governed by artefacts approved through the Design Authority and Project Control Group.
+The PPRT Framework is a critical pillar of the testing strategy. It involves executing real pay runs in both TSS and SAP ECP using identical inputs, allowing detailed reconciliation of outputs including payslips, deductions, leave balances, general ledger entries, and ATO submissions. Test artefacts such as Test Summary Reports, variance registers, and defect logs are recorded and reviewed through SAP ALM and Azure DevOps, ensuring end-to-end traceability. This dual-platform approach provides governance assurance and aligns test planning and execution across both SAP and Microsoft platforms.
+Environments Other systems will be documented. :
+Production
+SAP ECP
+Pre – Production
+(UAT)
+Training
+Development Test
+System s Integrator (SI)
+DoE Payroll Staff
+Production
+SAP SuccessFactors's EC
+Pre -
+Production
+Training
+Development Test
+System s Integrator (SI) DoE All Staff
+Production
+ServiceNow
+Pre – Production
+(UAT)
+Test
+(SIT)
+Development
+(CMDEV)
+DoE
+DoE All Staff
+SSO
+SSO
+SSO
+SSO
+Production
+SAP ECC 6
+Pre – Production
+(UAT)
+Test
+(DEV)
+Development
+(CMDEV)
+DoE
+DoE All Staff
+SSO
+SSO
+DoE CAB
+SAP Solution
+Manager/ SF
+Updates
+SAP Change & Release Management
+DoE Change Advisory Board
+Parallel Pay Run
+Testing
+• E.g. Training ($)
+• Request via ticket at no extra cost
+• Included in the licencing
+• Extra Tenant ($)
+• Request via ticket at no extra cost
+• Included in the licencing
+Integrated via API
+Legend
+• Existing
+Production
+TSS
+Pre – Production
+(UAT)
+Test
+(DEV)
+Development
+(CMDEV)
+DoE
+DoE All Staff
+SSO
+SSO
+Production
+MyHR
+Pre – Production
+(UAT)
+Test
+(SIT)
+Development
+(DEV)
+DoE
+DoE All Staff
+SSO
+SSO
+SAP HR Governance
+DoE CAB
+Approval
+Approval
+Other Systems
+Production
+DataHub
+Pre – Production
+(UAT)
+Test
+(SIT)
+Development
+(DEV)
+DoE
+DoE All Staff
+SSO
+SSO
+Production
+OneSchool
+Pre – Production
+(UAT)
+Test
+(SIT)
+Development
+(DEV)
+DoE
+DoE All Staff
+SSO
+SSO
+Production
+SBS
+Pre – Production
+(UAT)
+Test
+(SIT)
+Development (DEV)
+System s Integrator (SI)
+DoE All Staff
+SSO
+SSO
+Production
+EFI
+Pre – Production
+(MPE)
+(UAT)
+Test
+(SIT)
+System s Integrator (SI)
+DoE All Staff
+SSO
+SSO
+FILENAME
+HCMS TECHNICAL ARCHITECTURE LANDSCAP E
+ENVIRONMENTS V2.0.VSDX
+Department of Ed ucatio n
+Digital In novation Divi sio n
+Human Capi tal Management P rogram
+Environmen ts
+Date: 01/08/2025 / Document Owner :
+HCMS Technical Di rector: Desmond Rod gars
+5.
+DevOps, CI/CD and Lifecycle Governance
+The program follows a unified DevOps model across SAP and Microsoft Azure to ensure seamless build, test, deploy, and release operations. Azure DevOps governs the pipelines and infrastructure provisioning for the HR RG, while SAP ALM governs testing, configuration, transports, and change management across the SAP landscape.
+Azure DevOps pipelines are used to ingest TSS and SAP data into Fabric, run automated cleansing scripts, manage Notebooks for COBOL logic replication, and promote transformations between environments. Infrastructure such as lakehouses, workspaces, and security roles are provisioned via Terraform to enforce consistency across environments.
+SAP ALM manages configuration changes, test cases, and transports across SAP environments. It is integrated with Azure DevOps such that defects discovered in SAP ALM can be linked to DevOps backlog items, and test evidence from Azure (e.g. payroll variance reports) can be traced back to ALM test plans. This unified DevOps model ensures traceability, governance, and compliance across all layers of the HCMS architecture.
+6.
+Security, Compliance and IPOLA Framework
+Security across both SAP and Azure components is aligned with the Queensland Government’s IS18:2018 and follows The Information Privacy and Other Legislation Amendment Act 2023 (IPOLA Act) IPOLA framework.
+The Identify pillar is supported through Ping federation/Entra ID integration with role-based provisioning and SAP IAS/IPS. The Protect layer includes encryption at rest and in transit, RBAC enforcement, and MFA on all endpoints. The Observe and Log pillars are fulfilled by Microsoft Purview and Splunk/Sentinel, which track lineage, classify data sensitivity, and audit access and changes. The Alert layer includes anomaly detection, security breach alerts, and SAP BTP security event monitoring.
+Document lifecycle compliance is achieved through the integration of OpenText xECM for SAP, which handles document generation (e.g. contracts, variations) tied to SAP SuccessFactors records. These documents are archived into OpenText InfoArchive, an Azure-hosted solution aligned to QGEA and records retention obligations.
+Together, these controls ensure that all personal, financial, and payroll-related data is handled securely, compliantly, and in accordance with Queensland Government expectations.
+7.
+Risks and Mitigations
+A key risk is the loss of legacy payroll logic currently embedded in TSS COBOL programs CSL language/Run Books. This is mitigated by reverse engineering those rules into Fabric Notebooks and embedding them in the HR RG transformation layer.
+Another risk is data divergence between SAP and Azure, which is addressed by using SAP Data Sphere as the canonical data modelling layer before ingestion into HR RG.
+The risk of high-impact cutover is mitigated by implementing the HR RG early, allowing non-core systems to transition prior to SAP go-live.
+Security misconfiguration risks are reduced through alignment with IPOLA and the use of Purview classifications, while integration complexity is addressed through the use of SAP Integration Suite and a layered, standards-based hybrid model.
+Conclusion.
+The HCMS technical architecture represents a mature, secure, and extensible model for transforming the Department’s HR and payroll capability. By combining SAP’s cloud-native HR systems with Microsoft Fabric’s scalable data platform and governed through a shared DevOps lifecycle the Department is positioned for success.
+The HR RG will operate as the Department’s Golden Record and feed not only operational systems but also strategic insights through the Enterprise Data Platform (EDP) under the EQIP Program. With production readiness targeted for November 2025, and full SAP and downstream enablement by mid-2026, the program is on track to deliver a compliant, modern, and resilient HR data platform for the future.
+Core Technology Components
+SAP Core Products (Operational HR/Payroll Platform)
+The HCMS Program implements the following SAP cloud-based products as the core for HR operations, payroll, recruitment, and workforce planning:
+All of these platforms operate under a shared identity and integration model using SAP BTP, which securely bridges to Azure and Microsoft Fabric via the Integration Suite and Data Sphere.
+SAP Product
+Function
+SAP SuccessFactors (EC + ECP)
+Core HR master data (Employee Central) and payroll engine (Employee Central Payroll)
+SAP Fieldglass
+Contingent workforce management, vendor integration, time capture, and approvals
+SAP Build Apps
+Low-code tool for creating custom HR-facing apps and forms
+SAP Signavio
+Process modelling, HR workflow analysis, and continuous process improvement
+SAP ECC6 to S/4HANA Finance (RISE)
+Financial integration of payroll journals, cost centres, and vendor payments
+SAP Joule (AI)
+AI assistant embedded in SAP to support trend analysis and intelligent HR actions
+SAP WalkMe
+Guided onboarding, digital adoption, self-service HR walkthroughs
+SAP BTP (Business Technology Platform)
+Integration, extension, identity management, workflow coordination, and event mesh
+SAP Integration Suite
+API and data flow orchestration between SAP and external systems (including Azure)
+SAP Data Sphere
+SAP-native semantic modelling layer that transforms, joins, and feeds data to Fabric
+SAP ALM (Application Lifecycle Management)
+SAP test management, change request governance, and release traceability
+OpenText xECM for SAP: Document generation and storage solution integrated with SAP SuccessFactors
+OpenText InfoArchive (Azure-based): Archival of historic HR, payroll, and employment data (replaces TSS document archive)
+Azure / Microsoft Fabric Core Components (HR RG)
+The HR Resource Group (HR RG) built on Microsoft Fabric serves as the Master Data Management layer, Golden Record, and single source of truth for all HR and payroll data. It also supports ingestion, cleansing, transformation, and downstream integration.
+Azure/Fabric Component
+Purpose in HCMS
+Microsoft Fabric
+Unified analytics platform used to host the HR RG (Bronze, Silver, Gold data layers)
+Azure Data Hub
+Ingestion engine for TSS batch files, and non-SAP systems
+Azure DevOps
+CI/CD pipelines, test automation, defect tracking, version control (linked to SAP ALM)
+Terraform
+Infrastructure-as-Code to deploy and manage Fabric workspaces and HR RG components
+Microsoft Purview
+Data classification, lineage, metadata tagging, security labelling (DoE-aligned)
+Splunk/Microsoft Sentinel
+Security event logging, monitoring, and IPOLA-aligned alerting framework
+These Azure tools collectively power the data governance, integration, transformation, and reporting backbone of the HCMS program. The HR RG not only integrates with SAP but also feeds 46+ downstream systems and the Department’s Enterprise Data Platform (EDP) under the EQIP Program.
+Max Rounds: 80
+First Speaker: hugging
+================================================================================

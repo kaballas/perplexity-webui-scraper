@@ -1,0 +1,134 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Employee Tax Details Enhancement
+
+### Document Metadata
+- **Document Source**: HCMS - DoE Solution Design
+- **Published**: 10/12/2025, 10:02:57 PM
+- **Page Reference**: 219-221
+- **Feature Code**: E007 - EMPLOYEE TAX DETAILS
+- **Business Unit**: Queensland Department of Education
+- **Programme**: Human Capital Management System (HCMS) Programme
+- **Phase**: Explore Phase
+
+### Object Definition Metadata
+
+#### MDF Object: Employee Tax Details Portlet
+- **Object Type**: MDF Portlet (Custom)
+- **Purpose**: Self-service tax detail updates for employees
+- **Access Level**: Employee self-service
+- **Permissions**: Field-level permission control available
+- **Replication Target**: Employee Central Payroll (ECP)
+
+#### Foundation Object Relationships
+- **Source System**: Employee Central (EC)
+- **Target System**: Employee Central Payroll (ECP)
+- **Integration Method**: SAP Integration Suite
+- **Replication Objects**: 
+  - Tax File Number (National ID) → Infotype 227
+  - Tax Details → Infotype 188
+
+### Field Definition Metadata
+
+#### Tax Detail Fields
+- **Field Type**: MDF Custom Fields
+- **Data Types**: String, Date, Numeric, Boolean
+- **Effective Dating**: Supported
+- **Validation Rules**: 
+  - No retrospective changes allowed
+  - Effective dates must align with pay period start
+- **Field Permissions**: Configurable at individual field level
+
+#### Replication Fields
+- **Tax File Number**: 
+  - Source: National ID in EC
+  - Target: Infotype 227 in ECP
+  - Standard Replication: Enabled
+- **Tax Details**: 
+  - Source: Custom MDF Portlet
+  - Target: Infotype 188 in ECP
+  - Custom Replication: Required
+
+### Integration Metadata
+
+#### Integration Components
+- **Onboarding Integration**: 
+  - Source: SuccessFactors Onboarding
+  - Target: ECP Infotype 188
+  - Tool: SAP Integration Suite
+  - Trigger: Successful New Hire event
+
+- **Self-Service Integration**:
+  - Source: MDF Portlet
+  - Target: ECP Infotype updates
+  - Technology: ABAP on BTP platform
+
+#### API Dependencies
+- **OData Endpoints**: MDF Portlet API
+- **Integration Platform**: SAP BTP (Business Technology Platform)
+- **ABAP Development**: Required for ECP updates
+- **Real-time Processing**: Supported for immediate updates
+
+### Permission and Security Metadata
+
+#### Access Control
+- **Employee Access**: Self-service updates
+- **Manager Access**: View only (configurable)
+- **Admin Access**: Full access and override
+- **Field-Level Security**: Configurable permissions matrix
+
+#### Data Validation Metadata
+- **Date Validation**: Pay period alignment
+- **Retrospective Change Prevention**: Enabled
+- **Effective Dating**: Mandatory for all changes
+- **Compliance Validation**: AU tax regulation compliance
+
+### Enhancement Architecture Metadata
+
+#### Technical Components
+- **Frontend**: EC MDF Portlet or BTP Application
+- **Backend**: ABAP on BTP for ECP integration
+- **Integration Layer**: SAP Integration Suite
+- **Data Store**: MDF Custom Objects
+
+#### Configuration Requirements
+- **MDF Portlet Configuration**: Custom field setup
+- **Permission Framework**: Field-level access control
+- **Workflow Integration**: Payroll validation processes
+- **Business Rules**: Effective dating and validation logic
+
+### Replication Metadata
+
+#### Standard Replication
+- **Tax File Number**: Automatic from EC to ECP (Infotype 227)
+- **Frequency**: Real-time upon data change
+- **Mapping**: National ID → Infotype 227
+
+#### Enhanced Replication
+- **Tax Details**: Custom MDF to ECP (Infotype 188)
+- **Frequency**: Event-driven via ABAP program
+- **Trigger**: MDF Portlet updates
+- **Validation**: Pre-update business logic
+
+### Business Process Metadata
+
+#### Onboarding Process
+- **Initial Entry**: Tax information capture during onboarding
+- **Replication**: Automatic to ECP upon successful new hire
+- **Target**: Infotype 188 in ECP
+- **Validation**: Data completeness and accuracy checks
+
+#### Self-Service Process
+- **User Action**: Employee-initiated tax detail updates
+- **Interface**: MDF Portlet or BTP application
+- **Processing**: Real-time or batch ECP update
+- **Validation**: Compliance and effective dating checks
+
+### System Dependencies
+- **Employee Central**: Source of employee master data
+- **Employee Central Payroll**: Target for tax detail replication
+- **SAP Integration Suite**: Integration platform
+- **BTP Platform**: Custom development and integration
+- **Onboarding Module**: Initial tax data source
+
+### Metadata Summary
+This enhancement requires custom MDF portlet development, BTP/ABAP integration components, and SAP Integration Suite configuration to enable employee self-service tax detail updates with automated ECP replication while maintaining compliance with Australian tax regulations and effective dating requirements.

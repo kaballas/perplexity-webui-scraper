@@ -1,0 +1,85 @@
+# Missing Context Information Required
+
+## System Architecture Details
+
+### **Current State Integration Flows**
+- **Specific BAPI interfaces** used for EC to BTP to ECP communication
+- **Exact data transformation rules** between system layers
+- **Performance benchmarks** and system capacity limitations
+- **Existing error handling mechanisms** in current payroll processing
+
+### **Technical Constraints**
+- **Database schema details** for PTEX2010 staging table structure
+- **SAP payroll processing window limitations** (time constraints for batch runs)
+- **Memory and processing capacity** for retroactive calculations
+- **System-to-system authentication and authorization** mechanisms
+
+## Business Process Specifications
+
+### **Award and Pay Scale Details**
+- **Complete T510K/T510S configuration matrix** with all applicable wage types
+- **Award interpretation business rules** for different teacher categories
+- **Pay scale override conditions** and approval requirements
+- **Cost distribution rules** for Region Based vs Direct/Fixed Costing
+
+### **School Year and Term Operations**
+- **Exact school term dates** and vacation periods for current and next 2 years
+- **Teacher transfer protocols** during active terms
+- **End-of-year processing requirements** and data carry-forward rules
+- **Salary increment calculation methodology** and timing
+
+## Compliance and Regulatory Requirements
+
+### **Audit and Reporting Needs**
+- **Specific regulatory reporting formats** required by education authorities
+- **Audit trail retention requirements** (how long records must be kept)
+- **Compliance validation checkpoints** in payroll processing
+- **Required audit log fields** and formats
+
+### **Payment and Recovery Rules**
+- **Overpayment recovery threshold amounts** and timing rules
+- **Deduction limits** and employee protection requirements
+- **Payment timing requirements** for different allowance types
+- **Tax and superannuation adjustment rules** for corrections
+
+## User and Role Information
+
+### **Stakeholder Requirements**
+- **Payroll administrator permissions** and system access levels
+- **School-based user roles** and their specific system capabilities
+- **Approval authority limits** for different user types
+- **Reporting access requirements** for various stakeholders
+
+### **User Workflow Patterns**
+- **Peak processing periods** and expected transaction volumes
+- **User training requirements** for new system features
+- **Support escalation procedures** for system issues
+- **Change request processes** for business rule modifications
+
+## Data Quality and Error Handling
+
+### **Data Validation Requirements**
+- **Master data validation rules** for employee and assignment data
+- **Cross-system data consistency checks** and reconciliation requirements
+- **Data correction and audit trail** procedures
+- **Duplicate detection and prevention** mechanisms
+
+### **Exception Processing**
+- **Specific error codes** and their business meanings
+- **Automatic vs manual exception handling** criteria
+- **Escalation procedures** for different error types
+- **Recovery and rollback procedures** for failed processes
+
+## Integration Dependencies
+
+### **External System Connections**
+- **Third-party system interfaces** (tax, superannuation, banking)
+- **File format specifications** for external data exchanges
+- **Service level agreements** for system availability
+- **Backup and disaster recovery** requirements
+
+### **Timing and Scheduling**
+- **Payroll processing schedule** and dependencies
+- **Batch job timing windows** and sequence requirements
+- **System maintenance windows** and impact on processing
+- **Real-time vs batch processing** decision criteria

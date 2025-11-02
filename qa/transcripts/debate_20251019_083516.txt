@@ -1,0 +1,66 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 08:35:16
+Topic: E026 – LEAVE RATE INCLUSIVE OF HIGHER DUTIES WHEN HD
+IMMEDIATELY PRECEDES ELIGIBLE ABSENCE
+As per the Higher Duties directive, the payment of certain leave types during and immediately following a
+period of Higher Duties are required to be paid inclusive of the higher rate:
+Payment of higher duties amount during recreation leave, long service leave and paid
+parental leave
+An employee who takes recreation leave, long service leave or paid parental leave during a relieving
+period is entitled to be paid for the full period of such leave at the higher duties amount being paid
+to the employee immediately before the employee takes the leave. This will be the case even where
+the relieving period ceases on the last day of duty prior to the leave commencing, or at any point
+during the leave period
+Current State
+The functionality has been in-built in TSS and processes the following leave types
+􀁸 Long Service Leave
+􀁸 Paid Parental
+􀁸 Annual / Recreation Leave
+Future State - Out of The Box
+EC Payroll will natively pay appropriate leave types inclusive of the Higher Duties rate where the leave is
+taken during the relieving period, however an extension is required to maintain that higher rate even after
+the higher duties has finished.
+Enhancement Considerations
+The enhancement needs to consider a number of factors to ensure compliance with the Higher Duties
+directive.
+Identify the end of the relieving period, noting this could fall in a previous pay period, as well as confirming
+the Long Service Leave, Paid Parental (of which there could be multiple variants) and Annual / Recreation
+Leave has started immediately following the period of higher duties has ended.
+Furthermore, the processing must identify any scenarios where the leave and the period of higher duties
+overlaps to ensure the remainder of the leave is continued to be paid at the higher rate.
+Finally, the enhancement must be able to identify periods of consecutive leave that is not broken by either
+a working day, or another leave type that does not attract the same entitlement (e.g. sick leave).
+Enhancement Design
+Employee Central Payroll
+A payroll operation is required to be executed, triggered by the presence of an appropriate leave wage
+type (e.g. Long Service Leave), to then determine whether a higher duties rate needs to be applied.
+Page | 240
+Given the pay period in question could be mid-way through the leave and/or completely outside of the
+relieving period, the operation will query the preceding pay period to ascertain whether the higher rate is
+applicable.
+To reduce the payroll processing time as much as possible, the simplest way to achieve this is to have the
+payroll operation generate a notional wage type to flag that eligible leave types have immediately
+followed higher duties.
+As such the enhancement design should consider:
+􀍻 Eligible Leave
+○ Determine the eligible leave type through a custom processing class setting against the leave
+wage type. Using the processing class configuration negates the need to hard code the wage
+types themselves and therefore future proofs the operation design for any change in policy.
+○ Enhancement must consider consecutive periods of eligible leave
+􀍻 Higher Duties and Personal Work Schedule
+○ Once the leave is identified, determine the existence of higher duties and ensure no working
+day, with direct reference to the employees’ personal work schedule, exists between the last
+day of the relieving period.
+􀍻 Higher Duties Rate of Pay
+○ Determine the applicable hourly rate of pay to apply to the eligible leave type. There are a
+number of ways to achieve this, the operation itself could derive the rate of pay of the higher
+duties or similarly a notional pay component from EC could store the HD rate of pay.
+○ Once determined the rate of pay of the HD is added to the employee’s normal rate of pay for
+leave to achieve the higher rate.
+○ The design should take account of business-as-usual changes in an employee’s rate of pay.
+This could include a EBA pay increase against the substantive position, a retrospective pay
+increase in the relieving position or the application of a new recurring allowance
+Max Rounds: 80
+First Speaker: hugging
+================================================================================

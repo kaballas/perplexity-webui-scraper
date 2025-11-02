@@ -1,0 +1,178 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Concurrent Employment Optimization Configuration
+
+### Executive Summary
+This metadata extraction analyzes the concurrent employment optimization strategies document to identify core data objects, field definitions, relationships, and configuration parameters required for implementing advanced concurrent employment scenarios in SAP SuccessFactors Employee Central.
+
+### 1. Core Data Objects Metadata
+
+#### 1.1 Employee Central (EC) Objects
+- **EmploymentInfo** - Employment relationship tracking
+  - Key Fields: employmentStatus, startDate, endDate, employmentType
+  - Temporal Management: Effective dating support for concurrent employment records
+  - Relationships: One-to-Many with Person ID for multiple concurrent employments
+  - Properties: Primary/Secondary employment indicators, FTE allocation fields
+
+- **JobInfo** - Concurrent position assignment tracking
+  - Key Fields: position, jobCode, employmentType, assignmentId, costCenter
+  - Temporal Management: Date-effective concurrent position changes
+  - Relationships: Many-to-One with Position object, One-to-Many with Person
+  - Properties: Position hierarchy flags, reporting relationships
+
+- **PersonalInfo** - Employee identity management across concurrent roles
+  - Key Fields: personId, userId (multiple per person), employmentSwitcher
+  - Relationships: One-to-Many mapping between Person ID and User IDs
+  - Properties: Single sign-on context switching capabilities
+
+#### 1.2 Position Management Objects
+- **Position** - MDF Object for position hierarchy
+  - Key Fields: positionCode, reportingToPosition, department, costCenter
+  - Relationships: Hierarchical parent-child position relationships
+  - Properties: Concurrent employment support flags, circular reference prevention
+
+- **JobClassification** - MDF Object for role definitions
+  - Key Fields: jobClassificationCode, jobFamily, jobFunction
+  - Relationships: Position-to-JobClassification associations
+  - Properties: Concurrent employment eligibility indicators
+
+### 2. Foundation Objects Metadata
+
+#### 2.1 Organizational Structure Objects
+- **FOCompany** - Company assignment for concurrent employments
+  - Key Fields: companyCode, companyName, concurrentEmploymentEnabled
+  - Properties: Multi-company concurrent employment support
+
+- **FODepartment** - Departmental assignment tracking
+  - Key Fields: departmentCode, departmentName, costCenter
+  - Relationships: Multiple department assignments per employee
+  - Properties: Cross-department role change workflow triggers
+
+- **FOJobCode** - Job code definitions for concurrent roles
+  - Key Fields: jobCode, jobTitle, employmentType
+  - Properties: Concurrent employment eligibility flags
+
+- **FOCostCenter** - Cost allocation for split FTE scenarios
+  - Key Fields: costCenterCode, costCenterName, FTEAllocation
+  - Properties: Proportionate cost distribution capabilities
+
+### 3. Workflow and Business Rule Metadata
+
+#### 3.1 Workflow Configuration Objects
+- **Workflow Definitions** - Context-based approval routing
+  - Key Fields: workflowId, contextSource, contextTarget, approvalSequence
+  - Properties: Source/Target manager routing logic, duplicate approver consolidation
+  - Relationships: Dynamic Role assignments, approval hierarchy mapping
+
+- **Approval Routing** - Multi-step approval workflows
+  - Key Fields: approvalStep, approverType, dynamicRole, approvalOrder
+  - Properties: Two-step workflow for cross-department changes
+  - Relationships: Manager hierarchy, dynamic group assignments
+
+#### 3.2 Business Rule Configuration
+- **Concurrent Employment Rules** - Primary/Secondary employment logic
+  - Key Fields: ruleId, employmentSequence, terminationOrder
+  - Properties: Termination workflow specialization (Secondary first, Primary second)
+  - Relationships: EmploymentInfo business rule associations
+
+### 4. Picklist and Configuration Metadata
+
+#### 4.1 Employment Type Picklists
+- **Employment Status Values:**
+  - ACTIVE, INACTIVE, TERMINATED (with concurrent employment flags)
+  - Properties: Status-specific workflow routing rules
+
+- **Employment Type Values:**
+  - PRIMARY, SECONDARY, CONCURRENT (hierarchical positioning)
+  - Properties: FTE allocation methodology options
+
+#### 4.2 Dynamic Group Configuration
+- **Dynamic Group Definitions** - Attribute-based segmentation
+  - Key Fields: groupId, attributeCriteria, employeeFilter
+  - Properties: Cross-department role targeting capabilities
+  - Relationships: Mass change functionality integration
+
+### 5. Integration and API Metadata
+
+#### 5.1 OData API Endpoints
+- **Concurrent Employment Data API:**
+  - Entity Sets: EmploymentInfo, JobInfo, Position
+  - Query Parameters: Person ID, employment sequence, date range
+  - Properties: Effective dating support, concurrent employment filters
+
+#### 5.2 Cross-System Workflow Integration
+- **Integration Endpoints** - SuccessFactors to SAP ERP HCM
+  - Key Fields: triggerEvent, targetSystem, dataMapping
+  - Properties: Job Information change triggers, automated routing
+  - Relationships: Real-time data replication, payroll integration
+
+### 6. Performance and Configuration Metadata
+
+#### 6.1 Centralized Services Configuration
+- **Job Information Services** - Concurrent worker processing
+  - Key Fields: serviceId, enablementFlag, contingentWorkerSupport
+  - Properties: Default enablement for contingent workers
+  - Relationships: Company System and Logo Settings
+
+#### 6.2 Forward Propagation Settings
+- **Effective Dating Configuration** - Future-dated record updates
+  - Key Fields: propagationRule, effectiveDate, fieldMapping
+  - Properties: Cascade field value changes to future records
+  - Relationships: Position Management integration
+
+### 7. Security and Role-Based Permissions
+
+#### 7.1 User Identity Management
+- **User ID Mapping** - Single Person ID to Multiple User IDs
+  - Key Fields: personId, userId, employmentContext
+  - Properties: Employment switcher functionality, context-specific permissions
+  - Relationships: Role-based access control matrix
+
+#### 7.2 Role-Based Permissions (RBP)
+- **Concurrent Employment Access Rights:**
+  - Manager Experience: Multiple employment record access
+  - HR Administrator: Mass change capabilities, workflow monitoring
+  - Employee Self-Service: Employment switcher navigation, context-specific data access
+
+### 8. Module Integration Metadata
+
+#### 8.1 Performance Management Integration
+- **Performance Form Distribution:**
+  - Configuration: Both assignments vs. primary employment only
+  - Properties: Continuous Performance Management impact
+  - Relationships: Goal alignment, feedback cycle management
+
+#### 8.2 Compensation Planning Configuration
+- **Merit and Bonus Allocation:**
+  - Business Rules: Independent vs. consolidated participation
+  - Properties: Split FTE calculations, leading assignment models
+  - Relationships: Pay component groups, compensation cycles
+
+### 9. Data Quality and Validation Rules
+
+#### 9.1 Organizational Structure Validation
+- **Circular Reporting Prevention:**
+  - Business Rules: Pre-save validation for reporting relationships
+  - Properties: Automated detection, prevention mechanisms
+  - Relationships: Position hierarchy validation
+
+#### 9.2 FTE Allocation Validation
+- **Total FTE Calculation:**
+  - Business Rules: FTE sum validation (typically ≤ 1.0 per person)
+  - Properties: Proportionate allocation verification
+  - Relationships: Cost center distribution validation
+
+### 10. Technical Implementation Phases Metadata
+
+#### 10.1 Configuration Dependencies
+- **Phase 1 - Foundation:** Upgrade Center activation, organizational structure
+- **Phase 2 - Workflow:** Source/Target routing, approval sequences
+- **Phase 3 - Integration:** Cross-System Workflow, payroll replication
+- **Phase 4 - Optimization:** Mass changes, forward propagation, centralized services
+
+#### 10.2 Testing Configuration Metadata
+- **User Experience Testing:** Employment switcher functionality
+- **Workflow Routing:** Approval consolidation, sequence validation
+- **Integration Testing:** FTE calculations, payroll data replication
+- **Performance Testing:** Concurrent employment creation, mass operations
+
+This metadata extraction provides comprehensive coverage of the concurrent employment optimization configuration requirements, enabling systematic implementation and validation of the advanced concurrent employment scenarios in SAP SuccessFactors Employee Central.

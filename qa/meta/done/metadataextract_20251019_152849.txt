@@ -1,0 +1,222 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Queensland Department of Education - AI Candidate Summary Feature
+
+### Executive Summary
+This metadata extraction focuses on the AI-generated candidate summary capability within the Queensland Department of Education's SAP SuccessFactors Recruiting Management system, analyzing the technical requirements, data model dependencies, and integration architecture for FR-511 compliance.
+
+### 1. Core AI Feature Metadata Objects
+
+#### 1.1 AI Candidate Summary Configuration Objects
+- **AICandidateSummaryConfig** - AI processing configuration entity
+  - **Key Fields**:
+    - configId (Primary Key)
+    - featureEnabled (Boolean - maps to FR-511 Essential requirement)
+    - processingThreshold (Integer - for large candidate pools)
+    - summaryTemplateId (FK to Document Template MDF)
+    - aiProcessingEngine (Picklist: Basic/Advanced/NLP)
+    - complianceCheckRequired (Boolean - IS18:2018/IPOLA alignment)
+  - **Temporal Management**: Date-effective configuration changes
+  - **Relationships**: Links to Candidate MDF object, Job Requisition, Document Template MDF
+
+#### 1.2 Candidate Summary Output Objects
+- **CandidateSummaryOutput** - Generated summary result entity
+  - **Key Fields**:
+    - summaryId (Primary Key)
+    - candidateId (FK to Candidate MDF)
+    - requisitionId (FK to JobRequisition)
+    - generatedTimestamp (DateTime)
+    - summaryContent (Text - 1-page formatted output)
+    - aiConfidenceLevel (Decimal 0-100%)
+    - complianceStatus (Picklist: Clear/Flagged/Incomplete)
+    - riskIndicators (Multi-value picklist)
+    - processingStatus (Picklist: Complete/Error/Pending)
+  - **Temporal Management**: Retention policies for audit compliance
+  - **Relationships**: Direct linkage to Candidate Profile, Application, Interview records
+
+### 2. Data Model Dependencies
+
+#### 2.1 Source Data Objects for AI Processing
+- **Candidate** (EC Data Model)
+  - **Key Fields Required**:
+    - personalInfoNav (Contact Information)
+    - employmentInfoNav (Professional Experience)
+    - educationNav (Qualifications Summary)
+    - attachmentsNav (CVs, Certificates, Documents)
+    - custom01-custon20 (Custom fields for DoE compliance)
+  - **API Access**: OData v2/v4 endpoints for bulk processing
+  - **Integration Points**: Linked to OpenText xECM for document storage
+
+- **Application** (RCM Data Model)
+  - **Key Fields Required**:
+    - applicationId (Primary Key)
+    - candidateId (FK to Candidate)
+    - requisitionId (FK to JobRequisition)
+    - coverLetter (Text field)
+    - applicationAnswers (Collection of Questionnaire responses)
+    - status (Current application stage)
+  - **Temporal Management**: Stage-based processing for progressive data collection
+
+#### 2.2 Integration Metadata
+- **Integration Center Objects**:
+  - **SmartJobsIntegration**: Real-time application feed from external job boards
+  - **OpenTextxECMIntegration**: Document storage and retrieval for CVs/certificates
+  - **TeachQueenslandIntegration**: Educational sector specific data feeds
+  - **AuditTrailIntegration**: Compliance logging for IS18:2018 requirements
+
+### 3. AI Processing Configuration Metadata
+
+#### 3.1 Processing Engine Configuration
+- **AIProcessingEngine** (MDF Object)
+  - **Key Fields**:
+    - engineId (Primary Key)
+    - engineType (Picklist: TextExtraction/NLP/ML-Scoring)
+    - processingCapacity (Integer - applications per minute)
+    - timeoutThreshold (Integer - seconds)
+    - fallbackMechanism (Picklist: Manual/Template/Queue)
+  - **Performance Metrics**: Throughput, accuracy, error rates
+
+#### 3.2 Compliance Validation Rules
+- **ComplianceValidationRule** (MDF Object)
+  - **Key Fields**:
+    - ruleId (Primary Key)
+    - ruleName (Text)
+    - validationType (Picklist: IS18-2018/IPOLA/DoE-Policy)
+    - checkRequired (Boolean)
+    - actionOnFailure (Picklist: Flag/Block/Warning)
+  - **Relationships**: Linked to Candidate Summary Output for audit trail
+
+### 4. Security and Permission Metadata
+
+#### 4.1 Role-Based Access Control
+- **Role** (Foundation Object)
+  - **Key Roles for AI Summary**:
+    - HR_RECRUITER: Read/write access to candidate summaries
+    - HIRING_MANAGER: Read-only access to assigned requisition summaries
+    - RECRUITMENT_SUPER_USER: Full access including AI configuration
+    - COMPLIANCE_OFFICER: Audit access to all summaries and processing logs
+  - **Field-Level Security**: Confidential information masking based on role
+
+#### 4.2 Data Privacy Configuration
+- **PrivacyConfiguration** (MDF Object)
+  - **Key Fields**:
+    - configId (Primary Key)
+    - dataMaskingRequired (Boolean)
+    - retentionPeriod (Integer - days)
+    - anonymizationLevel (Picklist: None/Partial/Full)
+    - auditLoggingRequired (Boolean)
+
+### 5. Workflow and Business Rule Metadata
+
+#### 5.1 AI Summary Generation Workflow
+- **WorkflowTemplate**: AI_Candidate_Summary_Generation
+  - **Trigger Events**: Application submission, document upload, manual request
+  - **Processing Steps**:
+    1. Data validation and completeness check
+    2. AI processing execution
+    3. Compliance validation
+    4. Summary generation and storage
+    5. Notification to stakeholders
+  - **Error Handling**: Fallback to manual processing for incomplete data
+
+#### 5.2 Business Rules for AI Processing
+- **RuleType**: CANDIDATE_SUMMARY_AI_PROCESSING
+  - **Rule Conditions**:
+    - Application status = "Submitted"
+    - Requisition type = "Teacher" (for high-volume scenarios)
+    - Candidate data completeness > 80%
+  - **Rule Actions**: Execute AI summary generation, log processing metrics
+
+### 6. Performance and Scalability Metadata
+
+#### 6.1 Processing Capacity Configuration
+- **SystemCapacity** (MDF Object)
+  - **Key Metrics**:
+    - concurrentProcessingLimit (Integer - simultaneous AI processes)
+    - batchProcessingSize (Integer - applications per batch)
+    - queueDepthLimit (Integer - pending requests)
+    - peakHourThreshold (Integer - applications per hour triggering alerts)
+
+#### 6.2 Performance Monitoring
+- **PerformanceIndicator** (MDF Object)
+  - **Key Metrics**:
+    - averageProcessingTime (Seconds)
+    - successRatePercentage (Decimal 0-100%)
+    - errorRatePercentage (Decimal 0-100%)
+    - aiConfidenceAverage (Decimal 0-100%)
+  - **Alert Thresholds**: Configurable based on recruitment campaign volume
+
+### 7. Integration Mapping Metadata
+
+#### 7.1 External System Integration Points
+- **IntegrationMapping** (MDF Object)
+  - **SmartJobs Integration**:
+    - Source: External job board application feed
+    - Target: Application object in SuccessFactors
+    - Transformation: Field mapping for candidate data normalization
+  - **OpenText xECM Integration**:
+    - Source: Document repository
+    - Target: Candidate attachments
+    - Security: Encrypted transmission, access control validation
+
+#### 7.2 API Configuration
+- **ApiConfiguration** (MDF Object)
+  - **OData Endpoints**:
+    - /odata/v2/Candidate - Bulk candidate data retrieval
+    - /odata/v2/Application - Application data access
+    - /odata/v2/AICandidateSummaryOutput - Summary result storage
+  - **Rate Limits**: Configurable based on system capacity
+  - **Authentication**: OAuth2 with SAP Identity Authentication Service
+
+### 8. Compliance and Audit Metadata
+
+#### 8.1 Audit Trail Configuration
+- **AuditConfiguration** (MDF Object)
+  - **Audited Events**:
+    - AI summary generation requests
+    - Processing completion/failure
+    - Human review actions
+    - Compliance validation results
+  - **Retention**: 7-year retention per OpenText InfoArchive requirements
+
+#### 8.2 Bias Detection Configuration
+- **BiasDetectionRule** (MDF Object)
+  - **Detection Criteria**:
+    - Demographic pattern analysis
+    - Scoring consistency checks
+    - Human review validation
+  - **Alerting**: Automatic flagging for manual review
+
+### 9. Reporting and Analytics Metadata
+
+#### 9.1 AI Processing Reports
+- **ReportDefinition** (MDF Object)
+  - **Standard Reports**:
+    - AI Processing Performance Dashboard
+    - Candidate Summary Generation Metrics
+    - Compliance Validation Summary
+    - Error and Fallback Analysis
+  - **KPI Tracking**: Processing volume, accuracy, time-to-summary
+
+#### 9.2 Data Export Configuration
+- **ExportConfiguration** (MDF Object)
+  - **Supported Formats**: CSV, Excel, PDF
+  - **Security**: Encrypted export with access validation
+  - **Scheduling**: Automated batch exports for large recruitment campaigns
+
+### 10. Implementation Dependencies
+
+#### 10.1 Prerequisites for AI Summary Feature
+- SAP SuccessFactors Foundation 2405 or later
+- SAP BTP AI services integration enabled
+- OpenText xECM integration for document processing
+- Microsoft Azure integration for advanced AI capabilities
+- Identity federation with SAP IAS/IPS and Microsoft Entra ID
+
+#### 10.2 Configuration Dependencies
+- Candidate data model completeness (Context 3, 5)
+- Integration architecture validation (Context 9)
+- Compliance framework alignment (IS18:2018, IPOLA)
+- Performance capacity planning for high-volume scenarios
+
+### Conclusion
+This metadata extraction reveals that the AI candidate summary feature (FR-511) requires extensive configuration of MDF objects, integration points, and security controls. The feature is technically feasible within the SAP SuccessFactors framework but requires careful validation of processing capacity, compliance alignment, and integration complexity as highlighted in the quality assurance review.

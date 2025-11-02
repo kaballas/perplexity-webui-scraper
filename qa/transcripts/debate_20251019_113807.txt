@@ -1,0 +1,112 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 11:38:07
+Topic: Corporate Based Hiring
+In the future state, all corporate and regional recruitment will be managed within SAP SuccessFactors
+Recruiting Management, covering a broad range of functional areas such as administration, HR and
+support roles. Job requisitions for corporate positions will be created either via Position Management in
+Employee Central linked to approved, funded position or through the copy-create option.
+The primary requisition template used will be the
+􀁸 Corporate/Region Job Requisition
+􀍻 School Based Classified Officer Job Requisition
+􀁸 Exception from Advertising Requisition
+􀍻 Expression of Interest (EOI) Requisition
+􀍻 School Support Job Requisition
+􀍻 Generic Job Requisition (Evergreen)
+Each corporate requisition will follow a role-specific approval workflow, which will include the hiring
+manager, Upline manager(delegate) and corporate recruitment team. The approval process will ensure
+appropriate oversight and alignment with internal governance before advertising the role/job.
+Candidates will apply through the external careers site, and may also be sourced via internal job postings,
+LinkedIn, SmartJobs, or targeted recruitment campaigns. Screening will be conducted by recruiters and
+hiring managers, focusing on qualifications, experience, and alignment with role expectations. Working
+rights, conflict of interest declarations will be captured during the screening process.
+Panel members will complete a standard selection report template offline, sign it, and upload it to the
+candidate’s application in SuccessFactors. At the same time, key selection details (such as scoring,
+recommendations, and conflict of interest declarations) will be entered directly into the application fields
+in RCM. This process will take place before offer letter stage.
+Offer letters for corporate roles will be generated dynamically using configured templates, incorporating
+classification details, tenure, and negotiated conditions. Once accepted, the onboarding process will be
+triggered, ensuring a smooth transition for new hires into their assigned roles.
+Teacher & School Based Hiring
+In the future state, all teacher and school-based recruitment will be managed within SAP SuccessFactors
+Recruiting Management, supporting a range of appointment types including permanent, temporary, and
+policy-based hires. Job requisitions for these roles will be created via Position Management in Employee
+Central and linked to an approved school-based position or through the copy-create function for repeat
+roles. The following requisition templates will be available to support diverse hiring scenarios:
+􀍻 Teacher Eligibility Job Requisition (Evergreen)
+Page | 140
+􀍻 Teacher Job Requisition
+􀍻 Exception from Advertising Requisition
+Each requisition type will have a unique approval workflow, which are documented in detail in below
+section and in the recruiting workbook. Candidates will be sourced via the external career site and smart
+jobs or moved from eligibility and talent pools. Offers will be dynamically generated based on
+classification, FTE, and contract type, and upon acceptance, onboarding will be triggered automatically.
+This structure ensures a flexible yet compliant approach to managing school-based workforce needs
+across DoE.
+The Teacher & School Based hiring will use evergreen requisitions referred to as Teacher Eligibility Job
+Requisition (Evergreen) to continuously attract and assess candidates for high-volume and frequently
+recruited teaching roles across DoE. These requisitions are not tied to a specific position or FTE but
+instead serve as the front door to the teaching pipeline. Candidates applying through evergreen
+requisitions will be screened by recruiters for baseline eligibility and then marked as “Job Ready” when
+suitable for active placement.
+This approach enables proactive pipelining by capturing and maintaining a pool of prequalified
+candidates who can be moved into school-specific requisitions when vacancies arise. Recruiters will
+manage these pools through candidate statuses (e.g. New Application, Identity Verification, Future
+teachers etc) and will initiate manual movement of candidates into real requisitions based on subject
+expertise, location preferences, and hiring priorities.
+Evergreen requisitions will remain open year-round and will not close after a hire. The recruiter will
+appropriately segregate candidates in relevant status and will move selected candidates to child
+requisition where the actual hiring of candidate will take place. The Evergreen functions as an ongoing
+intake mechanism to build and refresh the DoE’s teacher talent pool, helping reduce time to fill and
+ensuring readiness across peak recruitment periods.
+DoE Job Requisition Templates
+Corporate Job Requisition
+􀍻 Corporate/Region Job Requisition - Used to recruit for non-school-based administrative, ICT,
+finance, and policy roles across corporate and regional offices, created via position management
+or copy-create.
+􀍻 School Based Classified Officer Job Requisition - for the recruitment or relocation of formally
+appointed teachers who hold a permanent classification within DoE.
+􀍻 Expression of Interest (EOI) Requisition – for temporary or short-term internal opportunities.
+Page | 141
+􀍻 Exception from Advertising Requisition – to support policy-based appointments that do not
+require open advertisement (e.g., compassionate transfers, medical return to work, closed merit
+process).
+􀍻 School Support Job Requisition – for hiring administration and support staff within schools
+(non-teaching roles).
+􀍻 Generic Job Requisition (Evergreen) - for general suitability for future talent.
+Teacher Job Requisition
+􀍻 Teacher Eligibility Job Requisition (Evergreen) – to assess general suitability for teaching
+roles and maintain a pool of “job ready” candidates.
+􀍻 Teacher Job Requisition – to recruit for specific classroom roles (e.g., “Cairns Maths Teacher”).
+􀍻 Exception from Advertising Requisition – to support policy-based appointments that do not
+require open advertisement (e.g., compassionate transfers, medical return to work, closed merit
+process).
+Requisition Creation & Approval
+Initiation Method: In the future state, the job requisition creation process in SAP SuccessFactors will begin
+primarily from the Position Management framework in Employee Central. Approved and vacant positions
+will serve as the foundation for initiating requisitions, ensuring alignment with the Queensland Department of
+Education of Education’s establishment controls. Where appropriate, users can also leverage the copycreate
+functionality to duplicate existing requisitions, particularly useful in high-volume scenarios like
+school-based teaching roles or classified officer hires. For teacher recruitment, if multiple hires are
+required from a single FTE (e.g., 1.0 FTE split across two 0.5 positions), separate requisitions will be
+created for each role using distinct position IDs. The system will be designed to enforce a one-to-one
+relationship between an open requisition and a position ID, preventing multiple active requisitions from
+referencing the same position simultaneously. For over-establishment recruitment scenarios—where a
+role exists outside of the funded establishment—requisitions can still be created, but must be supported
+by a prior risk assessment and approval process managed through ServiceNow.
+Once a requisition is initiated, the system will trigger a defined approval workflow based on the type of
+role and template selected. For school-based roles, this may involve the principal, a regional HR business
+partner, an endorser (where applicable), and a school delegate, ensuring all stakeholders sign off before
+the job is advertised. Corporate and classified requisitions will follow a more streamlined route, typically
+involving the hiring manager, a delegate, and the recruiter. Approvals will be tracked through
+SuccessFactors’ route map configuration, with support for ad hoc approvers where necessary. In cases
+where roles are filled through Expressions of Interest (EOIs) or policy-based pathways (e.g., Exception
+from Advertising), the system will allow requisition creation without external posting, and will still follow
+internal approvals to ensure accountability. Each requisition will be tied to the correct template—whether
+for eligibility pool, school-specific, corporate, or EOI recruitment—ensuring consistent data capture and
+downstream reporting.
+Page | 142
+Job Requisition Creation Process Map
+Max Rounds: 80
+First Speaker: hugging
+================================================================================

@@ -1,0 +1,557 @@
+================================================================================
+Date: 2025-10-22 16:53:41
+TASK: HCMS Project – SuccessFactors ECP
+SPECIFICATION
+E001 – Salary Increment
+Department of Education Queensland
+
+1	Introduction
+1.1	Overview
+Current Department of Education (DoE) System
+The Department of Education (DoE) currently manages incremental pay progression within its existing TSS system through a series of background jobs and custom tables.  This represents a complex process that is primarily automated, with exceptions addressed manually.
+
+SuccessFactors Standard Behaviour
+SuccessFactors, as a cloud based human capital management (HCM) system, currently lacks standard, out-of-the-box processes specifically designed to accommodate the Queensland Department of Education’s (DoE) complex incremental pay progression requirements.
+
+Required Enhancement for Compatibility
+To effectively manage the Queensland Department of Education's (DoE) complex pay increment process within a new system, significant custom development is necessary to meet the specific requirements of the existing process, which is currently handled by TSS.
+The Employee Central Payroll (ECP) system will require the creation of tailored programs and classes to handle intricate business calculations, including service-based increments (e.g., annual or bi-annual based on calendar days, school days, or hours for casual employees), higher duties, cross-counting, leave exclusions, and prior service recognition.
+These developments must support automated fortnightly calculations, retrospective adjustments for changes (e.g., leave or engagement updates), and manual exception handling for cases like conditional progressions (e.g., Senior Teacher or Teacher Aide advancements requiring certifications or qualifications).
+Additionally, the ECP notification sub system must be leveraged to alert specific employee groups, such as teachers and teacher aides, along with their principals, three months prior to eligibility for conditional progressions, ensuring timely submission of required certifications (e.g., Annual Performance Review or specific undertakings).
+The custom solution will need to integrate seamlessly with payroll and reporting functions to maintain compliance with award structures and ensure accurate, efficient increment processing.
+
+1.2	High Level Overview of Pay Increments
+The pay increment process in the Queensland Department of Education (DoE) governs salary progression for employees, advancing them from one paypoint to a higher one primarily based on accumulated service.  This is shaped by awards like the Teaching in State Education Award – State 2016, with rules varying by employee group, employment type (e.g., permanent, temporary, casual), and classification.
+1.2.1	Key Components
+•	Definition and Applicability: Increments represent salary advancement tied to service completion.  They apply to most groups, including teachers (classroom, promotional, interns), teacher aides, administrative officers, professional/technical/operational officers, senior officers/executives, health practitioners, nurses, cleaners, assistant/community teachers, and school leaders (e.g., heads of program, principals, deputy principals).
+•	Core Influences:
+o	Service: Duration at a classification/paypoint; typically annual (12 months) or bi-annual (24 months).  Measured in calendar days for permanent teachers, school days for temporary teachers (200 school days ≈ 1 year), or hours (1200 for casual non-teachers, no sooner than 12 months).
+o	Eligible Higher Duties Service: Counts toward the substantive/base classification; higher-level service accrues to lower levels but not vice versa, per cross-counting rules (e.g., teacher service may count toward teacher aide but not reverse).  Specific directives apply for higher duties increments after 12 months in a 24-month period.
+o	Service Exclusions: Unpaid leave (per Leave Without Salary Credited as Service Directive) delays progression (e.g., only first 3 months of 12-month parental leave credited).  Paid leave counts fully; FTE/part-time status does not affect calculations.
+o	Breaks in Service: Service performed at a lower classification level is not counted towards the employee’s service for pay increments.  This delays their movement to the next paypoint via break in service (similar to Unpaid Leave).
+o	Prior/External Service Recognition: Credited upon reemployment within 12 months (no disciplinary termination) or from other agencies, potentially advancing starting paypoints with "carryover" toward next increment.
+o	Concurrent Employment: Increments calculated separately for each role (e.g., 0.6 FTE admin + 0.4 FTE teacher aide).
+1.2.2	Types of Increments
+•	Non-Conditional: Purely service-based; automated by default.
+•	Conditional: Service plus additional requirements (e.g., Annual Performance Review (APR), qualifications, certifications, or undertakings). Examples include progressions to Senior Teacher (1 year at Band 3 Step 4 + APR + STAP), Experienced Senior Teacher Paypoint 1 (2+ years as Senior Teacher or equivalent + APR), Paypoint 2 (3+ years at Paypoint 1 + APR using AITSL competencies), or teacher aide advancements (e.g., TA2 to TA3: 12 months at TA2 Paypoint 4 + Certificate III + Senior First Aid). [Note: Not required to be captured in the ECP system but need to determine where this is held and how we capture it in ECP for this process]
+1.2.3	Process Flow
+•	Automation and Timing: Largely automated in theTSS system; calculations run fortnightly, applying increments retrospectively for changes (e.g. leave adjustments, engagement extensions).  Excludes by exception due to high volumes).
+•	Notifications and Certification: For conditional progressions (e.g. Senior/Experienced Senior Teacher, teacher aides), notifications sent 3 months prior to eligibility to teachers/aides and principals.  Principals submit certifications (e.g., via Teacher Progression Form in MyHR Home) confirming non-service criteria, stored in the system to trigger progression.
+•	Manual Interventions: Payroll operators adjust for exceptions (e.g., bring forward/delay via calendar/school days/hours entries) or handle retrospective impacts.
+•	Reporting and Verification: Includes reports for manual checks required, differences, and individual calculations.  Award-governed structure changes (e.g., enterprise bargaining) apply new rules from effective dates while preserving prior ones.
+•	Conversions and Special Cases: Temporary/permanent teacher switches convert service (school days * 360/200 or reverse).  Temporary teachers ceasing one week before school year-end at 7-week schools credited to year-end.  Higher duties vs. secondments: Higher duties start at lowest paypoint with specific rules; secondments can be at any paypoint without those rules.  Service at same/lower levels: Same counts; lower does not (break in service).
+1.2.4	Role-Specific Examples
+•	Teachers:
+o	Classroom (Stream 1): 12 months increment up to Band 3 Step 4 (unless MUP/disciplinary action); then conditional to Senior Teacher. Interns limited to Band 1 Step 2.
+o	Promotional (Streams 2/3): 24 months until 3rd paypoint.
+•	Teacher Aides: Increment within levels (TA2–TA4, TAA); conditional between (e.g., TA3 to TA4: 12 months at TA3 Paypoint 4 + Certificate III + First Aid + undertaking for higher duties).
+•	Non-Teaching Positions: Generally 12 months; casuals 1200 hours.  Prior service counts if reemployed within limits.
+NOTE: This is a high level view of the current process as determined from the IPS documentation, directives, documents & discussions during the discovery workshops.  This is subject to review by DoE and changes from enterprise bargaining.
+
+1.3	Assumptions
+Building this within BTP would introduce increased complexity and unnecessary points of failure for data integration.  The information is payroll related so should reside in the payroll system.   If the complexity of updating the EC events for Salary Increment increases, then it may be necessary to build a BTP Workbench to oversee the ECP to EC integration.
+
+1.4	Dependencies
+
+1.5	Additional Resources
+Higher Duties Directive
+https://www.forgov.qld.gov.au/__data/assets/pdf_file/0022/527116/higher-duties-directive-16-24.pdf
+Leave Without Salary Credited as Service Directive
+https://www.forgov.qld.gov.au/__data/assets/pdf_file/0021/527115/leave-without-salary-credited-as-service-directive-15-24.pdf
+Teaching in State Education Award – State 2016
+https://www.qirc.qld.gov.au/sites/default/files/teaching_in_state_education_determination_051216.pdf
+
+2	System Design
+2.1	Architecture and Design
+The implementation of the Queensland Department of Education's (DoE) pay increment process in SAP SuccessFactors Employee Central Payroll (ECP) will center on a custom infotype (IT9000) within ECP.  This design shifts emphasis from extensive Employee Central (EC) configurations and enhancements to ECP-centric customizations, ensuring robust handling of the complex rules derived from the DoE's increment guidelines.  IT9000 will serve as the core repository for employee-specific increment data, as part of the periodic payroll processing to automate service-based and conditional progressions while supporting manual exceptions.
+2.1.1	 Architecture Overview
+•	Core Components:
+o	ECP as Primary Processing Layer: Handles custom logic execution, and data storage via infotypes and customer tables.  IT9000 will be the central custom infotype for increment management, making use of standard infotypes like IT000 (Actions) IT0008 (Basic Pay), IT0007 (Planned Working Time), IT0509 (Higher Duties), IT2001 (Absences), IT2003 (Substitutions) for service tracking.
+o	Integration with EC: EC remains the system of record for HR master data (e.g., job info, compensation), with standard replication to ECP infotypes.  Changes in EC (e.g. higher duties assignments, absences) trigger updates to the standard ECP infotypes.  A self-service EC MDF Object & Portlet will be updated periodically from ECP to allow employees to view their projected increment information and historical increment information.
+2.1.2	Custom Infotype (IT9000) Design
+•	Structure and Fields: Create IT9000 as a custom infotype in ECP using the Infotype Framework (e.g., via transaction PM01). Key fields include:
+o	Increment Rule: A code linking to a custom table (e.g., ZPI_RULES) that defines award-specific logic (e.g., 12-month annual for classroom teachers, 24-month bi-annual for promotional teachers).
+o	Current Pay Scale Information: Fields for classification (e.g., Band/Step for teachers, TA level for aides), paypoint.
+o	Estimated Next Increment Date: Calculated field for projected eligibility based on current service.
+o	Actual Increment Date: Recorded date when progression occurs, updated post-processing.
+o	Manual Override Date: Date to override automatic processing for next increment.
+o	Notification Date: Date email should be sent for Conditional requirements.
+o	Notification Sent Date: Date email was actually sent for Conditional requirements.
+o	Counters:
+	Service: Tracks accumulated tenure (e.g., calendar days for permanent teachers, school days for temporary, hours for casuals).
+	Non-Service: For conditional elements (e.g., APR completion flag, qualification indicators).
+	Higher Duty: Periods of eligible higher-level service, with cross-counting flags.
+	Cross Counting: Periods of eligible cross counted service
+	Prior Service: "Carryover" from external/agency or reemployment service.
+o	Exclusion Indicator: Flag to exclude record from processing. e.g. disciplinary action).
+o	Additional Subtypes: If needed, subtypes for different employee groups (e.g., teachers vs. non-teachers) to segment rules.
+•	Validation and Defaults: Use infotype screen logic (e.g., via module pool) to enforce data integrity, such as deriving initial counters from prior service data during hiring/transfer actions.
+
+2.1.3	Custom Tables for Increment Rules
+•	Table Design (e.g. ZPI_RULES): A transparent table linked to the increment rule in IT9000, defining the Rule for progression:
+o	Fields: Increment Rule, Rule Description, Effective Dates, Required Service (e.g. 12/ 24 months/200 school days), Conditional Flags (e.g., APR required? Qualification needed?).
+o	Purpose: Defines the Increment Rules at the header level.  Increment Rules may be specific to an award or may cover several awards.
+o	Maintenance: Configurable via custom transaction or SM30 for payroll admins to update rules.
+•	Table Design (e.g. ZPI_RULE_STEPS): A transparent table linked to the increment rule ZPI_RULES, mapping logical steps for progression:
+o	Fields: Increment Rule, Step Sequence, Effective Dates, Class to Call, Method to Call.
+o	Purpose: Defines sequential processing (e.g., check service → validate conditions → apply exclusion → update paypoint).  Supports award changes/logic changes by effective dating the steps.
+o	Maintenance: Configurable via custom transaction or SM30 for payroll admins to update rules without code changes (unless the step requires a new logic method).
+•	Table Design (e.g. ZPI_RULE_AWARD): A transparent table to hold the increment and what awards it applies to:
+o	Fields: Increment Rule, Award and Effective Dates.
+o	Purpose: Defines the awards that an increment rule applies too and what paypoint/award they would move too.
+o	Maintenance: Configurable via SM30 for payroll admins to update.
+•	Table Design (e.g. ZPI_CC): A transparent table to hold the awards that an award can be cross countered with:
+o	Fields: Effective Dates, From Award, To Award.
+o	Purpose: Defines the awards that service can be calculated and recognised by another award.
+o	Maintenance: Configurable via SM30 for payroll admins to update.
+•	Table Design (e.g. ZPI_LWOP): A transparent table to hold the Leave Without Pay recognised for service:
+o	Fields: Leave Type, Effective Dates, Recognised Service (In Months). [Note: awaiting definition of Months – this could become calendar]
+o	Purpose: Defines the total length of leave that can be recognised for Pay Increment. [Note: This table may need to be extended or merged with a common custom table for other LWOP attributes not stored in the standard Payroll tables]
+o	Maintenance: Configurable via SM30 for payroll admins to update.
+
+2.1.4	Programs to Support Automatic Pay Increment
+•	New Pay Increment/Extension of older Pay Increment.
+o	Each new employee assignment will have a Pay Increment record created when an infotype 0000/0008 record is created in the system by a program reading change records and finding a matching Pay Increment Rule based on the Pay Scale details.  Determining if a previous increment record (e.g. due to a previous employment not greater than 12 months (for non teachers)) requires extending should be checked.   For causal employees we need to include any assignments that have been in the last 3 months (to be counted as continuous employment).
+•	Full/Delta Increment Calculation
+o	A program run will process all relevant IT9000 records and process the relevant increment rules and the related steps.  Each step will relate to a method class that will process the infotype.   The program will allow for the processing of individual records as well.  It will also require the ability to provide a comprehensive log for analysis by payroll admins.
+•	Increment Update
+o	When required in the payroll processing the actual updates of the employees job and compensation records in EC can be processed via the dates in IT9000.
+•	EC ESS Update
+o	Any increments that have been updated since the last run of the program will require an update to the EC MDF Object.  The EC MDF Object will hold a reduced number of attributes for the employee.
+o	The EC Portal will also allow the Principal, Business Manager to select a conditional date met value.  This will be transferred to ECP via the same program when the initial read of the EC MDF Object is made.
+•	Notifications
+o	A program to run across the IT9000 records and where the notification date has been reached will require an email to be sent.  The email template will be selected for the rule and output the via the SAP SMTP Sub System in ECP.   If successfully sent from the program then the notification sent date should be updated.  To ensure another notification is not sent.  (There is also the possibility of sending this as an EC alert via an API call).
+
+•	Notes
+o	As the pay increment processing will need to deal with many records it is important to ensure all the programs being built allow for the possibility of multi-tasking by splitting the number of IT9000 into chunks and running them in separate background jobs.
+o	Error Handling and Logging is required for audits; output exceptions to spool or email notifications for payroll operators.
+o	The program should make use of employee assignment attributes so that they can be scheduled to run for groups such as Permanent Teachers, Fixed Term Teachers, Casuals, School Types, Areas etc.  Using these attributes can allow for specific payroll groups to monitor and manage the different groups.
+
+2.2	Data Model
+Pay Increment Infotype
+Create a new infotype 9000 via transaction PM01.  This enables the infotype to be date effective and held at the assignment level.
+The fields contained in PS9000 (Which is the custom field structure).
+Field Name	Data Type	Description	Notes
+INCREMENT_RULE	ZDE_INCR_RULE	Increment Rule for Processing
+TRFAR	TRFAR	Pay Scale Type
+TRFGB	TRFGB	Pay Scale Area
+TRFGR	TRFGR	Pay Scale Group
+TRFST	TRFST	Pay Scale Level
+INCR_TYPE	ZDE_INCR_TYPE	Increment Type	Perm, Casual, Temp
+EXCLUSION	ZDE_EXCLUSION	Excluded from daily processing
+EST_INCR_DATE	ZDE_EST_INCR_DATE	Estimated Increment Date	Calculated
+ACT_INCR_DATE	ZDE_ACT_INCR_DATE	Actual Increment Date
+OVR_INCR_DATE	ZDE_OVR_INCR_DATE	Override Increment Date	Manual
+SERVICE	ZDE_SERVICE	Accumulated Service 	Calculated
+SERVICE_HOURS	ZDE_SERVICE_HOURS	Accumulated Service in Hours	Calculated - For Casuals
+HD_SERVICE	ZDE_HD_SERVICE	Accumulated HD Service 	Calculated
+PRIOR_HD_SERVICE	ZDE_PRIOR_HD_SERVICE	Manual Entry for Previous HD Service 	Manual
+PRIOR_SERVICE	ZDE_PRIOR_SERVICE	Prior Service Recognised for This Increment	Manual
+CC_SERVICE	ZDE_CC_SERVICE	Cross Counted Service	Calculated
+CONDITIONAL_MET	ZDE_COND_MET	Conditional Steps Met Date	Manual EC
+NOTIF_DATE	ZDE_NOTIF_DATE	Date the Notification is Required	Calculated
+NOTIF_SENT	ZDE_NOTIF_SENT	Date the Notification was sent
+LAST_FULL_RUN	ZDE_LAST_FULL_RUN	Date of the Last Full Increment Run
+LAST_DELTA_RUN	ZDE_LAST_DELTA_RUN	Date of the Last Delta Increment Run
+Pay Increment Rule Header Table – ZPI_RULE
+Field Name	Data Type	Description	Notes
+MANDT	MANDT	Client	Key
+INCREMENT_RULE	ZDE_INCR_RULE	Pay Increment Rule 	Key
+BEGDA	BEGDA	Effective Start Date	Key
+ENDDA	ENDDA	Effective End Date	Key
+DESCRIPTION	TEXT50	Description of Rule
+CONDITIONAL	XFELD	Conditional Rule
+REQ_SERVICE	ZDE_REQ_SERVICE	Required Service in Months
+REQ_SERVICE_HOURS	ZDE_REQ_SERVICE_HOURS	Required Service in Hours (Casual)
+NOTIF_DAYS	ZDE_NOTIF_DAYS	Number of days before the effective date that a notification is sent	E.G. 90 days
+NOTIF_TEMPLATE	ZDE_NOTIF_TEMPLATE	Template for the email notification	Could be a PDF attachment
+Pay Increment Rule Step Table – ZPI_RULE_STEP
+Field Name	Data Type	Description	Notes
+MANDT	MANDT	Client	Key
+INCREMENT_RULE	ZDE_INCR_RULE	Pay Increment Rule 	Key
+INCREMENT_STEP	ZDE_INCR_STEP	Pay Increment Step	Key
+BEGDA	BEGDA	Effective Start Date	Key
+ENDDA	ENDDA	Effective End Date	Key
+DESCRIPTION	TEXT50	Description of Rule
+CLASS	CLASSNAME	Class Name
+METHOD	CLASSMETHOD	Class Method
+Pay Increment Rule Header Table – ZPI_RULE_AWARD
+Field Name	Data Type	Description	Notes
+MANDT	MANDT	Client	Key
+INCREMENT_RULE	ZDE_INCR_RULE	Pay Increment Rule 	Key
+TRFAR	TRFAR	Pay Scale Type	Key
+TRFGB	TRFGB	Pay Scale Area	Key
+TRFGR	TRFGR	Pay Scale Group	Key
+TRFST	TRFST	Pay Scale Level	Key
+BEGDA	BEGDA	Effective Start Date	Key
+ENDDA	ENDDA	Effective End Date	Key
+TO_TRFAR	TRFAR	Pay Scale Type
+TO_TRFGB	TRFGB	Pay Scale Area
+TO_TRFGR	TRFGR	Pay Scale Group
+TO_TRFST	TRFST	Pay Scale Level
+Cross Counting Rule Table – ZPI_CC
+Field Name	Data Type	Description	Notes
+MANDT	MANDT	Client	Key
+CROSS_COUNT_RULE	ZDE_CC_RULE	Cross Counting Rule	Key
+BEGDA	BEGDA	Effective Start Date	Key
+ENDDA	ENDDA	Effective End Date	Key
+DESCRIPTION	TEXT50	Description of Cross Counting Rule
+FROM_TRFAR	TRFAR	Pay Scale Type
+FROM_TRFGB	TRFGB	Pay Scale Area
+FROM_TRFGR	TRFGR	Pay Scale Group
+TO_TRFAR	TRFAR	Pay Scale Type
+TO_TRFGB	TRFGB	Pay Scale Area
+TO_TRFGR	TRFGR	Pay Scale Group
+PERCENTAGE	PERC	Percentage of Service
+MINIMUM	MIN	Minimum Days of Transferable Service
+MAXIMUM	MAX	Maximum Days of Transferable Service
+Pay Increment Rule Header Table – ZPI_LWOP
+Field Name	Data Type	Description	Notes
+MANDT	MANDT	Client	Key
+LEAVE_TYPE	AWART	Leave Type	Key
+BEGDA	BEGDA	Effective Start Date	Key
+ENDDA	ENDDA	Effective End Date	Key
+REC_SERVICE	ZDE_REC_SERVICE	Number of Months of Recognised Service
+
+2.3	Logic Flow
+The following rule steps would be used to help determine progression:
+•	Identification of Exclusion Periods Due to Leave Without Pay:
+Identify any breaks in service resulting from leave without pay taken by employees during the increment period that exceed the leave type service component or table ZPI_LWOP.
+•	Accumulate service/tenure completed at this classification:
+Calculate and aggregate the service completed by the employee at the specified classification (Since the start of the current increment infotype 9000).   This can include multiple broken assignments.
+Perform checks to distinguish between temporary and permanent employees to ensure accurate calculation of service, considering the differing rules for each employment type.  (Different class methods for Employment Type).  Changes between temporary and permanent are required to be converted between school and calendar days during the service period.
+For permanent employees we can determine the calendar days of the assignment via the start and end days.
+For temporary employees we need to look at the work schedule to determine the school days worked since the start of the increment period – adjusting for special cases (7 week school – assignment ending 1 week from the end of term 4).
+Ensure exclusion periods due to LWOP are ignored in this processing.
+•	Higher Duties
+Determine and identify any periods during which the employee undertook higher duties from infotype 0509 that are eligible to be considered as service.  Note: As being on higher duties in ECP does not change your classification level in IT0008 it is not currently seen as needing different processing to determine service during this period.  If a separate Higher Duties count is required this will be possible via reading IT0509 during service count.
+•	Project the 12 months service eligibility date:
+Using the counts in the IT9000 record calculate and project the date when an employee will become eligible for the next increment based on their service and service requirements from the increment rule.   Use calendar days for the permanent employees and projected work schedule for the temporary employees.
+•	Set Conditional Notification Date:
+If the increment requires conditional steps, then if a notification has not been sent, calculate the notification date based on the calculated increment date.
+•	Automated Progression:
+Automate the progression process upon the fulfilment of both service and non-service requirements at the earliest date when both conditions have been met.  This is achieved by making an API call to EC to upsert the EmpJob (With the new paypoint fields) and EmpCompensation (With a Note and eventReason showing this is the Automatic Pay Increment process).  When the increment date is in the past or is a recalculation then the previous change needs to be deleted first.  The API calls can make use of BTP Cloud Integration to orchestrate these changes.
+The automation will generate the new records in EC that will then replicate to ECP for the correct payroll processing via the standard PTP integration.
+
+2.4	EC MDF Object and Portlet
+Employees will have access to a view of their current increment progression and historical records within Employee Central (EC). Additionally, the recording of principal certifications for non-service progression requirements can be handled directly in EC.
+The MDF Object can store a streamlined version of the data from IT9000, including details such as the estimated increment date, service counters, conditional eligibility dates, and notification sent dates.
+This information will be displayed in an MDF Portlet, enabling employees to easily track their next increment.
+Once non-service conditions are fulfilled (e.g., Annual Performance Review (APR), Senior Teacher Action Plan (STAP), or Annual Performance Development Plan (PDP)), the principal or business manager can enter the completion date in the EC Portlet. Access to the completion date field can be restricted via authorizations to ensure it's visible and editable only for authorized roles.
+
+2.5	Concurrent Employment (CE) Considerations
+Salary increments are processed at the assignment level for each employee, allowing for multiple increments to be active simultaneously. Cross-counting rules, as defined in the cross-counting table, determine how service in one assignment can contribute to increment progression in another assignment.
+
+If an employee terminates an assignment, the associated increment record is also terminated at that point. For non-teachers, if re-employed within a 12-month period, the increment record may be extended. For teachers, upon re-employment, any incomplete increment matching the same award will be extended.
+3	Implementation and Usage
+3.1	Cutover Considerations
+How is historical data to be managed?
+The new infotypes required for the increment processing need to be filled during migration so the in process increment records can be updated.
+If the new system is to manage the existing historical increments for possible update – then this also needs to be a data migration consideration.
+
+
+Appendix A -	Custom objects created in ECP/SuccessFactors/BTP
+1.	Custom objects
+System	Object Type	Object Description
+EC	MDF Object	Pay Increment information for Employee and Non Conditional fields for Principal/BM
+EC	MDF Portlet	ESS UI for Pay Increment Information
+ECP	Classes	Classes and methods to represent the different Rule Steps required
+ECP	Programs	New program to manage the different Pay Increment processes
+ECP	Tables	New Infotype and multiple custom tables
+BTP Cloud Integration	API Orchestration	To allow for pay increment APIs to be called in the correct order and processed in the correct order.  Errors and exceptions reported back to ECP for further processing.
+
+
+
+
+
+
+Appendix B -	Acronyms & Abbreviations
+
+Acronym	Definition
+EC	SuccessFactors Employee Central
+ECP	SuccessFactors Employee Central Payroll
+BTP	Business Technology Platform
+DoE	Department of Education
+================================================================================
+
+================================================================================
+Task 1
+================================================================================
+# Analysis: Queensland Department of Education Salary Increment System
+
+## Executive Summary
+
+The Queensland Department of Education (DoE) is implementing a custom salary increment system within SAP SuccessFactors Employee Central Payroll (ECP) to replace their current TSS system. This represents a significant technical challenge due to the complexity of Queensland's pay progression rules, which cannot be handled by standard SuccessFactors functionality.
+
+## Key Technical Components
+
+### 1. Custom Infotype Architecture
+- **IT9000**: Primary custom infotype for increment management
+- Stores employee-specific increment data including service counters, estimated dates, and conditional requirements
+- Date-effective and assignment-level tracking
+
+### 2. Custom Tables Structure
+- **ZPI_RULES**: Increment rule definitions with award-specific logic
+- **ZPI_RULE_STEPS**: Sequential processing steps with class/method mappings
+- **ZPI_RULE_AWARD**: Award-to-increment rule mappings
+- **ZPI_CC**: Cross-counting rules for service recognition
+- **ZPI_LWOP**: Leave without pay service recognition rules
+
+### 3. Processing Programs
+- Full/delta increment calculations
+- Automatic progression processing
+- Notification management
+- EC MDF object synchronization
+- Multi-tasking support for high-volume processing
+
+## Critical Business Requirements
+
+### Service Calculation Complexity
+- **Calendar days** for permanent teachers
+- **School days** for temporary teachers (200 school days ≈ 1 year)
+- **Hours** for casual employees (1,200 hours minimum)
+- Cross-counting between different award classifications
+- Leave exclusions and break-in-service rules
+
+### Conditional Progressions
+- 3-month advance notifications for conditional requirements
+- Integration with Annual Performance Review (APR) processes
+- Qualification and certification tracking
+- Principal approval workflows
+
+## Implementation Risks & Considerations
+
+### 1. Data Migration Challenge
+The cutover section indicates uncertainty about historical data management, which could impact:
+- Continuity of increment calculations
+- Service accumulation accuracy
+- Compliance with award requirements
+
+### 2. System Integration Complexity
+- ECP to EC integration via BTP orchestration
+- Real-time synchronization requirements
+- Error handling and exception management
+
+### 3. Performance Considerations
+- Fortnightly processing of large employee base
+- Multi-tasking requirements for system performance
+- Audit logging for compliance
+
+## Recommendations
+
+### Immediate Actions
+1. **Finalize Historical Data Strategy**: Determine scope and approach for historical increment data migration
+2. **Define Conditional Requirements Integration**: Clarify where conditional progression data (APR, qualifications) is stored and how it integrates with ECP
+3. **Establish Testing Framework**: Given the complexity, comprehensive testing of all increment scenarios is critical
+
+### Technical Considerations
+1. **Performance Testing**: Validate the multi-tasking approach with realistic data volumes
+2. **Error Recovery**: Implement robust error handling and manual override capabilities
+3. **Change Management**: Prepare for award structure changes during enterprise bargaining
+
+## Conclusion
+
+This specification addresses a highly complex payroll requirement with sophisticated business rules. The success of this implementation will depend heavily on the quality of data migration, thorough testing of edge cases, and careful management of the conditional progression workflows that require human intervention.
+
+The architecture appears technically sound, but the project's success will require close collaboration between technical teams and DoE business stakeholders to ensure all award-specific rules are correctly implemented and tested.
+
+================================================================================
+Task 2
+================================================================================
+# Structured Notes: Queensland Department of Education Salary Increment System
+
+## 1. Document Scope and Section Hierarchy
+
+### Primary Focus
+- **System**: SAP SuccessFactors Employee Central Payroll (ECP)
+- **Function**: Custom salary increment management for Queensland DoE
+- **Replacement**: Current TSS system
+
+### Document Structure
+- **Technical Architecture**: Custom infotypes, tables, processing programs
+- **Business Rules**: Service calculation, conditional progressions, award classifications
+- **Integration Requirements**: ECP-EC synchronization, BTP orchestration
+- **Risk Management**: Data migration, performance, compliance
+
+## 2. Key Entities, Systems, and Components
+
+### Core Systems
+- **Source System**: TSS (current)
+- **Target System**: SAP SuccessFactors ECP
+- **Integration Platform**: BTP (Business Technology Platform)
+
+### Custom Infrastructure Components
+- **IT9000**: Primary increment management infotype
+- **ZPI_RULES**: Increment rule definitions
+- **ZPI_RULE_STEPS**: Processing sequence definitions  
+- **ZPI_RULE_AWARD**: Award-to-rule mappings
+- **ZPI_CC**: Cross-counting service rules
+- **ZPI_LWOP**: Leave without pay rules
+
+### Business Entities
+- **Employee Cohorts**: Permanent teachers, temporary teachers, casual employees
+- **Award Classifications**: Different service calculation methods
+- **Service Types**: Calendar days, school days (200 ≈ 1 year), hours (1,200 minimum)
+
+## 3. Relationships and Dependencies
+
+### System Dependencies
+```
+ECP (Payroll) ←→ EC (Employee Central) ←→ BTP (Orchestration)
+     ↓              ↓
+Custom Infotypes ←→ MDF Objects
+```
+
+### Data Flow Dependencies
+- **Historical Data Migration** → Continuity of increment calculations
+- **Conditional Requirements** → APR/qualification systems
+- **Award Changes** → Enterprise bargaining outcomes
+- **Leave Processing** → Service accumulation accuracy
+
+### Processing Dependencies
+- **Fortnightly Calculations** → Real-time synchronization
+- **Multi-tasking Support** → Performance requirements
+- **Notification System** → 3-month advance alerts
+
+## 4. Technical Flows and Integrations
+
+### Primary Processing Flow
+1. **Data Input**: Employee service data, leave records, award classifications
+2. **Rule Processing**: ZPI_RULES → ZPI_RULE_STEPS execution
+3. **Service Calculation**: Calendar/school/hour-based accumulation
+4. **Cross-counting**: ZPI_CC rule application
+5. **Increment Determination**: Conditional/automatic progression
+6. **Output Generation**: IT9000 updates, notifications, EC synchronization
+
+### Integration Flow
+- **Source**: EC employee data via OData APIs
+- **Processing**: ECP custom infotypes and business rules
+- **Synchronization**: BTP-mediated EC-MDF object updates
+- **Output**: Payroll integration and notification delivery
+
+### Error Handling Flow
+- **Exception Detection**: Validation against ZPI_RULES
+- **Manual Override**: Human intervention for conditional requirements
+- **Audit Logging**: Compliance tracking and troubleshooting
+- **Recovery Processing**: Error correction and reprocessing
+
+## 5. Validation and Traceability
+
+### Technical Accuracy Verification
+- **Custom Extension Architecture**: Confirmed through multiple contexts showing MDF portlets, OData APIs, RBPM integration
+- **Performance Requirements**: Validated by high-severity risk documentation for real-time calculation performance
+- **Integration Complexity**: Supported by ECP to EC integration specifications
+
+### Business Rule Validation
+- **Service Calculation Methods**: Confirmed across contexts (calendar days, school days, hours)
+- **Conditional Progressions**: Verified through notification and approval workflow requirements
+- **Award Complexity**: Validated by EBA (Enterprise Bargaining Agreement) references
+
+### Risk Assessment Validation
+- **Data Migration**: Confirmed as critical gap in cutover planning
+- **Performance**: Validated by high-severity performance risk documentation
+- **Compliance**: Confirmed through audit logging and service calculation complexity
+
+### Traceability Matrix
+| Requirement | Source Document | Validation Status |
+|-------------|----------------|-------------------|
+| Custom Infotypes | Context 0, 2, 3 | ✅ Confirmed |
+| Real-time Performance | Context 1 | ✅ High Risk Validated |
+| ECP-EC Integration | Context 2, 3 | ✅ Confirmed |
+| Service Calculation Rules | Context 0, 2 | ✅ Confirmed |
+| Conditional Progressions | Context 0 | ✅ Confirmed |
+| Data Migration Strategy | Context 0 | ⚠️ Gap Identified |
+
+### Completeness Assessment
+- **Technical Architecture**: Complete - custom tables, infotypes, processing programs defined
+- **Integration Requirements**: Complete - ECP-EC-BTP flows documented
+- **Risk Factors**: Complete - performance, migration, compliance risks identified
+- **Business Rules**: Complete - service calculation methods, conditional requirements covered
+- **Implementation Gaps**: Identified - historical data strategy, conditional requirement integration pending
+
+[User Feedback]
+Do you see any gaps in the design
+
+================================================================================
+Task 3
+================================================================================
+Based on my analysis of the Queensland Department of Education salary increment system, I can identify several significant gaps in the current design that need to be addressed:
+
+## Critical Design Gaps
+
+### 1. **Historical Data Migration Strategy**
+The most critical gap is the lack of a comprehensive historical data migration plan. The system requires:
+- **Service accumulation history** for accurate starting points
+- **Previous increment dates** to maintain progression continuity
+- **Leave history** to correctly apply exclusion rules
+- **Award classification changes** to ensure proper cross-counting
+
+**Recommendation**: Develop a detailed data mapping strategy from TSS to the new ECP custom infotypes, including validation rules to ensure service calculations remain accurate post-migration.
+
+### 2. **Conditional Requirements Integration Architecture**
+The system mentions conditional progressions (APR, qualifications, principal approvals) but lacks:
+- **Data source specifications** for conditional requirement information
+- **Integration points** with existing qualification/credential systems
+- **Workflow triggers** for human approval processes
+- **Status synchronization** between systems
+
+**Recommendation**: Define clear API specifications and data models for conditional requirement systems, ensuring real-time status updates feed into increment calculations.
+
+### 3. **Performance and Scalability Architecture**
+While multi-tasking is mentioned, the design lacks:
+- **Specific performance benchmarks** (processing time per employee)
+- **Resource allocation strategies** for peak processing periods
+- **Load balancing mechanisms** for large employee base
+- **Failover procedures** for processing interruptions
+
+**Recommendation**: Conduct performance modeling with actual data volumes and establish SLAs for processing timeframes.
+
+### 4. **Error Handling and Manual Override Framework**
+The system needs more robust:
+- **Exception handling** for edge cases in service calculation
+- **Manual adjustment workflows** for corrections
+- **Audit trail completeness** for compliance
+- **Reversal and correction mechanisms** for erroneous calculations
+
+### 5. **Award Change Management Process**
+Given ongoing enterprise bargaining, the system needs:
+- **Dynamic rule updates** without system downtime
+- **Version control** for different award periods
+- **Retrospective calculation** capabilities
+- **Notification systems** for award changes
+
+### 6. **Testing and Validation Framework**
+Critical gaps include:
+- **Comprehensive test scenarios** for all service calculation methods
+- **Edge case testing** for complex leave and cross-counting scenarios
+- **Performance testing** with realistic data volumes
+- **User acceptance testing** protocols
+
+## Technical Architecture Gaps
+
+### 7. **Real-time Integration Specifications**
+- **Frequency requirements** for EC-ECP synchronization
+- **Conflict resolution** mechanisms for concurrent updates
+- **Data consistency** guarantees across systems
+
+### 8. **Security and Access Control**
+- **Role-based access** to increment data and manual adjustments
+- **Data privacy** compliance for sensitive employee information
+- **Audit logging** requirements for compliance
+
+## Immediate Action Items
+
+1. **Develop Historical Data Migration Plan** with data validation checkpoints
+2. **Design Conditional Requirements Integration** with clear API specifications
+3. **Establish Performance Benchmarks** and conduct load testing
+4. **Create Comprehensive Testing Strategy** including all service calculation scenarios
+5. **Define Award Change Management Process** for ongoing EBA updates
+
+These gaps represent significant risks to project success and should be addressed before moving to the detailed design phase. The complexity of Queensland's EBA requirements demands a more comprehensive approach to ensure system reliability and compliance.
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 3
+Total Characters: 12650

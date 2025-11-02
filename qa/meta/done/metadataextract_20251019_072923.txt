@@ -1,0 +1,200 @@
+# SAP SuccessFactors Metadata Extraction Report: Teacher & Teacher Aide Vacation Payments
+
+## Executive Summary
+This metadata extraction analyzes the vacation payment system for teachers and teacher aides within the Queensland Department of Education's SAP SuccessFactors HCM solution. The system encompasses complex eligibility rules, multiple payment types, and specialized processing requirements.
+
+## 1. Core Object Definitions
+
+### 1.1 Employee Central MDF Objects
+
+**Summer Vacation Payment MDF Object**
+- **Object Type**: MDF (Master Data Framework)
+- **Purpose**: Store vacation payment calculations and projections
+- **Self-Service Capability**: Yes (Employee preview functionality)
+- **Key Attributes**: Payment type, hours, dates, eligibility status
+
+**Teacher Vacation Payment Configuration**
+- **Object Type**: Custom MDF Object
+- **Access Level**: Employee Self-Service via homepage tile
+- **Processing Period**: Available from October onwards for simulation
+- **Integration**: Linked to ECP for calculation storage
+
+### 1.2 Foundation Objects
+
+**Employee Assignment (PerPerson)**
+- **Related Objects**: Employment type, FTE calculations, leave balances
+- **Key Fields**: Personnel Number, Assignment ID, Effective Dates
+- **Relationships**: Multiple assignments support for teacher aides
+
+**Payroll Result Objects**
+- **Custom Payroll Operations**: Embedded within ECP processing
+- **Retroactive Processing**: Standard SAP retro functionality
+- **Performance Optimization**: Custom ECP tables for calculation storage
+
+## 2. Field Definitions and Properties
+
+### 2.1 Core Payment Fields
+
+| Field Name | Data Type | Purpose | Validation Rules |
+|------------|-----------|---------|------------------|
+| `paymentType` | Picklist | Payment classification | Prorata/LSSP/LSOT |
+| `effectiveStartDate` | Date | School year start | Must be before end date |
+| `effectiveEndDate` | Date | School year end | Must be after start date |
+| `paymentHours` | Decimal | Calculated school hours | Positive values only |
+| `schoolType` | Picklist | School duration type | 6/7 week schools |
+| `employmentType` | Picklist | Staff category | Perm/Fixed Term/Casual |
+
+### 2.2 Leave and FTE Calculation Fields
+
+| Field Name | Data Type | Purpose | Calculation Logic |
+|------------|-----------|---------|-------------------|
+| `averageFTE` | Decimal | Annual FTE average | Hours worked / total hours |
+| `currentFTE` | Decimal | Current assignment FTE | As of last day of term |
+| `serviceDays` | Integer | Accumulated service days | Excluding breaks > 9 days |
+| `term4Service` | Integer | Term 4 service period | Until last 2 weeks |
+| `lwpDays` | Integer | Leave without pay days | Excludes from payment calculation |
+
+### 2.3 Termination and Special Conditions
+
+| Field Name | Data Type | Purpose | Business Rule |
+|------------|-----------|---------|---------------|
+| `terminationDate` | Date | Employment end date | Triggers LSOT calculation |
+| `shsCondition` | Boolean | State High School indicator | Special calculation rules |
+| `nineDayBreak` | Boolean | Service break > 9 days | Affects eligibility |
+| `workersComp` | Boolean | Workers compensation status | Special handling |
+| `paySuspend` | Boolean | Pay suspension status | Exclusion criteria |
+
+## 3. Picklist Metadata
+
+### 3.1 Payment Type Picklist
+```
+Values:
+- PRORATA: Prorata Summer Vacation Payment
+- LSSP: Lump Sum Summer Payment
+- LSOT: Lump Sum on Termination
+```
+
+### 3.2 Employment Type Picklist
+```
+Values:
+- PERM: Permanent Teacher
+- FIXED_TERM: Fixed Term Teacher
+- CASUAL: Casual Teacher
+- TA_PERM: Teacher Aide Permanent
+- TA_FIXED: Teacher Aide Fixed Term
+```
+
+### 3.3 School Type Picklist
+```
+Values:
+- 6_WEEK: 6-week school calendar
+- 7_WEEK: 7-week school calendar
+- YOUTH_DET: Youth Detention Centre (special rules)
+```
+
+## 4. Business Rules Metadata
+
+### 4.1 Teacher Eligibility Rules
+
+**LSSP (Lump Sum Summer Payment)**
+- Complete >100 days of service in school year
+- Work entire Semester 2
+- No breaks >9 days from permanent appointment
+
+**LSOT (Lump Sum on Termination)**
+- Additional 10 days service in Term 4
+- 100 days of service in school year
+- Applies when not eligible for Prorata or LSSP
+
+**Prorata Calculation**
+- Based on eligible service duration
+- Adjusted for FTE changes throughout year
+- Average FTE calculation methodology
+
+### 4.2 Teacher Aide SJM Rules
+
+**Standard Job Model (SJM)**
+- 12.5% additional ordinary hours during term
+- Deferred hours used for vacation payment calculation
+- Easter/Winter/Spring vacation payment structure
+
+**Multiple Assignment Processing**
+- Average FTE calculation across assignments
+- Combined engagement consideration
+- Youth Detention Centre special handling
+
+## 5. Integration Mapping Metadata
+
+### 5.1 BTP Extension Components
+- **Primary Integration**: EC to ECP via custom payroll operation
+- **Data Flow**: EC → BTP → ECP → Payroll Result
+- **Retroactive Processing**: Enabled for all vacation payment types
+
+### 5.2 System Integration Points
+- **EC Self-Service**: Vacation hour projection capability
+- **ECP Payroll**: Custom operation for payment calculation
+- **BTP Layer**: Business logic and calculation engine
+- **Foundation Tables**: Service, leave, and assignment data
+
+## 6. Workflow and Business Rule Metadata
+
+### 6.1 Vacation Payment Workflow
+```
+Trigger: Payroll period containing vacation start date
+Process: Custom payroll operation execution
+Validation: Eligibility and service calculation
+Output: Payment hours and type determination
+Storage: Custom ECP tables for performance
+```
+
+### 6.2 Calculation Timestamp Management
+- **Field**: `calcTimestamp` (DateTime)
+- **Purpose**: Retroactive processing trigger
+- **Logic**: Recalculate if system date > timestamp
+- **Scope**: All vacation payment scenarios
+
+## 7. Security and Permission Metadata
+
+### 7.1 Access Control
+- **Employee Self-Service**: Summer vacation hour preview
+- **Manager Access**: Vacation payment status and history
+- **Payroll Administrator**: Full configuration and processing
+- **HR Business Partner**: Configuration and exception handling
+
+### 7.2 Data Privacy Considerations
+- **Sensitive Data**: Termination dates, leave balances
+- **Access Logging**: All calculation and modification activities
+- **Audit Trail**: System messages and logged events
+
+## 8. Configuration Dependencies
+
+### 8.1 Required Configuration Objects
+- **Payroll Operations**: Custom vacation payment operation
+- **MDF Objects**: Summer vacation projection object
+- **Picklists**: All vacation-related selection values
+- **Business Rules**: Eligibility and calculation logic
+- **Integration Specifications**: EC-ECP-BTP data flow
+
+### 8.2 External System Dependencies
+- **Teacher Aide Certified Agreement 2022**: SJM rules
+- **School Calendar System**: Term dates and vacation periods
+- **Leave Management**: Integration for leave impact calculations
+- **Cost Distribution**: Region-specific cost center mapping
+
+## 9. Performance Optimization Metadata
+
+### 9.1 Custom ECP Tables
+- **Purpose**: Store calculated vacation payment data
+- **Structure**: Employee assignment and calculation results
+- **Performance**: Reduce processing time for complex calculations
+- **Retroactive**: Support for historical period recalculation
+
+### 9.2 Processing Optimization
+- **Batch Processing**: Assignment-level calculation grouping
+- **Caching**: Frequently accessed configuration data
+- **Indexing**: Employee, assignment, and calculation date fields
+- **Partitioning**: School year-based data partitioning
+
+## 10. Metadata Catalog Summary
+
+This vacation payment system represents a complex integration of custom MDF objects, BTP extensions, and ECP payroll operations. The metadata structure supports multiple employment types, complex eligibility rules, and specialized calculation requirements for both teachers and teacher aides. The system is designed for scalability, retroactive processing, and integration with existing SAP SuccessFactors components while meeting the specific requirements of the Queensland Department of Education's certified agreements.

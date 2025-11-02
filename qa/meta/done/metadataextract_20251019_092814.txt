@@ -1,0 +1,860 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Queensland DoE HCMS - Organisational Design Module
+
+### Executive Summary
+This comprehensive metadata extraction analyzes the 38 functional requirements for the Queensland Department of Education's HCMS Organisational Design module, identifying technical metadata implications, system capabilities, and implementation considerations for SAP SuccessFactors Employee Central.
+
+## 1. Core Metadata Framework Analysis
+
+### 1.1 Foundation Object Mappings
+```
+Standard Foundation Objects:
+├── FOCompany: Department/organisation entities
+│   ├── externalCode: OrgUnitID
+│   ├── name: OrgUnitTitle  
+│   ├── status: Active/Inactive status
+│   └── effectiveStartDate/EndDate: Temporal validity
+├── FODivision: Divisional structures
+│   ├── externalCode: DivisionID
+│   ├── name: DivisionName
+│   └── parentExternalCode: Hierarchical relationship
+├── FOBusinessUnit: Business unit management
+│   ├── externalCode: BusinessUnitID
+│   ├── name: BusinessUnitName
+│   └── costCenterCode: Financial integration
+├── FODepartment: Departmental structures
+│   ├── externalCode: DepartmentID
+│   ├── name: DepartmentName
+│   └── reportsToExternalCode: Hierarchical parent
+├── FOCompanyLocation: Location/centre entities
+│   ├── externalCode: LocationID
+│   ├── name: LocationName
+│   ├── address: LocationAddress
+│   ├── contactDetails: LocationContactDetails
+│   ├── latitude: Geographic coordinate
+│   └── longitude: Geographic coordinate
+├── FOCostCenter: Cost centre integration
+│   ├── externalCode: CostCentreID
+│   ├── name: CostCentreName
+│   └── status: CostCentreStatus
+└── FOJobCode: Job architecture framework
+    ├── externalCode: JobID
+    ├── jobTitle: JobTitle
+    ├── jobFamily: JobFamily
+    ├── jobFunction: JobFunction
+    ├── jobRoleLevel1: JobRoleLevel1
+    ├── jobRoleLevel2: JobRoleLevel2
+    ├── anzcoCode: ANZSCOCode
+    ├── anzcoName: ANZSCOName
+    └── certifiedAgreement: CertifiedAgreement
+```
+
+### 1.2 Custom MDF Objects Required
+
+#### OrganizationUnit (Cust_MDF)
+```
+Object: OrganizationUnit
+├── Fields:
+│   ├── orgUnitId (string, maxLength: 32): Unique organizational unit identifier
+│   ├── orgUnitTitle (string, maxLength: 128): Organizational unit title
+│   ├── orgUnitType (picklist): Department/Division/Region/School/Centre/Office/Branch/BusinessUnit
+│   ├── status (picklist): Active/Inactive/Abolished
+│   ├── headPositionId (string, maxLength: 32): Head position identifier
+│   ├── costCentre (string, maxLength: 16): Associated cost centre
+│   ├── location (string, maxLength: 32): Associated location ID
+│   ├── transferRating (picklist): Transfer rating classification
+│   ├── maxFTEAllocation (decimal): Maximum FTE allocation allowed
+│   ├── vacancyManagementEnabled (boolean): Enable vacancy management
+│   ├── approvedFTECap (decimal): Approved FTE cap for organizational unit
+│   └── concurrentEmploymentEnabled (boolean): Enable concurrent employment
+├── Temporal Fields:
+│   ├── effectiveStartDate (date): Date effective start
+│   └── effectiveEndDate (date): Date effective end
+└── Associations:
+    ├── parentOrgUnitId (association): Hierarchical parent relationship
+    └── childOrgUnits (collection): Child organizational units
+```
+
+#### PositionManagement (Cust_MDF)
+```
+Object: PositionManagement
+├── Fields:
+│   ├── positionId (string, maxLength: 32): Unique position identifier
+│   ├── positionTitle (string, maxLength: 128): Position title
+│   ├── locallyKnownAs (string, maxLength: 128): Local position name
+│   ├── jobProfile (string, maxLength: 32): Associated job profile
+│   ├── reportsTo (string, maxLength: 32): Reports to position
+│   ├── supervisorPosition (string, maxLength: 32): Supervisor position
+│   ├── numberOfDirectReports (integer): Number of direct reports
+│   ├── budgetedFTE (decimal): Budgeted full-time equivalent
+│   ├── actualFTE (decimal): Actual full-time equivalent
+│   ├── numberOfIncumbents (integer): Headcount
+│   ├── vacant (boolean): Vacant position indicator
+│   ├── positionType (picklist): Permanent/Term/Contract/Casual/Volunteer
+│   ├── startDate (date): Position start date
+│   ├── endDate (date): Position end date
+│   ├── fundingType (picklist): Funding source type
+│   ├── organizationalUnit (string, maxLength: 32): Associated organizational unit
+│   ├── location (string, maxLength: 32): Associated location
+│   ├── costCentre (string, maxLength: 16): Associated cost centre
+│   ├── award (string, maxLength: 64): Associated award
+│   ├── classification (string, maxLength: 64): Position classification
+│   ├── positionBasedAllowances (string, maxLength: 256): Site-specific allowances
+│   ├── hrDelegations (picklist): HR delegation level
+│   ├── financeDelegations (picklist): Finance delegation level
+│   ├── identifiedPosition (boolean): Identified position indicator
+│   └── roleDescription (text): Position role description
+├── Temporal Fields:
+│   ├── effectiveStartDate (date): Date effective start
+│   └── effectiveEndDate (date): Date effective end
+└── Associations:
+    ├── jobCodeId (association): Associated job code
+    ├── orgUnitId (association): Associated organizational unit
+    ├── locationId (association): Associated location
+    └── costCentreId (association): Associated cost centre
+```
+
+## 2. Technical Metadata Considerations
+
+### 2.1 Temporal Data Management Requirements
+
+#### OData Entity Sets for Effective Dating
+```
+Entity: EmploymentInfo
+├── employmentStatus: Employment status with effective dating
+├── startDate: Employment start date
+├── endDate: Employment end date
+└── effectiveStartDate/effectiveEndDate: Temporal validity
+
+Entity: JobInfo
+├── position: Associated position
+├── jobCode: Associated job code
+├── employmentType: Employment type
+├── assignmentId: Assignment identifier
+└── effectiveStartDate/effectiveEndDate: Temporal validity
+
+Entity: OrgUnitInfo
+├── orgUnitId: Organizational unit identifier
+├── orgUnitType: Organizational unit type
+├── effectiveStartDate: Start date of validity
+└── effectiveEndDate: End date of validity
+
+Entity: PositionInfo
+├── positionId: Position identifier
+├── positionTitle: Position title
+├── budgetedFTE: Budgeted FTE value
+├── actualFTE: Actual FTE value
+├── effectiveStartDate: Start date of validity
+└── effectiveEndDate: End date of validity
+```
+
+### 2.2 Hierarchical Structure Metadata
+
+#### Object Relationships and Navigation Properties
+```
+OrgUnit Hierarchy Structure:
+├── Entity: OrgUnit
+│   ├── ParentOrgUnitID (string): Association to parent organizational unit
+│   ├── ChildOrgUnits (collection): Collection of child organizational units
+│   ├── HierarchyLevel (integer): Level in organizational hierarchy
+│   ├── Path (string): Full hierarchical path for navigation
+│   └── HierarchySequence (integer): Sequence within level
+└── Navigation Properties:
+    ├── ParentOrgUnit (single): Navigation to parent
+    └── ChildOrgUnits (multiple): Navigation to children
+
+Position-to-OrgUnit Association:
+├── Position.orgUnitId → OrgUnit.externalCode (many-to-one)
+├── Position.jobCode → JobCode.externalCode (many-to-one)
+└── Position.locationId → Location.externalCode (many-to-one)
+
+Concurrent Employment Tracking:
+├── EmployeePositionAssignment (MDF): Custom object for concurrent assignments
+├── assignmentId: Unique assignment identifier
+├── employeeId: Employee identifier
+├── positionId: Position identifier
+├── fteAllocation: FTE allocation for this assignment
+├── effectiveStartDate/effectiveEndDate: Temporal validity
+└── assignmentStatus: Active/Inactive/Completed
+```
+
+### 2.3 Integration Metadata (CIS Integration - FR-4)
+
+#### Required API Endpoints and Integration Objects
+```
+OData Services:
+├── /odata/v2/FOCompany: Company/department entities
+├── /odata/v2/OrganizationUnit: Custom organizational units
+├── /odata/v2/Position: Position management
+├── /odata/v2/JobInfo: Job information
+├── /odata/v2/Location: Location information
+├── /odata/v2/CostCenter: Cost center information
+├── /odata/v2/Employee: Employee information
+└── /odata/v2/JobCode: Job code information
+
+Integration Objects:
+├── CIS_OrgUnit_Inbound: Organizational unit data from CIS
+├── CIS_Position_Inbound: Position data from CIS
+├── CIS_Job_Inbound: Job data from CIS
+├── CIS_Location_Inbound: Location data from CIS
+└── CIS_Employee_Inbound: Employee data from CIS
+
+Integration Scenarios:
+├── Data Source: CIS (Centre Information System)
+├── Target System: SAP SuccessFactors EC
+├── Frequency: Real-time/batch as per business requirements
+├── Error Handling: Retry mechanisms and error logging
+└── Data Transformation: Mapping between CIS and EC field structures
+```
+
+## 3. Potential Design and Implementation Issues
+
+### 3.1 Technical Challenges
+
+#### A. Concurrent Employment Complexity (FR-20, FR-31)
+```
+Metadata Issue: Standard EC doesn't natively support concurrent employment
+
+Required Customization:
+├── Custom MDF object: EmployeePositionAssignment
+│   ├── Fields:
+│   │   ├── assignmentId (string): Unique assignment identifier
+│   │   ├── employeeId (string): Employee identifier
+│   │   ├── positionId (string): Position identifier
+│   │   ├── fteAllocation (decimal): FTE allocation for assignment
+│   │   ├── effectiveStartDate (date): Assignment start date
+│   │   ├── effectiveEndDate (date): Assignment end date
+│   │   ├── assignmentStatus (picklist): Active/Inactive/Completed
+│   │   └── primaryAssignment (boolean): Primary assignment indicator
+│   ├── Temporal: effectiveStartDate, effectiveEndDate
+│   └── Associations: employeeId, positionId
+├── Modified JobInfo schema: Support multiple assignments per employee
+├── Enhanced workflow: Concurrent position management processes
+└── Custom payroll integration: Split FTE calculations for payroll processing
+```
+
+#### B. FTE Management and Validation (FR-17, FR-24-26)
+```
+Metadata Requirements:
+├── Real-time FTE calculation fields on OrgUnit objects:
+│   ├── currentFTE (decimal): Current FTE allocation
+│   ├── budgetedFTE (decimal): Budgeted FTE allocation
+│   ├── availableFTE (decimal): Available FTE allocation
+│   └── ftePercentageUsed (decimal): Percentage of FTE capacity used
+├── Hierarchical FTE aggregation logic:
+│   ├── orgUnitFTEAggregation (function): Calculate FTE at organizational level
+│   ├── parentOrgUnitFTE (function): Aggregate parent FTE totals
+│   └── totalOrgStructureFTE (function): Calculate total organizational FTE
+├── Custom validation rules for FTE cap enforcement:
+│   ├── fteCapValidationRule (rule): Validate FTE does not exceed cap
+│   ├── hierarchicalFTEValidation (rule): Validate FTE across hierarchy levels
+│   └── positionFTEValidation (rule): Validate individual position FTE allocation
+└── Position-based FTE inheritance mechanisms:
+    ├── inheritFTEFromJob (rule): Inherit FTE from associated job
+    ├── fteOverrideCapability (field): Allow FTE override at position level
+    └── fteInheritanceLog (log): Track FTE inheritance changes
+```
+
+#### C. Bulk Operations Performance (FR-21, FR-22)
+```
+Technical Considerations:
+├── OData batch operation limits: Typically 1000 records per batch
+├── API rate limiting and throttling: Configurable limits per tenant
+├── Transaction management for bulk operations: Rollback capabilities
+├── Error handling and partial success scenarios: Detailed error reporting
+├── Performance optimization strategies:
+│   ├── batchProcessingQueue (queue): Queue for bulk operations
+│   ├── batchOperationStatus (status): Track operation progress
+│   ├── errorLog (log): Detailed error logging for failed operations
+│   └── retryMechanism (mechanism): Automatic retry for transient failures
+└── Monitoring and alerting:
+    ├── performanceMetrics (metrics): Track processing times
+    ├── throughputMonitoring (monitoring): Monitor batch processing throughput
+    └── failureAlerts (alerts): Alert on batch operation failures
+```
+
+### 3.2 Operational Challenges
+
+#### A. Workflow Integration (FR-28)
+```
+Workflow Metadata:
+├── Approval processes for permanent/SES positions:
+│   ├── approvalProcessId (string): Unique approval process identifier
+│   ├── approvalType (picklist): Permanent/SES/Other approval types
+│   ├── requiredApprovers (collection): List of required approvers
+│   ├── approvalSequence (sequence): Order of approval steps
+│   └── escalationRules (rules): Escalation if approval not completed
+├── Role-based routing (JADE, Finance teams):
+│   ├── jadeTeamRole (role): JADE team approval role
+│   ├── financeTeamRole (role): Finance team approval role
+│   ├── routingRules (rules): Rules for role-based routing
+│   └── conditionalRouting (logic): Conditional routing based on criteria
+├── Conditional workflow triggers:
+│   ├── triggerConditions (conditions): Conditions that trigger workflows
+│   ├── positionTypeTrigger (condition): Trigger based on position type
+│   ├── fteThresholdTrigger (condition): Trigger based on FTE thresholds
+│   └── costCentreTrigger (condition): Trigger based on cost centre
+└── Escalation and timeout mechanisms:
+    ├── timeoutPeriods (periods): Time limits for approval steps
+    ├── escalationPaths (paths): Escalation routing paths
+    └── notificationRules (rules): Notification rules for escalations
+```
+
+#### B. Position-Based Allowances (FR-32)
+```
+Payroll Integration Metadata:
+├── Infotype 220 (Pension Scheme Benefits) extensions:
+│   ├── allowanceTypeId (string): Type identifier for allowances
+│   ├── allowanceAmount (decimal): Allowance amount
+│   ├── allowanceEffectiveDate (date): Allowance effective date
+│   └── allowanceStatus (picklist): Active/Inactive status
+├── Position-based pay component assignments:
+│   ├── payComponentId (string): Pay component identifier
+│   ├── payComponentValue (decimal): Pay component value
+│   ├── payComponentEffectiveDate (date): Effective date
+│   └── payComponentType (picklist): Type of pay component
+├── Real-time allowance calculation triggers:
+│   ├── positionChangeTrigger (trigger): Trigger on position changes
+│   ├── assignmentChangeTrigger (trigger): Trigger on assignment changes
+│   ├── fteChangeTrigger (trigger): Trigger on FTE changes
+│   └── locationChangeTrigger (trigger): Trigger on location changes
+└── Integration with ECP for payroll processing:
+    ├── ecpIntegrationEndpoint (endpoint): ECP integration endpoint
+    ├── allowanceDataMapping (mapping): Mapping for allowance data
+    └── payrollCalculationTrigger (trigger): Trigger payroll calculations
+```
+
+### 3.3 Compliance and Governance Issues
+
+#### A. Data Retention and Audit (FR-38)
+```
+Audit Trail Requirements:
+├── Change history for all organizational objects:
+│   ├── changeLogId (string): Unique change log identifier
+│   ├── changedObjectId (string): Identifier of changed object
+│   ├── changedObjectType (string): Type of changed object
+│   ├── changeType (picklist): Create/Update/Delete
+│   ├── oldValue (string): Previous value
+│   ├── newValue (string): New value
+│   ├── changedBy (string): User who made change
+│   ├── changedDate (datetime): Date of change
+│   └── changeReason (string): Reason for change
+├── User action logging for compliance:
+│   ├── userActionId (string): Unique user action identifier
+│   ├── userId (string): User identifier
+│   ├── actionType (picklist): Type of action performed
+│   ├── actionTarget (string): Target of action
+│   ├── actionDate (datetime): Date of action
+│   ├── ipAddress (string): IP address of user
+│   └── userAgent (string): Browser/user agent information
+├── Data lineage tracking for reporting:
+│   ├── dataLineageId (string): Unique data lineage identifier
+│   ├── sourceSystem (string): Source system identifier
+│   ├── targetSystem (string): Target system identifier
+│   ├── transformationRules (string): Applied transformation rules
+│   ├── dataFlowPath (string): Path of data flow
+│   └── lineageTimestamp (datetime): Timestamp of lineage
+└── GDPR/privacy compliance for location data:
+    ├── privacyConsent (boolean): Privacy consent status
+    ├── dataSubjectRights (rights): Data subject rights management
+    ├── dataRetentionPolicy (policy): Data retention policy
+    └── automatedDeletion (mechanism): Automated data deletion mechanism
+```
+
+#### B. External Mappings (FR-10)
+```
+Metadata for ANZSCO Integration:
+├── ANZSCO Code external reference fields:
+│   ├── anzcoCode (string): ANZSCO code
+│   ├── anzcoDescription (string): ANZSCO description
+│   ├── anzcoLevel (integer): ANZSCO level
+│   ├── anzcoMajorGroup (string): Major group classification
+│   ├── anzcoSubMajorGroup (string): Sub-major group classification
+│   ├── anzcoMinorGroup (string): Minor group classification
+│   └── anzcoUnitGroup (string): Unit group classification
+├── External mapping tables for job classifications:
+│   ├── externalMappingId (string): Unique mapping identifier
+│   ├── sourceSystem (string): Source system identifier
+│   ├── targetSystem (string): Target system identifier
+│   ├── sourceValue (string): Source system value
+│   ├── targetValue (string): Target system value
+│   ├── mappingType (picklist): Type of mapping
+│   └── mappingStatus (picklist): Active/Inactive status
+├── Validation rules for ANZSCO code compliance:
+│   ├── anzcoCodeValidationRule (rule): Validate ANZSCO code format
+│   ├── anzcoCodeExistenceRule (rule): Validate ANZSCO code exists
+│   ├── anzcoCodeLevelRule (rule): Validate ANZSCO code level
+│   └── anzcoCodeHierarchyRule (rule): Validate ANZSCO code hierarchy
+└── Integration endpoints for external reference data:
+    ├── externalReferenceEndpoint (endpoint): External reference data endpoint
+    ├── dataSyncSchedule (schedule): Schedule for data synchronization
+    ├── errorHandling (mechanism): Error handling for sync failures
+    └── dataValidation (validation): Validation of external data
+```
+
+## 4. Custom Field and Extension Requirements
+
+### 4.1 Organizational Unit Extensions
+```
+Custom Fields (OrgUnit MDF):
+├── transferRating (picklist):
+│   ├── Type: Picklist
+│   ├── Values: High/Medium/Low/Not Applicable
+│   ├── Description: Transfer rating for organizational unit
+│   └── Validation: Required for certain organizational types
+├── certifiedAgreement (picklist):
+│   ├── Type: Picklist
+│   ├── Values: List of certified agreements
+│   ├── Description: Associated certified agreement
+│   └── Validation: Required for education positions
+├── maxFTEAllocation (decimal):
+│   ├── Type: Decimal
+│   ├── Precision: 2 decimal places
+│   ├── Description: Maximum FTE allocation allowed
+│   └── Validation: Must be positive value
+├── vacancyManagementEnabled (boolean):
+│   ├── Type: Boolean
+│   ├── Description: Enable vacancy management for unit
+│   └── Default: False
+├── concurrentEmploymentEnabled (boolean):
+│   ├── Type: Boolean
+│   ├── Description: Enable concurrent employment for unit
+│   └── Default: False
+└── approvedFTECap (decimal):
+    ├── Type: Decimal
+    ├── Precision: 2 decimal places
+    ├── Description: Approved FTE cap for organizational unit
+    └── Validation: Must be positive value
+```
+
+### 4.2 Position Management Extensions
+```
+Custom Fields (Position MDF):
+├── locallyKnownAs (string):
+│   ├── Type: String
+│   ├── Length: 128 characters
+│   ├── Description: Local name for position
+│   └── Validation: Required for certain position types
+├── identifiedPosition (boolean):
+│   ├── Type: Boolean
+│   ├── Description: Flag for identified positions
+│   └── Default: False
+├── fundingType (picklist):
+│   ├── Type: Picklist
+│   ├── Values: Direct/Indirect/Grant/Self-Funded/Other
+│   ├── Description: Type of funding for position
+│   └── Validation: Required for all positions
+├── hrDelegationLevel (picklist):
+│   ├── Type: Picklist
+│   ├── Values: Level 1/Level 2/Level 3/Level 4/None
+│   ├── Description: HR delegation level for position
+│   └── Validation: Required for management positions
+├── financeDelegationLevel (picklist):
+│   ├── Type: Picklist
+│   ├── Values: Level 1/Level 2/Level 3/Level 4/None
+│   ├── Description: Finance delegation level for position
+│   └── Validation: Required for management positions
+├── roleDescription (text):
+│   ├── Type: Text
+│   ├── Length: 4000 characters
+│   ├── Description: Detailed role description
+│   └── Validation: Required for new positions
+└── vacancyManagementFlag (boolean):
+    ├── Type: Boolean
+    ├── Description: Enable vacancy management for position
+    └── Default: True
+```
+
+### 4.3 Location-Specific Extensions
+```
+Custom Fields (Location MDF):
+├── latitude (decimal):
+│   ├── Type: Decimal
+│   ├── Precision: 6 decimal places
+│   ├── Description: Geographic latitude coordinate
+│   └── Validation: Must be between -90 and 90
+├── longitude (decimal):
+│   ├── Type: Decimal
+│   ├── Precision: 6 decimal places
+│   ├── Description: Geographic longitude coordinate
+│   └── Validation: Must be between -180 and 180
+├── remoteLocationFlag (boolean):
+│   ├── Type: Boolean
+│   ├── Description: Flag for remote locations
+│   └── Default: False
+├── locationBasedAllowanceEligible (boolean):
+│   ├── Type: Boolean
+│   ├── Description: Eligible for location-based allowances
+│   └── Default: False
+├── physicalLocationType (picklist):
+│   ├── Type: Picklist
+│   ├── Values: Office/Remote/Personal Residence/Virtual Academy/Other
+│   ├── Description: Type of physical location
+│   └── Validation: Required for remote work arrangements
+└── payImplicationIndicator (boolean):
+    ├── Type: Boolean
+    ├── Description: Has pay implications for location
+    └── Default: False
+```
+
+## 5. Integration Mapping Metadata
+
+### 5.1 EC to ECP Integration
+```
+Entity Mappings:
+├── Position → Payroll Infotype 0007 (Planned Compensation):
+│   ├── Position.positionId → IT0007.assignmentId
+│   ├── Position.positionBasedAllowances → IT0007.allowanceComponents
+│   ├── Position.award → IT0007.payScaleArea
+│   └── Position.classification → IT0007.payScaleLevel
+├── JobCode → Payroll Classification:
+│   ├── JobCode.externalCode → Payroll.jobCode
+│   ├── JobCode.anzcoCode → Payroll.anzcoClassification
+│   ├── JobCode.jobFamily → Payroll.jobFamily
+│   └── JobCode.jobFunction → Payroll.jobFunction
+├── Location → Payroll Location Codes:
+│   ├── Location.externalCode → Payroll.locationCode
+│   ├── Location.locationBasedAllowanceEligible → Payroll.locationAllowanceFlag
+│   └── Location.remoteLocationFlag → Payroll.remoteWorkFlag
+└── CostCenter → Payroll Cost Distribution:
+    ├── CostCenter.externalCode → Payroll.costCenter
+    └── CostCenter.name → Payroll.costCenterDescription
+```
+
+### 5.2 CIS Integration Schema
+```
+Inbound Fields:
+├── CIS_OrgUnitID → OrgUnit.externalCode:
+│   ├── Source: CIS.orgUnitId
+│   ├── Target: OrgUnit.externalCode
+│   ├── Transformation: Validate format, check duplicates
+│   └── Error Handling: Log errors, continue processing
+├── CIS_LocationCode → Location.externalCode:
+│   ├── Source: CIS.locationCode
+│   ├── Target: Location.externalCode
+│   ├── Transformation: Format validation, existence check
+│   └── Error Handling: Create if not exists, log errors
+├── CIS_CostCentre → CostCenter.externalCode:
+│   ├── Source: CIS.costCentreId
+│   ├── Target: CostCenter.externalCode
+│   ├── Transformation: Format validation, check validity
+│   └── Error Handling: Validate before processing
+└── CIS_BudgetedFTE → Position.budgetedFTE:
+    ├── Source: CIS.budgetedFTE
+    ├── Target: Position.budgetedFTE
+    ├── Transformation: Decimal format, range validation
+    └── Error Handling: Range validation, error logging
+```
+
+## 6. Reporting and Analytics Metadata
+
+### 6.1 Organizational Reporting Entities
+```
+Report Objects:
+├── OrgStructureReport: Hierarchical org chart data
+│   ├── Fields: orgUnitId, orgUnitTitle, hierarchyLevel, parentOrgUnit, childOrgUnits
+│   ├── Filters: orgUnitType, status, dateRange
+│   ├── Sort: hierarchyLevel, orgUnitTitle
+│   └── Output: Hierarchical structure view
+├── VacancyReport: Position vacancy status and metrics
+│   ├── Fields: positionId, positionTitle, vacancyStatus, fteAllocation, budgetedFTE
+│   ├── Filters: orgUnit, positionType, vacancyStatus
+│   ├── Aggregations: TotalVacant, TotalBudgeted, PercentageVacant
+│   └── Output: Vacancy metrics and trends
+├── FTEReport: Headcount and FTE analytics
+│   ├── Fields: orgUnitId, orgUnitTitle, budgetedFTE, actualFTE, headcount
+│   ├── Filters: orgUnit, dateRange, fteRange
+│   ├── Aggregations: TotalFTE, AverageFTE, FTEUtilization
+│   └── Output: FTE utilization and capacity analysis
+└── EstablishmentReport: Organizational establishment data
+    ├── Fields: orgUnitId, orgUnitTitle, positions, incumbents, fteAllocation
+    ├── Filters: orgUnit, establishmentType, dateRange
+    ├── Aggregations: TotalPositions, TotalIncumbents, TotalFTE
+    └── Output: Establishment management overview
+```
+
+### 6.2 Custom Report Definitions
+```
+Report Schema:
+├── OrgHierarchy: Parent-child relationships
+│   ├── Level 1: Department/Division
+│   ├── Level 2: Business Unit
+│   ├── Level 3: Department
+│   ├── Level 4: Division
+│   ├── Level 5: Branch
+│   └── Level 6: Position
+├── PositionOccupancy: Employee-position assignments
+│   ├── Fields: employeeId, employeeName, positionId, positionTitle, fteAllocation
+│   ├── Status: Active/Vacant/Shared
+│   ├── Duration: Assignment start/end dates
+│   └── Concurrent: Multiple position assignments
+├── FTEAggregation: FTE calculations by organizational level
+│   ├── Level 1: Department total FTE
+│   ├── Level 2: Division total FTE
+│   ├── Level 3: Branch total FTE
+│   ├── Level 4: Unit total FTE
+│   ├── Calculations: Budgeted vs Actual vs Available FTE
+│   └── Trends: Historical FTE utilization patterns
+└── ConcurrentEmployment: Multiple position assignments per employee
+    ├── Fields: employeeId, employeeName, position1, position2, fte1, fte2, totalFTE
+    ├── Validation: Total FTE <= 1.0 for full-time equivalent
+    ├── Reporting: Concurrent employment patterns and trends
+    └── Compliance: FTE allocation compliance checking
+```
+
+## 7. Security and Permission Metadata
+
+### 7.1 Role-Based Permissions
+```
+Permission Groups:
+├── ORG_DESIGN_ADMIN: Full organizational design access
+│   ├── Permissions: Create, Read, Update, Delete all organizational objects
+│   ├── Scope: All organizational units and positions
+│   ├── Restrictions: None
+│   └── Audit: Full audit trail
+├── LINE_MANAGER: Position creation/edit for assigned units
+│   ├── Permissions: Create, Read, Update positions within assigned units
+│   ├── Scope: Direct reports and organizational units
+│   ├── Restrictions: Cannot exceed FTE caps without approval
+│   └── Self-Service: Can create self-funded positions
+├── JADE_TEAM: Job analysis and design permissions
+│   ├── Permissions: Read organizational data, create job profiles
+│   ├── Scope: Job architecture framework
+│   ├── Restrictions: Cannot modify organizational structure
+│   └── Approval: Job design approval workflows
+├── FINANCE_APPROVER: Financial approval workflows
+│   ├── Permissions: Approve financial aspects of positions
+│   ├── Scope: Cost centers, funding types, budget allocations
+│   ├── Restrictions: Cannot modify organizational structure
+│   └── Authority: Financial approval authority levels
+└── REPORT_VIEWER: Organizational reporting access
+    ├── Permissions: Read-only access to organizational reports
+    ├── Scope: All organizational reports
+    ├── Restrictions: Cannot modify data or run ad-hoc reports
+    └── Data Masking: Sensitive data masked in reports
+```
+
+### 7.2 Field-Level Security
+```
+Security Metadata:
+├── Position.salaryInformation: HR role access only
+│   ├── Field: Position.salaryInformation
+│   ├── Access: HR_ROLE only
+│   ├── Masking: Full masking for non-HR roles
+│   └── Audit: Access logging required
+├── CostCenter.budgetData: Finance role access only
+│   ├── Field: CostCenter.budgetData
+│   ├── Access: FINANCE_ROLE only
+│   ├── Masking: Full masking for non-finance roles
+│   └── Audit: Access logging required
+├── Employee.payrollData: Payroll role access only
+│   ├── Field: Employee.payrollData
+│   ├── Access: PAYROLL_ROLE only
+│   ├── Masking: Full masking for non-payroll roles
+│   └── Audit: Access logging required
+└── OrgUnit.fundingInformation: Authorized access only
+    ├── Field: OrgUnit.fundingInformation
+    ├── Access: AUTHORIZED_ROLE only
+    ├── Masking: Partial masking for limited access roles
+    └── Audit: Access logging required
+```
+
+## 8. Performance and Scalability Metadata
+
+### 8.1 System Performance Requirements
+```
+Performance Metrics:
+├── Response Time SLAs:
+│   ├── Organizational chart load: < 3 seconds
+│   ├── Position search: < 2 seconds
+│   ├── Bulk operations: < 10 minutes for 1000 records
+│   ├── Report generation: < 30 seconds for standard reports
+│   └── Concurrent user sessions: Support 500+ simultaneous users
+├── Data Volume Capacity:
+│   ├── Organizational units: 10,000+ units
+│   ├── Positions: 50,000+ positions
+│   ├── Employees: 100,000+ employees
+│   ├── Historical records: 5+ years retention
+│   └── Concurrent assignments: 10,000+ concurrent assignments
+└── Integration Performance:
+    ├── CIS data sync: < 5 minutes for daily sync
+    ├── Payroll integration: < 2 minutes for position updates
+    ├── Bulk load operations: < 30 minutes for 10,000 records
+    └── Real-time updates: < 1 second for position changes
+```
+
+### 8.2 Scalability Considerations
+```
+Scalability Features:
+├── Horizontal Scaling:
+│   ├── Load balancing across multiple instances
+│   ├── Database connection pooling
+│   ├── Caching mechanisms for frequently accessed data
+│   └── Distributed processing for bulk operations
+├── Vertical Scaling:
+│   ├── Memory allocation for large data sets
+│   ├── CPU optimization for complex calculations
+│   ├── Storage capacity for historical data
+│   └── Network bandwidth for integration traffic
+└── Performance Optimization:
+    ├── Index optimization for search operations
+    ├── Query optimization for complex joins
+    ├── Batch processing for large data volumes
+    └── Asynchronous processing for background tasks
+```
+
+## 9. Data Quality and Validation Metadata
+
+### 9.1 Data Validation Rules
+```
+Validation Rules:
+├── Organizational Unit Validation:
+│   ├── Unique OrgUnitID: Each org unit must have unique identifier
+│   ├── Required Fields: Mandatory fields must be populated
+│   ├── Date Validation: Effective dates must be logical
+│   ├── Hierarchy Validation: No circular references in hierarchy
+│   └── Status Validation: Only valid status values allowed
+├── Position Validation:
+│   ├── Unique PositionID: Each position must have unique identifier
+│   ├── FTE Validation: FTE values must be within valid ranges
+│   ├── Date Validation: Position dates must be logical
+│   ├── Cost Centre Validation: Cost centre must exist
+│   └── Location Validation: Location must exist
+├── Job Code Validation:
+│   ├── ANZSCO Validation: ANZSCO codes must be valid
+│   ├── Job Family Validation: Job family must exist
+│   ├── Hierarchy Validation: Job hierarchy must be logical
+│   └── External Mapping Validation: External mappings must be valid
+└── Location Validation:
+    ├── Geographic Validation: Coordinates must be valid
+    ├── Address Validation: Addresses must be properly formatted
+    ├── Location Type Validation: Valid location types only
+    └── Remote Work Validation: Remote work eligibility rules
+```
+
+### 9.2 Data Quality Monitoring
+```
+Quality Metrics:
+├── Completeness Metrics:
+│   ├── Required field population: Track required field completion
+│   ├── Reference data completeness: Track reference data completeness
+│   ├── Hierarchical data completeness: Track hierarchy completeness
+│   └── Integration data completeness: Track integration data completeness
+├── Accuracy Metrics:
+│   ├── Data accuracy scoring: Score data accuracy by entity type
+│   ├── Validation rule compliance: Track validation rule compliance
+│   ├── Error rate monitoring: Monitor data entry error rates
+│   └── Correction rate tracking: Track data correction rates
+└── Consistency Metrics:
+    ├── Cross-system consistency: Monitor consistency across systems
+    ├── Referential integrity: Track referential integrity violations
+    ├── Duplicate detection: Monitor for duplicate records
+    └── Data synchronization: Track integration synchronization status
+```
+
+## 10. Implementation Recommendations
+
+### 10.1 Technical Implementation
+```
+Implementation Strategy:
+├── Phase 1: Core Organizational Structure
+│   ├── Foundation objects setup
+│   ├── Basic MDF objects creation
+│   ├── Hierarchical structure implementation
+│   └── Basic reporting capabilities
+├── Phase 2: Position Management
+│   ├── Position MDF object implementation
+│   ├── FTE management and validation
+│   ├── Position-based allowance integration
+│   └── Basic workflow implementation
+├── Phase 3: Advanced Features
+│   ├── Concurrent employment tracking
+│   ├── Advanced workflow processes
+│   ├── Bulk operation capabilities
+│   └── Integration with external systems
+└── Phase 4: Optimization and Enhancement
+    ├── Performance optimization
+    ├── Advanced reporting and analytics
+    ├── User experience enhancements
+    └── Security and compliance improvements
+```
+
+### 10.2 Integration Architecture
+```
+Integration Design:
+├── CIS Integration:
+│   ├── Real-time data synchronization
+│   ├── Error handling and retry mechanisms
+│   ├── Data transformation and mapping
+│   └── Monitoring and alerting
+├── ECP Integration:
+│   ├── Position-based allowance processing
+│   ├── Real-time payroll integration
+│   ├── Error handling and reconciliation
+│   └── Performance optimization
+└── External Reference Data:
+    ├── ANZSCO code integration
+    ├── External mapping services
+    ├── Data validation and verification
+    └── Regular update mechanisms
+```
+
+### 10.3 Governance and Compliance
+```
+Governance Framework:
+├── Data Retention Policies:
+│   ├── Historical data retention: 7-year retention for compliance
+│   ├── Audit log retention: 5-year retention for audit trails
+│   ├── Temporary data retention: 30-day retention for temporary data
+│   └── Archival policies: Automated archival for old data
+├── Compliance Monitoring:
+│   ├── Regulatory compliance tracking
+│   ├── Data privacy compliance
+│   ├── Audit trail maintenance
+│   └── Compliance reporting
+└── Change Management:
+    ├── Change request processes
+    ├── Impact assessment procedures
+    ├── Testing and validation procedures
+    └── Rollback and recovery procedures
+```
+
+## 11. Risk Assessment and Mitigation
+
+### 11.1 Technical Risks
+```
+Risk: Concurrent Employment Complexity
+├── Impact: High - Core requirement not natively supported
+├── Probability: Medium - Requires custom development
+├── Mitigation: Custom MDF objects, thorough testing, phased implementation
+└── Contingency: Alternative approach if custom solution fails
+
+Risk: Performance with Large Data Volumes
+├── Impact: High - System performance affects user adoption
+├── Probability: Medium - Large user base and data volumes
+├── Mitigation: Performance optimization, caching, load balancing
+└── Contingency: Additional hardware resources, database optimization
+
+Risk: Integration Complexity
+├── Impact: High - Multiple system integrations required
+├── Probability: High - Complex integration requirements
+├── Mitigation: Thorough integration testing, monitoring, error handling
+└── Contingency: Manual processes, fallback procedures
+```
+
+### 11.2 Operational Risks
+```
+Risk: User Adoption and Training
+├── Impact: Medium - Training required for new processes
+├── Probability: High - Significant process changes
+├── Mitigation: Comprehensive training, change management, user support
+└── Contingency: Extended support, additional training resources
+
+Risk: Data Migration and Quality
+├── Impact: High - Critical data migration required
+├── Probability: Medium - Data quality issues possible
+├── Mitigation: Data validation, cleansing, verification processes
+└── Contingency: Data rollback procedures, manual data entry
+```
+
+This comprehensive metadata extraction provides the foundation for implementing the comprehensive organizational design requirements while addressing potential technical, operational, and compliance challenges in the SAP SuccessFactors HCMS solution. The detailed metadata framework enables systematic implementation planning and risk mitigation strategies.

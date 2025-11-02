@@ -1,0 +1,335 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 08:30:45
+Topic: E023 – AUTO CREATION OF NET OFFSET FOR OVERPAYMENTS OVER
+THRESHOLD
+Overpayments are prevalent at DoE and as such an extension is required to reduce the overpayment
+administration as much as possible with a view to standardising the treatment of overpayments and
+subsequent repayments.
+Current State
+TSS has within it a custom-built Overpayments portal that allows for an administrator view to process
+overpayments detected as part of the current payroll process. In certain circumstances the overpayments
+can be auto recovered (e.g. retrospective adjustment of leave); however generally the process will assess
+each individual overpayment and where required send notification to the employee advising them of the
+overpayment and suggested repayment plan. In many cases a payroll advisor will take some time in
+explaining the reasons why the overpayment has occurred.
+Currently at DoE the offset that is loaded is gross, with the Tax and Superannuation being adjusted with
+the repayment.
+Future State - Out of The Box
+SAP Payroll, by default, will automatically recover any overpayments through it’s in built retro-accounting
+function. Furthermore, Overpayments can easily be identified through the Payroll Control Centre however,
+the Out of The Box solution would be a manual process to load an offsetting payment to stop the
+overpayment being recovered before first contacting the employee to arrange a repayment plan.
+Enhancement Considerations
+For the purposes of this BTP Extension an overpayment should be considered as a negative influx of
+dollars into the current pay period that had been paid in a previous pay period.
+In order to automate the process to reduce the administrative overhead, the enhancement should
+consider:
+􀍻 Identification that an Overpayment has occurred.
+􀍻 Creation of an Offset wage type
+􀍻 Creation of an Overpayment Total
+􀍻 Creation of an Overpayment Repayment Deduction
+􀍻 Reporting Requirements
+The other consideration of this enhancement is at what point should the system add the offset given
+further master data changes may occur throughout the pay process. This could either be embedded
+within the payroll processing or run as a stand-alone payroll process. Accurately being able to predict the
+number of overpayments in the new system, then the recommendation would be to run this as a separate
+step in the payroll process so if it was decided that the numbers didn’t justify the automation then it would
+be at the Payroll Manager’s discretion to run it and not require further configuration changes to the payroll.
+Enhancement Design
+Employee Central Payroll
+Page | 235
+Within ECP, Employees with an overpayment can distinctly be identified through the existence of Wage
+Type ‘/652 – Stat Net Post Deduction’ in the current pay period results table.
+A custom table will be required to store a $ threshold per employee / worker type in order to determine if
+an offset is required, or whether the $ amount falls below the threshold and can be auto recovered.
+The matrix to store the dollar threshold against employee cohort will be provided during the
+implementation but must include the ability to make date-effective changes.
+If the overpayment exceeds the relevant threshold, then the program will create a Net Offset equal to the
+amount of the Overpayment (/652).
+Whilst there is an option to create the offset in either EC or directly in ECP, the recommendation would be
+to create directly in ECP (using a dedicated number range) thereby easily identifying offsets created via
+this program as opposed to a manual process.
+The creation of the net offset prevents the employee from paying back the overpayment in the current pay
+period, however further entries are required to set up the overpayment for future pay periods.
+To that end, ECP can control the overpayment through Reducing Balance Deductions, whereby a ‘Total
+Debt’ wage type is created to store the full overpayment, and an associated recurring deduction is set up
+to pay an amount each pay period until such time as the debt is fully repaid.
+The calculation logic for the Deduction Amount will be provided by DoE during the implementation.
+In scenarios where, even above threshold, employees agree to pay back the overpayment in the current
+pay, the offset should be removed and pay re-run. Similarly, any total debt and repayment created as part
+of the process should also be deleted.
+To avoid the chance of too much rework, the extension should be designed so that the creation of the
+offset occurs within the Pre Payroll or Live Payroll process however the creation of the subsequent debt
+and repayment can be done in the Post Payroll step.
+Max Rounds: 80
+First Speaker: hugging
+================================================================================
+
+================================================================================
+Round 1 - MetadataExtract
+================================================================================
+# SAP SuccessFactors Metadata Extraction Report
+## E023 - Auto Creation of Net Offset for Overpayments Over Threshold
+
+### Executive Summary
+This metadata extraction analyzes the custom overpayment management enhancement for the Queensland Department of Education (DoE) HCMS implementation, focusing on automated net offset creation for overpayments exceeding defined thresholds.
+
+---
+
+## 1. System Context Metadata
+
+### 1.1 Project Information
+- **Project**: Human Capital Management System (HCMS) Programme
+- **Organization**: Queensland Department of Education
+- **Business Unit**: Queensland Department of Education
+- **Phase**: Explore Phase
+- **Solution Domain**: Employee Central Payroll (ECP)
+- **Enhancement ID**: E023
+
+### 1.2 Current State System
+- **Legacy System**: TSS (Time and Salary System)
+- **Current Feature**: Custom-built Overpayments portal
+- **Processing Type**: Manual assessment with auto-recovery capabilities
+- **Offset Method**: Gross offset with tax and superannuation adjustments
+
+---
+
+## 2. Enhanced Functionality Metadata
+
+### 2.1 Core Enhancement Objectives
+| Enhancement Element | Description | Processing Type |
+|-------------------|-------------|-----------------|
+| Overpayment Identification | Detection via wage type /652 analysis | Automated |
+| Net Offset Creation | Creation of offset equal to overpayment amount | Conditional |
+| Total Debt Management | Storage of full overpayment amount | Automated |
+| Repayment Deduction | Recurring deduction setup | Configurable |
+
+### 2.2 Key Wage Types
+| Wage Type | Purpose | Usage Context |
+|-----------|---------|---------------|
+| /652 | Stat Net Post Deduction | Overpayment identification |
+| Custom Offset Wage Types | Net offset creation | ECP direct creation |
+| Total Debt Wage Type | Overpayment storage | Reducing balance deduction |
+| Recurring Deduction Wage Type | Payment collection | Periodic recovery |
+
+---
+
+## 3. Data Model Metadata
+
+### 3.1 Custom Foundation Objects Required
+
+#### 3.1.1 Overpayment Threshold Configuration Object
+```
+Object Name: OverpaymentThresholdConfiguration
+Object ID: OverpaymentThresholdConfig
+Description: Stores dollar threshold per employee/worker type
+Date Effectiveness: Enabled
+Key Fields:
+  - EmployeeType (Picklist)
+  - WorkerCategory (Picklist) 
+  - ThresholdAmount (Currency)
+  - EffectiveStartDate (Date)
+  - EffectiveEndDate (Date)
+```
+
+#### 3.1.2 Overpayment Management Object
+```
+Object Name: OverpaymentManagement
+Object ID: OverpaymentMgmt
+Description: Tracks overpayment identification and recovery status
+Key Fields:
+  - EmployeeID (String)
+  - OverpaymentAmount (Currency)
+  - OverpaymentDate (Date)
+  - ThresholdExceeded (Boolean)
+  - OffsetCreated (Boolean)
+  - TotalDebtCreated (Boolean)
+  - RepaymentSetup (Boolean)
+  - RecoveryStatus (Picklist)
+```
+
+### 3.2 Integration Points
+- **Employee Central (EC)**: Master data source
+- **Employee Central Payroll (ECP)**: Processing engine
+- **Payroll Control Centre**: Monitoring and identification
+- **BTP (Business Technology Platform)**: Orchestration
+
+---
+
+## 4. Configuration Metadata
+
+### 4.1 Threshold Configuration Matrix
+| Configuration Element | Type | Effective Management |
+|----------------------|------|---------------------|
+| Employee Cohort | Picklist | Date-effective |
+| Dollar Threshold | Currency | Date-effective |
+| Worker Type | Picklist | Date-effective |
+| Calculation Logic | Formula | Implementation-defined |
+
+### 4.2 Processing Configuration
+| Process Step | Timing | Location | Purpose |
+|--------------|--------|----------|---------|
+| Pre-Payroll | Pre-processing | ECP | Offset creation |
+| Live Payroll | During processing | ECP | Offset execution |
+| Post-Payroll | Post-processing | ECP | Debt/repayment setup |
+
+---
+
+## 5. Field Definitions and Properties
+
+### 5.1 Overpayment Identification Fields
+```
+Field: OverpaymentDetected
+Type: Boolean
+Source: Wage Type /652 existence in current pay period
+Validation: Exists in ECP results table
+
+Field: OverpaymentAmount
+Type: Currency
+Precision: 2 decimal places
+Source: Negative value calculation from /652
+
+Field: ThresholdExceeded
+Type: Boolean
+Calculation: OverpaymentAmount > ConfiguredThreshold
+```
+
+### 5.2 Offset Management Fields
+```
+Field: NetOffsetAmount
+Type: Currency
+Calculation: Equal to OverpaymentAmount when threshold exceeded
+Location: ECP direct creation
+Numbering: Dedicated range for program identification
+
+Field: OffsetCreated
+Type: Boolean
+Status: Track offset creation status
+Location: Custom table
+```
+
+---
+
+## 6. Business Logic Metadata
+
+### 6.1 Decision Logic
+```
+IF OverpaymentAmount > ThresholdConfiguredFor(EmployeeType, WorkerCategory)
+  THEN CreateNetOffset = OverpaymentAmount
+  AND CreateTotalDebt = OverpaymentAmount
+  AND SetupRecurringDeduction = TRUE
+ELSE 
+  AutoRecover = TRUE
+```
+
+### 6.2 Processing Rules
+- **Master Data Change Tolerance**: Standalone payroll process to accommodate changes
+- **Offset Creation Timing**: Pre-payroll or Live-payroll process
+- **Debt/Repayment Creation**: Post-payroll process
+- **Manual Override**: Remove offset and re-run payroll when employee agrees to current period repayment
+
+---
+
+## 7. Reporting and Monitoring Metadata
+
+### 7.1 Required Reports
+| Report Name | Purpose | Frequency | Data Source |
+|-------------|---------|-----------|-------------|
+| Overpayment Identification | Identify overpayments | Per pay period | ECP wage types |
+| Offset Creation Summary | Track automated offsets | Per pay period | Custom tables |
+| Recovery Progress | Monitor repayment status | Ongoing | ECP deductions |
+
+### 7.2 Monitoring Objects
+- **Payroll Control Centre**: Overpayment visibility
+- **Custom Dashboards**: Threshold configuration and processing status
+- **Audit Logs**: Offset creation and modification tracking
+
+---
+
+## 8. Integration Metadata
+
+### 8.1 API Requirements
+- **OData Services**: ECP integration for offset creation
+- **BTP Orchestration**: Process automation and scheduling
+- **EC Integration**: Master data synchronization
+- **Payroll Control Centre**: Status and monitoring integration
+
+### 8.2 Data Flow
+```
+EC Master Data → ECP Payroll Processing → Overpayment Detection (/652) 
+→ Threshold Comparison → Offset Creation (ECP) → Debt Setup (ECP) 
+→ Recurring Deduction (ECP) → Status Update (Custom Tables)
+```
+
+---
+
+## 9. Security and Permission Metadata
+
+### 9.1 Role Requirements
+| Role | Permissions | Scope |
+|------|-------------|-------|
+| Payroll Manager | Execute enhancement, override decisions | Payroll process |
+| Payroll Advisor | View overpayments, configure thresholds | Employee records |
+| System Administrator | Configure threshold matrix, monitor processing | System level |
+
+### 9.2 Data Security
+- **Data Sensitivity**: Financial data requiring payroll-level security
+- **Access Control**: Role-based access to overpayment information
+- **Audit Requirements**: Complete audit trail for offset creation and modifications
+
+---
+
+## 10. Custom Development Metadata
+
+### 10.1 Custom Objects
+- **MDF Objects**: Threshold configuration matrix
+- **Custom Tables**: Overpayment tracking and status
+- **Workflow Enhancements**: Approval for manual overrides
+- **Business Rules**: Threshold validation and offset creation logic
+
+### 10.2 Technical Implementation
+- **Platform**: SAP BTP for orchestration
+- **Integration**: ECP direct wage type creation
+- **Numbering**: Dedicated range for program-generated offsets
+- **Error Handling**: Process failure and recovery mechanisms
+
+---
+
+## 11. Dependencies and Relationships
+
+### 11.1 System Dependencies
+- **EC Foundation Objects**: Employee master data
+- **ECP Configuration**: Wage type setup and processing rules
+- **Payroll Control Centre**: Monitoring and identification
+- **Tax and Superannuation**: Adjustment calculations
+
+### 11.2 Process Dependencies
+- **Payroll Processing**: Timing and sequence requirements
+- **Master Data Changes**: Accommodation for ongoing changes
+- **Manual Processes**: Integration with existing advisor workflows
+
+---
+
+## 12. Implementation Considerations
+
+### 12.1 Configuration Requirements
+- **Threshold Matrix**: Must be provided during implementation
+- **Calculation Logic**: Deduction amount logic to be defined by DoE
+- **Date Effectiveness**: All threshold configurations must support date-effective changes
+- **Number Range**: Dedicated ECP number range for offset identification
+
+### 12.2 Performance Considerations
+- **Processing Volume**: Number of overpayments expected
+- **Timing Requirements**: Integration with payroll schedule
+- **Scalability**: Support for varying overpayment volumes
+- **Monitoring**: Performance tracking and optimization
+
+This metadata extraction provides comprehensive coverage of the overpayment automation enhancement, supporting system documentation, implementation planning, and ongoing system management.
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 1
+Total Characters: 8827

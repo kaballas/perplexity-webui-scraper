@@ -1,0 +1,238 @@
+# SAP SuccessFactors Onboarding Metadata Extraction Report
+## Queensland Department of Education HCMS - Manage Onboarding Requirements Analysis
+
+### Executive Summary
+This metadata extraction analyzes the technical and data model requirements for the "Manage Onboarding" functional area (FR-39 to FR-51) within the Queensland Department of Education's HCMS implementation. The analysis covers Employee Central (EC), Onboarding 2.0, and integration metadata necessary to support the specified functional requirements.
+
+---
+
+## 1. Core Data Objects Metadata
+
+### 1.1 Employee Central (EC) Objects
+- **PersonalInfo** - Personal information capture and storage
+  - Key Fields: firstName, lastName, gender, dateOfBirth, email, phone, address
+  - Temporal Management: Effective dating for personal information changes
+  - Required for: FR-39 (Name and contact information)
+
+- **EmploymentInfo** - Employment history and status tracking
+  - Key Fields: employmentStatus, startDate, endDate, jobInfo changes
+  - Temporal Management: Effective dating support for historical employment records
+  - Required for: FR-41, FR-42, FR-43 (Appointment and employment details)
+
+- **JobInfo** - Job assignment and position history
+  - Key Fields: position, jobCode, employmentType, assignmentId
+  - Temporal Management: Date-effective job changes
+  - Required for: FR-41, FR-43 (Position details, concurrent employment)
+
+- **PayComponentNonRecurring** - Banking and deduction details
+  - Key Fields: bankAccount, deductionCodes, paymentMethod
+  - Temporal Management: Effective dating for payment changes
+  - Required for: FR-39 (Banking details, employee deductions)
+
+- **PerPerson** - Core person data with emergency contact support
+  - Key Fields: emergencyContact, personalEmail, homePhone
+  - Temporal Management: Effective dating for personal data
+  - Required for: FR-39 (Emergency contact details)
+
+### 1.2 Onboarding 2.0 MDF Objects
+- **OnboardingProcess** - Onboarding workflow and status tracking
+  - Key Fields: processId, status, startDate, onboardingSteps
+  - Temporal Management: Process start and completion dates
+  - Required for: FR-44, FR-45 (Early onboarding support)
+
+- **OnboardingStep** - Individual onboarding task definitions
+  - Key Fields: stepName, stepStatus, assignee, completionDate
+  - Temporal Management: Step-level effective dating
+  - Required for: FR-46, FR-47 (Training and induction distribution)
+
+### 1.3 Custom MDF Objects for Superannuation
+- **SuperannuationDetails** - Superannuation fund information
+  - Key Fields: fundName, fundNumber, memberNumber, employerChoice
+  - Temporal Management: Effective dating from start of employment
+  - Required for: FR-39 (Superannuation details)
+
+---
+
+## 2. Integration Metadata
+
+### 2.1 SuccessFactors OData Entities for Onboarding
+- **Entity Set**: OnboardingProcess
+  - Version: v1
+  - Key Properties: processId (Edm.String), startDate (Edm.DateTime)
+  - Navigation Properties: _person, _steps, _documents
+  - Required for: FR-40, FR-42 (Automatic transfer to payroll)
+
+- **Entity Set**: PersonalInfo
+  - Version: v1
+  - Key Properties: personId (Edm.String), effectiveStartDate (Edm.DateTime)
+  - Navigation Properties: _employmentInfo, _payComponentNonRecurring
+  - Required for: FR-39, FR-40 (Employee information transfer)
+
+- **Entity Set**: EmploymentInfo
+  - Version: v1
+  - Key Properties: employmentId (Edm.String), startDate (Edm.DateTime)
+  - Navigation Properties: _jobInfo, _payComponentPayGroup
+  - Required for: FR-41, FR-42, FR-43 (Appointment details transfer)
+
+### 2.2 Integration Field Mapping Matrix
+| Source Object | Source Field | Target Object | Target Field | Transformation Rule | Required For |
+|---------------|--------------|---------------|--------------|-------------------|--------------|
+| Onboarding.PersonalInfo | firstName, lastName | EC.PersonalInfo | firstName, lastName | Direct mapping | FR-39 |
+| Onboarding.EmploymentInfo | startDate, jobCode | EC.EmploymentInfo | startDate, jobCode | Direct mapping | FR-41 |
+| Onboarding.PayComponentNonRecurring | bankAccount | EC.PayComponentNonRecurring | bankAccount | Validation required | FR-39 |
+| Onboarding.SuperannuationDetails | fundDetails | EC.PayComponentPayGroup | pensionScheme | Format conversion | FR-39 |
+
+---
+
+## 3. Foundation Objects Metadata
+
+### 3.1 Core Foundation Objects
+- **FOCompany** - Company information for employment records
+  - Key Fields: externalCode, name, legalEntity
+  - Required for: FR-41, FR-43 (Position and employment details)
+
+- **FODepartment** - Departmental assignment tracking
+  - Key Fields: externalCode, name, parentDepartment
+  - Required for: FR-41 (Position details)
+
+- **FOJobCode** - Job classification and role definitions
+  - Key Fields: externalCode, jobTitle, jobLevel
+  - Required for: FR-41 (Classification details)
+
+- **FOCostCenter** - Cost center allocation for concurrent employment
+  - Key Fields: externalCode, name, parentCostCenter
+  - Required for: FR-43 (Concurrent employment support)
+
+### 3.2 MDF Foundation Objects
+- **Position** - Position management with concurrent employment support
+  - Key Fields: code, name, jobCode, costCenter
+  - Temporal Management: Effective dating for position changes
+  - Required for: FR-41, FR-43 (Position details, concurrent employment)
+
+- **JobClassification** - Classification and salary grade mapping
+  - Key Fields: code, name, salaryGrade, awardClassification
+  - Required for: FR-41 (Classification details)
+
+- **ConcurrentEmployment** - Multi-assignment support structure
+  - Key Fields: assignmentId, positionCode, fundingSource
+  - Temporal Management: Assignment start/end dates
+  - Required for: FR-43 (Concurrent employment arrangement)
+
+---
+
+## 4. Picklist Metadata
+
+### 4.1 Employment Status Picklists
+- **Picklist ID**: employmentStatus
+  - Values: ACTIVE, INACTIVE, TERMINATED, EARLY_ONBOARD
+  - Required for: FR-44, FR-45 (Early onboarding support)
+
+### 4.2 Onboarding Status Picklists
+- **Picklist ID**: onboardingStatus
+  - Values: NOT_STARTED, IN_PROGRESS, COMPLETED, NO_SHOW
+  - Required for: FR-50 (No-show management)
+
+### 4.3 Employment Type Picklists
+- **Picklist ID**: employmentType
+  - Values: PERMANENT, TEMPORARY, CASUAL, CONTRACT
+  - Required for: FR-41 (Temporary engagement support)
+
+### 4.4 Award Classification Picklists
+- **Picklist ID**: awardClassification
+  - Values: TEACHER, CORPORATE, RELIEF, ADMINISTRATIVE
+  - Required for: FR-46, FR-47 (Cohort-specific training)
+
+---
+
+## 5. Business Rules and Workflow Metadata
+
+### 5.1 Onboarding Process Rules
+- **Rule Name**: OnboardingToEC_Transfer
+  - Trigger: Onboarding completion
+  - Action: Automatic data transfer to Employee Central
+  - Required for: FR-40, FR-42 (Automatic transfer requirements)
+
+- **Rule Name**: ConcurrentEmployment_Validation
+  - Trigger: New assignment creation
+  - Action: Validate funding source allocation
+  - Required for: FR-43 (Concurrent employment support)
+
+### 5.2 Early Onboarding Business Rules
+- **Rule Name**: PreQualified_EarlyOnboarding
+  - Trigger: Pre-qualified applicant status
+  - Action: Create early onboarding process
+  - Required for: FR-44, FR-45 (Early onboarding support)
+
+### 5.3 Training Completion Integration Rules
+- **Rule Name**: TrainingCompletion_Storage
+  - Trigger: Training completion event
+  - Action: Store completion date in Core HR
+  - Required for: FR-48 (Training completion storage)
+
+---
+
+## 6. Security and Permission Metadata
+
+### 6.1 Role-Based Access Control
+- **Role**: OnboardingAdministrator
+  - Permissions: Full access to onboarding processes
+  - Scope: All onboarding functions and employee records
+  - Required for: All functional requirements
+
+- **Role**: OnboardingSpecialist
+  - Permissions: Process management and data entry
+  - Scope: Assigned onboarding processes only
+  - Required for: FR-44, FR-45 (Early onboarding management)
+
+### 6.2 Field-Level Security
+- **Field**: PersonalInfo.SSN
+  - Security Level: Confidential
+  - Access: HR Admin only
+  - Required for: FR-39 (Personal information security)
+
+- **Field**: PayComponentNonRecurring.BankAccount
+  - Security Level: Restricted
+  - Access: HR Admin and Employee Self-Service
+  - Required for: FR-39 (Banking details security)
+
+---
+
+## 7. Technical Considerations and Potential Issues
+
+### 7.1 Integration Complexity Issues
+- **Issue**: Real-time data synchronization between Onboarding 2.0 and Employee Central
+- **Metadata Impact**: Requires OData API monitoring and error handling
+- **Required For**: FR-40, FR-42, FR-43 (Automatic transfer requirements)
+
+### 7.2 Concurrent Employment Data Model Issues
+- **Issue**: Managing multiple assignments and funding streams
+- **Metadata Impact**: Complex Position-to-Job relationships with effective dating
+- **Required For**: FR-43 (Concurrent employment support)
+
+### 7.3 Early Onboarding Process Issues
+- **Issue**: Managing pre-qualified applicants with future start dates
+- **Metadata Impact**: Employment status management with future effective dates
+- **Required For**: FR-44, FR-45 (Early onboarding requirements)
+
+### 7.4 No-Show Process Issues
+- **Issue**: End-dating employee records and payroll recovery
+- **Metadata Impact**: EmploymentInfo status management and audit trails
+- **Required For**: FR-50 (No-show management)
+
+---
+
+## 8. Compliance and Audit Metadata
+
+### 8.1 Data Retention Requirements
+- **Object**: OnboardingProcess
+  - Retention Period: 7 years
+  - Compliance Standard: Australian Privacy Act
+  - Required for: All functional requirements
+
+### 8.2 Audit Trail Requirements
+- **Object**: PersonalInfo
+  - Audit Level: Full change history
+  - Compliance Standard: PAYG and superannuation reporting
+  - Required for: FR-39, FR-40 (Employee information compliance)
+
+This metadata extraction provides the foundational data model understanding necessary to address the technical, operational, and compliance considerations for the Manage Onboarding functional requirements within the Queensland Department of Education's HCMS implementation.

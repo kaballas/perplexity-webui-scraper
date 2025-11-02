@@ -1,0 +1,1126 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Teacher & Teacher Aide Vacation Payment Enhancement - Complete Metadata Analysis
+
+### Executive Summary
+This comprehensive metadata extraction report provides detailed analysis of all metadata elements required for implementing Teacher and Teacher Aide Vacation Payment enhancements in the Queensland Department of Education's HCMS implementation. The analysis covers complete MDF objects, foundation objects, picklists, security configurations, and integration dependencies.
+
+---
+
+## 1. Complete MDF Object Definitions
+
+### Summer Vacation MDF Object - Enhanced Security & Validation
+```yaml
+ObjectName: SummerVacationPayment
+Namespace: custom.sf.edu.au
+Status: Active
+Security: Role-based access control enabled
+AuditTrail: Enabled (createdBy, createdDate, lastModifiedBy, lastModifiedDate)
+
+Fields:
+  - FieldName: employeeId
+    DataType: string
+    Length: 12
+    Mandatory: true
+    Unique: true
+    Security: Read-only for employee, Full access for payroll admin
+    Validation: Personnel number format validation
+    Description: Personnel Number (unique to work assignment)
+
+  - FieldName: effectiveStartDate
+    DataType: date
+    Mandatory: true
+    Security: Read-only after creation
+    Validation: Must be before effectiveEndDate
+    Description: School Year Start date
+
+  - FieldName: effectiveEndDate
+    DataType: date
+    Mandatory: true
+    Security: Read-only after creation
+    Validation: Must be after effectiveStartDate
+    Description: School Year End date
+
+  - FieldName: paymentType
+    DataType: picklist
+    Picklist: paymentTypePicklist
+    Mandatory: true
+    Security: Read-only for employee, Editable for payroll admin
+    Validation: Required field validation
+    Description: Prorata/LSSP/LSOT derived values
+
+  - FieldName: paymentDate
+    DataType: date
+    Mandatory: false
+    Security: Read-only for all roles
+    Validation: Calculated field
+    Description: Calculated payment date
+
+  - FieldName: paymentHours
+    DataType: decimal
+    Precision: 10
+    Scale: 4
+    Mandatory: true
+    Security: Editable by payroll admin only
+    Validation: Must be >= 0
+    Description: School Hours calculation
+
+  - FieldName: schoolType
+    DataType: picklist
+    Picklist: schoolTypePicklist
+    Mandatory: true
+    Security: Editable by HR admin only
+    Validation: Required field validation
+    Description: 6 or 7 Week School identifier
+
+  - FieldName: employmentType
+    DataType: picklist
+    Picklist: employmentTypePicklist
+    Mandatory: true
+    Security: Editable by HR admin only
+    Validation: Required field validation
+    Description: Perm/Fixed Term/Casual
+
+  - FieldName: calcTimestamp
+    DataType: datetime
+    Mandatory: true
+    Security: System generated, read-only
+    Validation: Auto-populated on calculation
+    Description: Date/Time Stamp for Retro processing
+
+  - FieldName: createdBy
+    DataType: string
+    Length: 12
+    Mandatory: true
+    Security: System generated
+    Validation: Auto-populated
+    Description: User who created the record
+
+  - FieldName: createdDate
+    DataType: datetime
+    Mandatory: true
+    Security: System generated
+    Validation: Auto-populated
+    Description: Date record was created
+
+  - FieldName: lastModifiedBy
+    DataType: string
+    Length: 12
+    Mandatory: true
+    Security: System generated
+    Validation: Auto-populated on modification
+    Description: User who last modified the record
+
+  - FieldName: lastModifiedDate
+    DataType: datetime
+    Mandatory: true
+    Security: System generated
+    Validation: Auto-populated on modification
+    Description: Date record was last modified
+
+  - FieldName: status
+    DataType: picklist
+    Picklist: calculationStatusPicklist
+    Mandatory: true
+    Security: Editable by payroll admin only
+    Validation: Required field validation
+    Description: Current status of calculation
+
+  - FieldName: version
+    DataType: integer
+    Mandatory: true
+    Security: System generated
+    Validation: Auto-incremented on update
+    Description: Version number for change tracking
+```
+
+### Teacher Vacation Calculation MDF Object
+```yaml
+ObjectName: TeacherVacationCalculation
+Namespace: custom.sf.edu.au
+Status: Active
+Security: Role-based access control enabled
+AuditTrail: Enabled
+
+Fields:
+  - FieldName: employeeId
+    DataType: string
+    Length: 12
+    Mandatory: true
+    Unique: true
+    Security: Read-only for employee, Full access for payroll admin
+
+  - FieldName: unpaidLeave
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: LWOP during Vacation flag
+
+  - FieldName: sickLeave
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Sick Leave during Vacation flag
+
+  - FieldName: sickLeaveGreaterThan12Months
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Extended sick leave indicator
+
+  - FieldName: sickLeaveResume
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Sick Leave ends during Vacation
+
+  - FieldName: terminationDate
+    DataType: date
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Employee termination date
+
+  - FieldName: stateHighSchoolIndicator
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: SHS in Term 4 and terminated
+
+  - FieldName: day1Current
+    DataType: date
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Employed Day 1 current school year
+
+  - FieldName: day1Next
+    DataType: date
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Employed Day 1 next school year
+
+  - FieldName: week3Current
+    DataType: date
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Employed by Week 3 current year
+
+  - FieldName: week3Next
+    DataType: date
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Employed by Week 3 next year
+
+  - FieldName: nineDayBreak
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: Break over 9 days exists
+
+  - FieldName: serviceDaysAccumulated
+    DataType: integer
+    Mandatory: true
+    Security: Read-only, calculated field
+    Description: School Days Service for Assignment
+
+  - FieldName: term4Service
+    DataType: integer
+    Mandatory: true
+    Security: Read-only, calculated field
+    Description: Service in Term 4 until last 2 weeks
+
+  - FieldName: workersComp
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: On Workers Comp over the Vacation
+
+  - FieldName: higherDutiesDays
+    DataType: integer
+    Mandatory: true
+    Security: Editable by payroll admin only
+    Validation: Must be >= 0
+    Description: Eligible HD Days
+
+  - FieldName: higherDutiesHours
+    DataType: decimal
+    Precision: 10
+    Scale: 4
+    Mandatory: true
+    Security: Editable by payroll admin only
+    Validation: Must be >= 0
+    Description: Eligible HD Hours
+
+  - FieldName: midYearPaidSum
+    DataType: decimal
+    Precision: 12
+    Scale: 2
+    Mandatory: true
+    Security: Read-only, calculated field
+    Validation: Must be >= 0
+    Description: Sum of Mid-Year Vacation Payments
+
+  - FieldName: schoolDaysTotal
+    DataType: integer
+    Mandatory: true
+    Security: Read-only, calculated field
+    Validation: Must be > 0
+    Description: Total number of Days in School Year
+
+  - FieldName: currentFte
+    DataType: decimal
+    Precision: 5
+    Scale: 4
+    Mandatory: true
+    Security: Editable by HR admin only
+    Validation: Must be between 0.0 and 1.0
+    Description: Current FTE % (0.0 to 1.0)
+
+  - FieldName: averageFte
+    DataType: decimal
+    Precision: 5
+    Scale: 4
+    Mandatory: true
+    Security: Read-only, calculated field
+    Validation: Must be between 0.0 and 1.0
+    Description: Average FTE % (0.0 to 1.0)
+
+  - FieldName: secondedIndicator
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: On Secondment
+
+  - FieldName: suspendOnPay
+    DataType: boolean
+    Mandatory: false
+    Security: Editable by HR admin only
+    Description: On Pay Suspend
+
+  - FieldName: systemMessage
+    DataType: string
+    Length: 500
+    Mandatory: false
+    Security: Read-only, system generated
+    Description: System messages
+
+  - FieldName: systemLoggedMessages
+    DataType: string
+    Length: 2000
+    Mandatory: false
+    Security: Read-only, system generated
+    Description: Logged messages
+
+  - FieldName: auditTrail
+    DataType: string
+    Length: 4000
+    Mandatory: false
+    Security: Read-only, system generated
+    Description: Complete audit trail of changes
+```
+
+---
+
+## 2. Comprehensive Picklist Metadata
+
+### Payment Type Picklist
+```yaml
+PicklistName: paymentTypePicklist
+Namespace: custom.sf.edu.au
+Status: Active
+EffectiveDates: true
+Validation: Required field validation
+
+Values:
+  - Value: PRORATA
+    ExternalCode: PRORATA
+    Description: Prorata Summer Vacation
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: LSSP
+    ExternalCode: LSSP
+    Description: Lump Sum Summer Payment
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: LSOT
+    ExternalCode: LSOT
+    Description: Lump Sum On Termination
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+```
+
+### Employment Type Picklist
+```yaml
+PicklistName: employmentTypePicklist
+Namespace: custom.sf.edu.au
+Status: Active
+EffectiveDates: true
+Validation: Required field validation
+
+Values:
+  - Value: PERM
+    ExternalCode: PERM
+    Description: Permanent
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: FIXED_TERM
+    ExternalCode: FIXED_TERM
+    Description: Fixed Term
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: CASUAL
+    ExternalCode: CASUAL
+    Description: Casual
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+```
+
+### School Type Picklist
+```yaml
+PicklistName: schoolTypePicklist
+Namespace: custom.sf.edu.au
+Status: Active
+EffectiveDates: true
+Validation: Required field validation
+
+Values:
+  - Value: 6_WEEK
+    ExternalCode: 6_WEEK
+    Description: 6 Week School
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: 7_WEEK
+    ExternalCode: 7_WEEK
+    Description: 7 Week School
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+```
+
+### Calculation Status Picklist
+```yaml
+PicklistName: calculationStatusPicklist
+Namespace: custom.sf.edu.au
+Status: Active
+EffectiveDates: true
+Validation: Required field validation
+
+Values:
+  - Value: PENDING
+    ExternalCode: PENDING
+    Description: Calculation Pending
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: CALCULATED
+    ExternalCode: CALCULATED
+    Description: Calculation Complete
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: VERIFIED
+    ExternalCode: VERIFIED
+    Description: Calculation Verified
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: APPROVED
+    ExternalCode: APPROVED
+    Description: Calculation Approved
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+
+  - Value: ERROR
+    ExternalCode: ERROR
+    Description: Calculation Error
+    Status: Active
+    ValidFrom: 2024-01-01
+    ValidTo: 9999-12-31
+```
+
+---
+
+## 3. Security & Role-Based Access Control Metadata
+
+### Security Configuration
+```yaml
+SecurityModel: Role-Based Access Control (RBAC)
+Authentication: SAP SuccessFactors Identity Management
+Authorization: Field-level and object-level permissions
+
+Roles:
+  - RoleName: PayrollAdministrator
+    Permissions:
+      - Object: SummerVacationPayment
+        Actions: [READ, WRITE, DELETE, EXECUTE]
+      - Object: TeacherVacationCalculation
+        Actions: [READ, WRITE, DELETE, EXECUTE]
+      - Fields: All fields in both objects
+        AccessLevel: Full access
+
+  - RoleName: HRAdministrator
+    Permissions:
+      - Object: SummerVacationPayment
+        Actions: [READ, WRITE]
+      - Object: TeacherVacationCalculation
+        Actions: [READ, WRITE]
+      - Fields: [employeeId, effectiveStartDate, effectiveEndDate, schoolType, employmentType]
+        AccessLevel: Full access
+      - Fields: [paymentHours, midYearPaidSum, serviceDaysAccumulated]
+        AccessLevel: Read-only
+
+  - RoleName: Employee
+    Permissions:
+      - Object: SummerVacationPayment
+        Actions: [READ]
+      - Fields: [paymentType, paymentDate, paymentHours, status]
+        AccessLevel: Read-only
+      - Fields: [calcTimestamp]
+        AccessLevel: Read-only
+
+  - RoleName: Manager
+    Permissions:
+      - Object: SummerVacationPayment
+        Actions: [READ]
+      - Object: TeacherVacationCalculation
+        Actions: [READ]
+      - Fields: [employeeId, paymentType, paymentDate, paymentHours]
+        AccessLevel: Read-only
+```
+
+### Data Privacy Configuration
+```yaml
+PrivacySettings:
+  - DataClassification: Financial
+    Sensitivity: High
+    AccessControl: Restricted to payroll and HR administrators
+    AuditTrail: Mandatory logging of all access
+    Retention: 7 years as per financial regulations
+    Encryption: AES-256 encryption at rest and in transit
+
+  - DataClassification: Personal
+    Sensitivity: Medium
+    AccessControl: Role-based access with business justification
+    AuditTrail: Logging of access by non-administrative roles
+    Retention: 5 years after employment termination
+    Encryption: AES-256 encryption at rest and in transit
+```
+
+---
+
+## 4. Payroll Integration Metadata
+
+### Custom Payroll Operation
+```yaml
+OperationName: Z_TEACHER_VACATION_PAYMENT
+Namespace: custom.sf.edu.au
+Status: Active
+Type: Custom Payroll Operation
+ProcessingMode: Real-time and batch
+RetroProcessing: Enabled
+
+Configuration:
+  - Parameter: employeeId
+    DataType: string
+    Length: 12
+    Mandatory: true
+    Description: Personnel Number for calculation
+
+  - Parameter: schoolYear
+    DataType: date
+    Mandatory: true
+    Description: School year for calculation period
+
+  - Parameter: vacationType
+    DataType: string
+    Length: 10
+    Mandatory: true
+    Values: [MID_YEAR, SUMMER]
+    Description: Type of vacation payment to calculate
+
+  - Parameter: forceRecalculation
+    DataType: boolean
+    Mandatory: false
+    Default: false
+    Description: Force recalculation even if timestamp is current
+
+ProcessingLogic:
+  - Step: 1
+    Name: ValidateInputParameters
+    Description: Validate all required input parameters
+    ErrorHandling: Stop processing if validation fails
+
+  - Step: 2
+    Name: LoadEmployeeData
+    Description: Load employee data from EC and MDF objects
+    ErrorHandling: Log error and continue with default values
+
+  - Step: 3
+    Name: CalculateEligibility
+    Description: Calculate vacation payment eligibility based on business rules
+    ErrorHandling: Set status to ERROR and log detailed error
+
+  - Step: 4
+    Name: DeterminePaymentType
+    Description: Determine appropriate payment type (Prorata/LSSP/LSOT)
+    ErrorHandling: Default to LSOT if calculation cannot be determined
+
+  - Step: 5
+    Name: CalculatePaymentAmount
+    Description: Calculate payment amount based on determined type
+    ErrorHandling: Set amount to 0 if calculation fails
+
+  - Step: 6
+    Name: UpdateMDFObjects
+    Description: Update MDF objects with calculation results
+    ErrorHandling: Rollback all changes if update fails
+
+  - Step: 7
+    Name: GenerateAuditTrail
+    Description: Create detailed audit trail of calculation process
+    ErrorHandling: Continue processing even if audit trail fails
+```
+
+### Custom ECP Tables
+```yaml
+TableName: Z_TEACHER_VACATION_CALC
+Database: SAP HANA
+Status: Active
+Performance: Optimized for bulk processing
+
+Columns:
+  - ColumnName: EMPLOYEE_ID
+    DataType: NVARCHAR
+    Length: 12
+    Nullable: False
+    PrimaryKey: True
+    Index: Clustered
+
+  - ColumnName: SCHOOL_YEAR_START
+    DataType: DATE
+    Nullable: False
+    PrimaryKey: True
+    Index: Clustered
+
+  - ColumnName: PAYMENT_TYPE
+    DataType: NVARCHAR
+    Length: 10
+    Nullable: False
+    Index: Non-clustered
+
+  - ColumnName: PAYMENT_HOURS
+    DataType: DECIMAL
+    Precision: 12
+    Scale: 4
+    Nullable: False
+
+  - ColumnName: PAYMENT_DATE
+    DataType: DATE
+    Nullable: True
+
+  - ColumnName: SERVICE_DAYS
+    DataType: INTEGER
+    Nullable: False
+
+  - ColumnName: AVG_FTE
+    DataType: DECIMAL
+    Precision: 5
+    Scale: 4
+    Nullable: False
+
+  - ColumnName: CALC_TIMESTAMP
+    DataType: TIMESTAMP
+    Nullable: False
+    Default: CURRENT_TIMESTAMP
+
+  - ColumnName: STATUS
+    DataType: NVARCHAR
+    Length: 20
+    Nullable: False
+    Default: 'PENDING'
+
+  - ColumnName: ERROR_MESSAGE
+    DataType: NVARCHAR
+    Length: 1000
+    Nullable: True
+
+Indexes:
+  - IndexName: IDX_EMPLOYEE_YEAR
+    Columns: [EMPLOYEE_ID, SCHOOL_YEAR_START]
+    Type: Clustered
+
+  - IndexName: IDX_STATUS
+    Columns: [STATUS]
+    Type: Non-clustered
+
+  - IndexName: IDX_CALC_TIMESTAMP
+    Columns: [CALC_TIMESTAMP]
+    Type: Non-clustered
+```
+
+---
+
+## 5. Integration Dependencies & API Metadata
+
+### OData API Endpoints
+```yaml
+APIEndpoint: /odata/v2/SummerVacationPayment
+Method: GET, POST, PUT, PATCH
+Authentication: OAuth 2.0
+RateLimiting: 1000 requests per minute per client
+
+Endpoints:
+  - Endpoint: /odata/v2/SummerVacationPayment
+    Method: GET
+    Description: Retrieve all summer vacation payment records
+    Permissions: PayrollAdministrator, HRAdministrator
+    Filters: employeeId, effectiveStartDate, status
+
+  - Endpoint: /odata/v2/SummerVacationPayment('{employeeId}')
+    Method: GET
+    Description: Retrieve specific employee's vacation payment record
+    Permissions: Employee (own records), Manager (reports), PayrollAdministrator
+    Filters: employeeId
+
+  - Endpoint: /odata/v2/SummerVacationPayment
+    Method: POST
+    Description: Create new vacation payment record
+    Permissions: PayrollAdministrator, HRAdministrator
+    RateLimit: 100 requests per minute
+
+  - Endpoint: /odata/v2/TeacherVacationCalculation
+    Method: GET
+    Description: Retrieve teacher vacation calculation data
+    Permissions: PayrollAdministrator, HRAdministrator
+    Filters: employeeId, schoolYear
+
+SecurityHeaders:
+  - Header: X-CSRF-Token
+    Required: True
+    Description: Cross-site request forgery protection
+
+  - Header: Authorization
+    Required: True
+    Description: OAuth 2.0 Bearer token
+
+  - Header: Content-Type
+    Required: True
+    Values: [application/json, application/xml]
+```
+
+### Integration Flow Metadata
+```yaml
+IntegrationName: TeacherVacationPaymentIntegration
+Type: BTP Extension
+Status: Active
+Version: 1.0
+
+FlowDefinition:
+  - Step: 1
+    Component: Employee Central
+    Action: Data Change Detection
+    Trigger: Employee data update
+    Output: Employee data snapshot
+
+  - Step: 2
+    Component: BTP Extension
+    Action: Business Rule Processing
+    Trigger: Vacation payment calculation required
+    Output: Eligibility determination
+
+  - Step: 3
+    Component: Employee Central Payroll
+    Action: Payroll Calculation
+    Trigger: Payroll run execution
+    Output: Payment amount and hours
+
+  - Step: 4
+    Component: Custom ECP Table
+    Action: Data Storage
+    Trigger: Calculation completion
+    Output: Stored calculation results
+
+  - Step: 5
+    Component: MDF Object
+    Action: Data Update
+    Trigger: Calculation completion
+    Output: Updated MDF records
+
+ErrorHandling:
+  - ErrorType: DataValidation
+    Action: Log error, set status to ERROR
+    Retry: Manual intervention required
+
+  - ErrorType: SystemFailure
+    Action: Rollback changes, log error
+    Retry: Automatic after 5 minutes, max 3 attempts
+
+  - ErrorType: BusinessRuleViolation
+    Action: Set status to ERROR, log details
+    Retry: Manual correction required
+```
+
+---
+
+## 6. Foundation Object Dependencies
+
+### Employee Foundation Object Integration
+```yaml
+FoundationObject: Employee
+Namespace: SuccessFactors
+Integration: Field mapping and validation
+
+FieldMappings:
+  - SourceField: personnelNumber
+    TargetField: employeeId
+    Validation: Format validation, uniqueness check
+
+  - SourceField: employmentType
+    TargetField: employmentType
+    Validation: Value mapping to custom picklist
+
+  - SourceField: fte
+    TargetField: currentFte
+    Validation: Range validation (0.0 to 1.0)
+
+  - SourceField: hireDate
+    TargetField: day1Current
+    Validation: Date format validation
+
+  - SourceField: terminationDate
+    TargetField: terminationDate
+    Validation: Date format validation
+
+  - SourceField: jobInfo(0).jobTitle
+    TargetField: employmentType (derived)
+    Validation: Job title to employment type mapping
+```
+
+### Job Information Integration
+```yaml
+FoundationObject: JobInfo
+Namespace: SuccessFactors
+Integration: Service calculation and eligibility determination
+
+FieldMappings:
+  - SourceField: employmentType
+    TargetField: employmentType
+    Validation: Value mapping validation
+
+  - SourceField: fte
+    TargetField: currentFte
+    Validation: Range validation
+
+  - SourceField: jobTitle
+    TargetField: employmentType (derived)
+    Validation: Title-based employment type determination
+
+  - SourceField: startDate
+    TargetField: effectiveStartDate
+    Validation: Date range validation
+```
+
+---
+
+## 7. Business Rule Metadata
+
+### Eligibility Calculation Rules
+```yaml
+RuleSetName: TeacherVacationEligibilityRules
+Namespace: custom.sf.edu.au
+Status: Active
+Version: 1.0
+
+Rules:
+  - RuleId: FIXED_TERM_PRORATA_ELIGIBILITY
+    Name: Fixed Term Prorata Eligibility
+    Description: Determine if fixed term teacher is eligible for prorata payment
+    Conditions:
+      - employmentType == 'FIXED_TERM'
+      - serviceDaysAccumulated >= 100
+      - term4Service >= 10
+    Actions:
+      - paymentType = 'PRORATA'
+      - status = 'CALCULATED'
+
+  - RuleId: FIXED_TERM_LSSP_ELIGIBILITY
+    Name: Fixed Term LSSP Eligibility
+    Description: Determine if fixed term teacher is eligible for LSSP
+    Conditions:
+      - employmentType == 'FIXED_TERM'
+      - serviceDaysAccumulated > 100
+      - term4Service == totalTerm4Days
+    Actions:
+      - paymentType = 'LSSP'
+      - status = 'CALCULATED'
+
+  - RuleId: FIXED_TERM_LSOT_ELIGIBILITY
+    Name: Fixed Term LSOT Eligibility
+    Description: Determine if fixed term teacher is eligible for LSOT
+    Conditions:
+      - employmentType == 'FIXED_TERM'
+      - NOT (serviceDaysAccumulated >= 100 AND term4Service >= 10)
+    Actions:
+      - paymentType = 'LSOT'
+      - status = 'CALCULATED'
+
+  - RuleId: PERMANENT_FULL_ELIGIBILITY
+    Name: Permanent Full Payment Eligibility
+    Description: Determine if permanent teacher gets full payment
+    Conditions:
+      - employmentType == 'PERM'
+      - unpaidLeave < 30
+      - terminationDate IS NULL
+    Actions:
+      - paymentType = 'PRORATA'
+      - status = 'CALCULATED'
+
+  - RuleId: PERMANENT_PRORATA_ELIGIBILITY
+    Name: Permanent Prorata Eligibility
+    Description: Determine if permanent teacher gets prorata payment
+    Conditions:
+      - employmentType == 'PERM'
+      - unpaidLeave >= 30
+    Actions:
+      - paymentType = 'PRORATA'
+      - status = 'CALCULATED'
+
+  - RuleId: FTE_CALCULATION
+    Name: FTE Average Calculation
+    Description: Calculate average FTE for payment determination
+    Conditions:
+      - TRUE
+    Actions:
+      - averageFte = calculateAverageFte(employeeId, schoolYearStart, schoolYearEnd)
+      - status = 'CALCULATED'
+```
+
+---
+
+## 8. Self-Service Enhancement Metadata
+
+### Employee Self-Service Portlet
+```yaml
+PortletName: SummerVacationHoursPreview
+Namespace: custom.sf.edu.au
+Status: Active
+Version: 1.0
+Accessibility: WCAG 2.1 AA compliant
+
+Configuration:
+  - Property: availabilityStartDate
+    DataType: date
+    Default: 2024-10-01
+    Description: Start date for portlet availability
+
+  - Property: availabilityEndDate
+    DataType: date
+    Default: 2024-12-31
+    Description: End date for portlet availability
+
+  - Property: allowedRoles
+    DataType: array
+    Values: ['Employee']
+    Description: Roles allowed to access portlet
+
+  - Property: dataSource
+    DataType: string
+    Values: ['SummerVacationPayment']
+    Description: MDF object used as data source
+
+UIComponents:
+  - Component: VacationHoursDisplay
+    Type: InformationDisplay
+    Fields: [paymentType, paymentDate, paymentHours, status]
+    Security: Role-based field access
+
+  - Component: CalculationHistory
+    Type: DataTable
+    Fields: [calcTimestamp, status, systemMessage]
+    Security: Employee can only see own history
+
+  - Component: SimulationCalculator
+    Type: InteractiveForm
+    Fields: [currentFte, serviceDaysAccumulated, employmentType]
+    Security: Read-only for employee, editable for admin
+```
+
+---
+
+## 9. Data Validation & Integrity Metadata
+
+### Validation Rules
+```yaml
+ValidationSetName: TeacherVacationValidationRules
+Namespace: custom.sf.edu.au
+Status: Active
+Severity: Error, Warning, Information
+
+Rules:
+  - ValidationId: FTE_RANGE_VALIDATION
+    Name: FTE Range Validation
+    Description: Validate FTE values are within acceptable range
+    Field: currentFte, averageFte
+    Rule: value >= 0.0 AND value <= 1.0
+    Severity: Error
+    Message: "FTE value must be between 0.0 and 1.0"
+
+  - ValidationId: DATE_RANGE_VALIDATION
+    Name: Date Range Validation
+    Description: Validate date ranges are logical
+    Field: effectiveStartDate, effectiveEndDate
+    Rule: effectiveStartDate < effectiveEndDate
+    Severity: Error
+    Message: "Effective start date must be before effective end date"
+
+  - ValidationId: PAYMENT_HOURS_VALIDATION
+    Name: Payment Hours Validation
+    Description: Validate payment hours are positive
+    Field: paymentHours
+    Rule: value >= 0
+    Severity: Error
+    Message: "Payment hours must be greater than or equal to zero"
+
+  - ValidationId: SERVICE_DAYS_VALIDATION
+    Name: Service Days Validation
+    Description: Validate service days are within school year range
+    Field: serviceDaysAccumulated
+    Rule: value >= 0 AND value <= 200
+    Severity: Warning
+    Message: "Service days seem unusually high, please verify"
+
+  - ValidationId: EMPLOYEE_ID_FORMAT
+    Name: Employee ID Format Validation
+    Description: Validate employee ID format
+    Field: employeeId
+    Rule: value.matches("^[0-9]{12}$")
+    Severity: Error
+    Message: "Employee ID must be 12 digits"
+```
+
+---
+
+## 10. Audit Trail & Compliance Metadata
+
+### Audit Configuration
+```yaml
+AuditTrail:
+  - Object: SummerVacationPayment
+    Fields: [paymentType, paymentHours, status]
+    Events: [CREATE, UPDATE, DELETE]
+    Retention: 7 years
+    Encryption: AES-256
+
+  - Object: TeacherVacationCalculation
+    Fields: [all fields]
+    Events: [CREATE, UPDATE]
+    Retention: 7 years
+    Encryption: AES-256
+
+ComplianceRequirements:
+  - Regulation: Fair Work Act 2009
+    Requirement: Accurate payment calculation and documentation
+    Validation: Business rule compliance check
+
+  - Regulation: Queensland DoE Policy
+    Requirement: Vacation payment eligibility determination
+    Validation: Business rule validation
+
+  - Regulation: Financial Reporting Standards
+    Requirement: Accurate financial records
+    Validation: Payment amount validation
+
+  - Regulation: Data Privacy Act
+    Requirement: Employee data protection
+    Validation: Access control validation
+```
+
+---
+
+## 11. Performance & Monitoring Metadata
+
+### Performance Configuration
+```yaml
+PerformanceMetrics:
+  - Metric: CalculationResponseTime
+    Target: < 2 seconds
+    AlertThreshold: > 5 seconds
+    Monitoring: Real-time
+
+  - Metric: APIResponseTime
+    Target: < 1 second
+    AlertThreshold: > 3 seconds
+    Monitoring: Real-time
+
+  - Metric: BatchProcessingTime
+    Target: < 30 minutes for 10,000 records
+    AlertThreshold: > 60 minutes
+    Monitoring: Per batch run
+
+Monitoring:
+  - Component: Custom Payroll Operation
+    Metrics: [executionTime, errorRate, throughput]
+    Alerts: [executionTime > 30s, errorRate > 5%]
+
+  - Component: MDF Object Access
+    Metrics: [readTime, writeTime, concurrency]
+    Alerts: [responseTime > 2s, lockWaitTime > 10s]
+
+  - Component: Database Queries
+    Metrics: [queryTime, connectionPool, memoryUsage]
+    Alerts: [queryTime > 5s, connectionPool > 80%]
+```
+
+---
+
+## 12. Deployment & Configuration Metadata
+
+### Deployment Configuration
+```yaml
+DeploymentPackage: TeacherVacationPaymentEnhancement
+Version: 1.0.0
+Environment: [DEV, TEST, PROD]
+Dependencies: [Employee Central, Employee Central Payroll, BTP]
+
+ConfigurationItems:
+  - ConfigName: vacationPaymentEnabled
+    DataType: boolean
+    Default: false
+    Description: Enable vacation payment functionality
+
+  - ConfigName: retroProcessingEnabled
+    DataType: boolean
+    Default: true
+    Description: Enable retro processing for vacation payments
+
+  - ConfigName: maxConcurrentCalculations
+    DataType: integer
+    Default: 100
+    Description: Maximum concurrent calculation operations
+
+  - ConfigName: calculationTimeout
+    DataType: integer
+    Default: 300
+    Description: Timeout for calculation operations in seconds
+
+  - ConfigName: auditLoggingEnabled
+    DataType: boolean
+    Default: true
+    Description: Enable detailed audit logging
+```
+
+This comprehensive metadata extraction provides the complete foundation for implementing the Teacher and Teacher Aide Vacation Payment enhancements, addressing all security, performance, and compliance requirements identified in the quality assurance review.

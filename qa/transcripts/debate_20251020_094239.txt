@@ -1,0 +1,161 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-20 09:42:40
+Topic: 5 High Level Functional Requirements
+   5.1 Manage Organisation Design
+ID	Priority	High Level Functional Requirements
+FR-1	Essential	The solution must support a range of organisation design objects including department / organisation, divisions, regions, schools / centres, offices, branches, business units, jobs, positions, cost centres and locations.
+FR-2	Essential	The solution must support the creation of organisational units with a date effective and a range of data attributes e.g. Org Unit ID, Org Unit Title, Org Unit Type, Status, Head Position ID, Cost Centre, Location, Transfer Rating etc.
+FR-3	Essential	The solution must support the changing of organisational units with a date effective with the option to change / update any of the data attributes stored against the org unit.
+FR-4	Essential	The solution must support integration from the Centre Information System (CIS) including the required data attributes for organisational units.
+FR-5	Essential	The solution must support the abolishing of organisational units with a date effective.
+FR-6	Essential	The solution must support the creation and ongoing management of a hierarchical organisational structure, displaying the relationships between the organisational units in both a graphical or list format.
+FR-7	Essential	The solution must support online organisational charts with visibility across vacant, filled and shared positions.
+FR-8	Essential	The solution must support the ongoing management of a hierarchical organisational structure across past, current and future organisational modelling scenarios.
+FR-9	Essential	The solution must support the creation and ongoing management of the Department’s preferred job or workforce architecture framework consisting of job families, job functions, job roles and job titles.
+FR-10	Essential	The solution must support the Department’s preferred job or workforce architecture framework including external mappings to data elements such as ANZSCO Codes and Descriptions (e.g. 134311 – School Principal).
+FR-11	Essential	The solution must support the creation of jobs with a date effective and a range of data attributes e.g. Job ID, Job Family, Job Function, Job Role Level 1, Job Role Level 2, ANZSCO Code, ANZSCO Name and Certified Agreement.
+FR-12	Essential	The solution must support the changing of jobs with a date effective with the option to change / update any of the data attributes stored against the job.
+FR-13	Essential	The solution must support the abolishing of jobs with a date effective.
+FR-14	Essential	The solution must support the automatic inheriting of data attributes stored against jobs through to the creation of new positions.
+FR-15	Essential	The solution must support the creation of positions with a date effective and a range of data attributes e.g. Position ID, Position Title, Locally Known As, Job Profile, Reports To, Supervisor Position, Number of Direct Reports, Budgeted FTE, Actual FTE, Number of Incumbents (Headcount), Vacant (Y/N – FTE), Position Type, Start Date, End Date, Funding Type, Organisational Unit, Location, Cost Centre, Award, Classification, Position Based Allowances (Site Specific Allowance), HR / Finance Delegations, Identified Position.
+FR-16	Essential	The solution must support the loading and storage of role descriptions against positions.
+FR-17	Essential	The solution must provide warnings when a request is submitted to create a new position would result in the approved FTE cap for that organisational unit to be exceeded.
+FR-18	Essential	The solution must support the changing of positions with a date effective with the option to change / update any of the data attributes stored against the position.
+FR-19	Essential	The solution must support the abolishing of positions with a date effective.
+FR-20	Essential	The solution must support concurrent employment scenarios across the Department, including concurrent employment in the same award and concurrent employment across awards.
+FR-21	Essential	The solution must support the bulk creation of positions to manage annual school allocations FTE and funding source with the option to split out to reflect school based direct and indirect reporting lines.
+FR-22	Essential	The solution must support the bulk creation and update of organisational units and positions to manage Machinery of Government changes or large organisational restructures.
+FR-23	Essential	The solution must allow line managers to create and edit positions based on allowable permissions (e.g. schools to create self-funded positions), which automatically updates the schools establishment without the need for additional workflow approvals.
+FR-24	Essential	The solution must support Headcount and FTE management for Corporate positions at both a position level and positions within an organisational unit.
+FR-25	Essential	The solution must support Resource and FTE management for School positions at both a position level and positions within an organisational unit.
+FR-26	Essential	The solution must support a maximum allowed allocation of FTE against positions at multiple levels of the org structure (e.g. unit, branch or division).
+FR-27	Essential	The solution must support vacancy management, including vacancy management reporting, across 1:1 position management, 1:Many position management and a hybrid model of both 1:1 and 1:Many establishment management model.
+FR-28	Essential	The solution must support the workflow of create position and change position to internal teams (JADE – Job Analysis Design & Establishment, Finance) for review and or approval based on pre-defined parameters e.g. position is a permanent position or a Senior Executive Service (SES) position.
+FR-29	Essential	The solution must support the creation and ongoing management of positions for volunteers, contingent / contractor employees and casuals in a talent pool via 1:Many position management.
+FR-30	Essential	The solution must support automatic occupancy management from employee movements including concurrent employment.
+FR-31	Essential	The solution must allow an employee to occupy multiple positions numbers concurrently and accurately reflect the occupied concurrent positions against the Department’s establishment management and organisational structure.
+FR-32	Essential	The solution must support position based allowances that are automatically included in payroll calculations for any employee assigned to that position.
+FR-33	Essential	The solution must support the automatic inheriting of data attributes stored against positions through to the creation of new hires, with the option to override at the employee level.
+FR-34	Essential	The solution must support the creation of locations / centres with a date effective and a range of data attributes e.g. Location ID, Location Name, Location Address, Location Contact Details and Longitude and Latitude details.
+FR-35	Essential	The solution must support the changing of locations / centres with a date effective with the option to change / update any of the data attributes stored against the location / centre.
+FR-36	Essential	The solution must support the abolishing of locations / centres with a date effective.
+FR-37	Essential	The solution must support the recording of an employee’s work site location and their physical location e.g. work site location is a remote location and their physical location for certain days of the week is a personal residence or virtual academy, which has pay outcome implications e.g. no entitlement location based allowances if working from a personal residence that is outside of the remote location.
+FR-38	Essential	The solution must support organisation design reporting including vacancy management reporting, occupancy management reporting, headcount and FTE reporting, organisational structure reporting and establishment management reporting with a consolidated view across organisational units, jobs, positions, locations, concurrent employment and key employee information.
+Max Rounds: 80
+First Speaker: hugging
+================================================================================
+
+================================================================================
+Round 1 - Writer
+================================================================================
+The HCMS Technical Overview details the Department of Education's new platform, built on two core components: the SAP platform and the Microsoft Fabric-based HCMS HR Resource Group (HR RG).
+
+### SAP Platform
+- **SAP SuccessFactors**: Core HR functions, including Employee Central, Payroll, Recruitment, and Onboarding.
+- **SAP Business Technology Platform (BTP)**: Enables API-based communication, identity federation, and extensibility for SAP modules.
+- **SAP Integration Suite**: Facilitates data exchange between SAP components and external platforms like Microsoft Fabric.
+- **SAP Data Sphere**: Harmonizes HR and payroll data from SAP sources, preparing it for the HR RG.
+- **SAP ALM (Application Lifecycle Management)**: Oversees testing, change control, and release documentation for SAP components.
+- **SAP Build Apps**: Supports low-code development of custom HR workflow extensions.
+- **OpenText Extended ECM for SAP SuccessFactors**: Manages document generation and storage for employment records.
+- **OpenText InfoArchive**: Planned for long-term archiving of historical HR and payroll documents from retired systems.
+- **Joule**: Provides AI-driven analytics and insights within the HR interface.
+- **Signavio**: Assists with process analysis.
+- **SAP WalkMe**: Enhances user experience with guided onboarding and digital adoption tools.
+
+### Microsoft Azure Technologies
+- **Microsoft Fabric-based HCMS HR Resource Group (HR RG)**: Central data repository serving as the master data management (MDM) layer and "golden record" for HR and payroll data.
+- **Medallion Architecture**: Organizes the HR RG into bronze, silver, and gold layers for data ingestion, staging, and business-ready datasets.
+- **Azure DataHub**: Manages data ingestion into the HR RG.
+- **Dataflows and Notebooks**: Perform data transformation within Fabric.
+- **Terraform and Azure DevOps CI/CD Pipelines**: Automate and provision HR RG infrastructure.
+- **Microsoft Purview**: Handles data classification, lineage, and metadata.
+- **Microsoft Sentinel**: Planned as the monitoring solution for audit trails and alerts, replacing Splunk.
+- **Power BI Gateway (On-Prem Gateway)**: Supported legacy data ingestion during the proof-of-concept phase.
+
+### Downstream Systems
+The HCMS integrates with downstream systems sourcing HR data from the HR RG, including:
+- CIS
+- IAM
+- Alloc8
+- SBS
+- OneSchool
+
+---
+
+### Data Flow and Integration
+
+#### 1. Transformation Logic: SAP Data Sphere vs. Microsoft Fabric
+- **SAP Data Sphere**: Focuses on SAP-specific data harmonization and modeling for HR and payroll, delivering business-ready data to the HR RG.
+- **Microsoft Fabric Dataflows**: Handles general-purpose data transformation, including cleansing, staging, and enrichment, following the Medallion Architecture. Processes data from SAP and other enterprise sources.
+- **Usage**: SAP Data Sphere is used for SAP-specific transformations, while Fabric handles broader data processing and integration.
+
+#### 2. Data Synchronization Failure
+- **SAP Integration Suite**: Monitors and logs data exchange between SAP and Fabric.
+- **Azure DevOps/Terraform**: Automates ingestion jobs and flags failures for resolution.
+- **Recovery and Reconciliation**:
+  - **Alerting**: Splunk (and later Microsoft Sentinel) triggers alerts for failures.
+  - **Monitoring**: Dashboards track integration flow status and discrepancies.
+  - **Troubleshooting**: Logs identify issues such as network errors, API limits, or data format problems.
+  - **Re-execution**: Failed data batches are reprocessed based on the issue type.
+  - **Reconciliation**: Automated or manual processes compare SuccessFactors data with the HR RG to ensure accuracy, especially for critical data like payroll.
+
+#### 3. Real-Time vs. Batch Data Updates
+- **Batch Updates**: Used for large, less time-sensitive data (e.g., end-of-month payroll entries).
+- **Real-Time Updates**: Applied to critical events (e.g., hires, terminations) using APIs or change data capture (CDC) mechanisms for near-real-time ingestion.
+
+---
+
+### Governance and Compliance
+
+#### 1. Data Lineage and Audit Trails
+- **Microsoft Purview**: Tracks data lineage, classification, and metadata within Fabric.
+- **SAP ALM and Integration Suite Logs**: Provide audit trails for data changes within SAP.
+- **End-to-End Traceability**: Combines SAP logs and Purview lineage tracking for full auditability from source to final dataset.
+
+#### 2. Queensland Government Compliance Requirements
+- **Hybrid Architecture**: Combines SAP capabilities with Azure scalability, aligning with Queensland Government Enterprise Architecture (QGEA) standards, including IS18:2018 for data security and interoperability.
+- **Data Sovereignty**: Ensures sensitive HR data remains within Australian Azure regions, meeting local requirements.
+- **Vendor Choice**: Avoids vendor lock-in by leveraging best-of-breed services.
+
+#### 3. Microsoft Purview Across SAP-to-Fabric Boundary
+- **Purview's Role**: Tracks data lineage within Fabric.
+- **Cross-Boundary Lineage**: Relies on integration pipeline configurations to document SAP as the data source.
+
+---
+
+### Operational and Performance
+
+#### 1. Data Latency Requirements
+- **Monitoring**: SAP Integration Suite and Azure Monitor detect latency issues.
+- **Latency Tolerance**: Near-real-time updates (e.g., sub-5 minutes) for critical events; batch transfers for less time-sensitive data.
+
+#### 2. Peak Load Handling
+- **SAP Scalability**: SuccessFactors supports high-volume workloads like payroll processing.
+- **Azure Elasticity**: Fabric and DataHub dynamically scale resources during peak loads, such as data migration or payroll cycles.
+- **Parallel Payroll Run Testing (PPRT)**: Validates system performance under peak conditions.
+
+#### 3. Failover Strategy
+- **SAP Platform**: Provides high availability and disaster recovery across multiple regions.
+- **Azure Components**: Designed for high availability with geo-redundancy and Azure Site Recovery.
+- **Hybrid Failover**: Coordinates failover plans for SAP and Azure components.
+
+---
+
+### Future State
+
+#### 1. OpenText InfoArchive Activation
+- **Triggers**: Activated for archiving historical data from the decommissioned TSS platform.
+- **Migration Strategy**: Extracts data from TSS and ingests it into InfoArchive using tools like OpenText Migrate.
+
+#### 2. SAP WalkMe and Microsoft Fabric Integration
+- **WalkMe's Role**: Enhances user experience within SAP applications.
+- **Integration**: WalkMe does not directly integrate with Fabric. Reporting and analytics are delivered via Power BI, while WalkMe guides users through SAP interfaces.
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 1
+Total Characters: 6640

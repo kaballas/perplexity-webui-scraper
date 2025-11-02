@@ -10,6 +10,7 @@ from httpx import Client, Timeout
 from orjson import loads
 
 # Local modules
+from .logger import get_logger, log_request_details, log_response_details
 from .models import ModelBase, ModelType
 from .utils import AskCall, CitationMode, SearchFocus, SearchResultItem, SourceFocus, TimeRange, format_citations
 
@@ -24,6 +25,10 @@ class Perplexity:
         Args:
             session_token: The session token (`__Secure-next-auth.session-token` cookie) to use for authentication.
         """
+
+        self.logger = get_logger()
+        self.logger.info("Initializing Perplexity client")
+        self.logger.debug(f"Session token provided: {'***' + session_token[-8:] if len(session_token) > 8 else '[MASKED]'}")
 
         self._headers: dict[str, str] = {
             "Accept": "text/event-stream, application/json",
@@ -47,7 +52,12 @@ class Perplexity:
         self._max_files: int = 30
         self._max_file_size: int = 50 * 1024 * 1024
 
+        self.logger.debug(f"Client configured with timeout: 1800s, max files: {self._max_files}, max file size: {self._max_file_size / (1024*1024)}MB")
+        self.logger.info("Perplexity client initialization completed")
+
     def reset_response_data(self) -> None:
+        if hasattr(self, 'logger'):
+            self.logger.debug("Resetting response data")
         self.title = None
         self.answer = None
         self.chunks = []
@@ -56,69 +66,109 @@ class Perplexity:
         self.conversation_uuid = None
         self.raw_data = {}
 
-    @staticmethod
-    def _extract_json_line(line: str | bytes) -> dict[str, Any] | None:
-        if isinstance(line, bytes):
-            return loads(line[6:]) if line.startswith(b"data: ") else None
-        else:
-            return loads(line[6:]) if line.startswith("data: ") else None
+    def _extract_json_line(self, line: str | bytes) -> dict[str, Any] | None:
+        try:
+            if isinstance(line, bytes):
+                if line.startswith(b"data: "):
+                    result = loads(line[6:])
+                    self.logger.debug(f"Extracted JSON from bytes line: {str(result)[:200]}{'...' if len(str(result)) > 200 else ''}")
+                    return result
+                else:
+                    return None
+            else:
+                if line.startswith("data: "):
+                    result = loads(line[6:])
+                    self.logger.debug(f"Extracted JSON from string line: {str(result)[:200]}{'...' if len(str(result)) > 200 else ''}")
+                    return result
+                else:
+                    return None
+        except Exception as e:
+            self.logger.warning(f"Failed to extract JSON from line: {e}")
+            return None
 
     def validate_files(self, files: str | PathLike | list[str | PathLike] | None) -> list[dict[str, str | int | bool]]:
+        self.logger.debug(f"Starting file validation for input: {type(files).__name__}")
+
         if files is None:
             files = []
+            self.logger.debug("No files provided")
         elif isinstance(files, (str, PathLike)):
             files = [Path(files).resolve().as_posix()] if files else []
+            self.logger.debug(f"Single file path converted to list: {files}")
         elif isinstance(files, list):
+            original_count = len(files)
             files = list(
                 dict.fromkeys(Path(item).resolve().as_posix() for item in files if item and isinstance(item, (str, PathLike)))
             )
+            self.logger.debug(f"File list processed: {original_count} -> {len(files)} files (duplicates removed)")
         else:
             files = []
+            self.logger.warning(f"Invalid file input type {type(files)}, defaulting to empty list")
 
         if len(files) > self._max_files:
+            self.logger.error(f"Too many files: {len(files)} > {self._max_files}")
             raise ValueError(f"Too many files: {len(files)}. Maximum allowed is {self._max_files} files.")
 
         result = []
+        self.logger.debug(f"Validating {len(files)} files")
 
-        for file_path in files:
+        for i, file_path in enumerate(files):
+            self.logger.debug(f"Validating file {i+1}/{len(files)}: {file_path}")
             try:
                 path_obj = Path(file_path)
 
                 if not path_obj.exists():
+                    self.logger.error(f"File not found: {file_path}")
                     raise FileNotFoundError(f"File not found: {file_path}")
 
                 if not path_obj.is_file():
+                    self.logger.error(f"Path is not a file: {file_path}")
                     raise ValueError(f"Path is not a file: {file_path}")
 
                 file_size = path_obj.stat().st_size
+                self.logger.debug(f"File size: {file_size} bytes ({file_size / (1024*1024):.2f} MB)")
 
                 if file_size > self._max_file_size:
                     size_mb = file_size / (1024 * 1024)
+                    self.logger.error(f"File too large: {file_path} ({size_mb:.1f}MB)")
                     raise ValueError(f"File '{file_path}' exceeds 50MB limit: {size_mb:.1f}MB")
 
                 if file_size == 0:
+                    self.logger.error(f"Empty file: {file_path}")
                     raise ValueError(f"File is empty: {file_path}")
 
                 mimetype, _ = guess_type(file_path)
                 mimetype = mimetype or "application/octet-stream"
+                is_image = mimetype.startswith("image/")
 
-                result.append({
+                self.logger.debug(f"File details - MIME: {mimetype}, Is image: {is_image}")
+
+                file_info = {
                     "path": file_path,
                     "size": file_size,
                     "mimetype": mimetype,
-                    "is_image": mimetype.startswith("image/"),
-                })
+                    "is_image": is_image,
+                }
+                result.append(file_info)
+                self.logger.debug(f"File validated successfully: {file_path}")
 
             except (FileNotFoundError, PermissionError) as e:
+                self.logger.error(f"Access error for file '{file_path}': {e}")
                 raise ValueError(f"Cannot access file '{file_path}': {str(e)}") from e
             except OSError as e:
+                self.logger.error(f"OS error for file '{file_path}': {e}")
                 raise ValueError(f"File system error for '{file_path}': {str(e)}") from e
             except Exception as e:
+                self.logger.error(f"Unexpected error processing file '{file_path}': {e}")
                 raise ValueError(f"Unexpected error processing file '{file_path}': {str(e)}") from e
 
+        self.logger.info(f"File validation completed: {len(result)} files validated successfully")
         return result
 
     def upload_file(self, file_data: dict[str, str | int | bool]) -> str:
+        file_path = file_data["path"]
+        self.logger.info(f"Starting file upload for: {file_path}")
+
         try:
             json_data = {
                 "filename": file_data["path"],
@@ -128,6 +178,10 @@ class Perplexity:
                 "force_image": file_data["is_image"],
             }
 
+            self.logger.debug(f"Upload request data: {json_data}")
+            log_request_details(self.logger, "POST", "https://www.perplexity.ai/rest/uploads/create_upload_url",
+                              self._headers, json_data)
+
             response = self._client.post(
                 "https://www.perplexity.ai/rest/uploads/create_upload_url",
                 headers=self._headers,
@@ -136,19 +190,27 @@ class Perplexity:
             )
 
             response.raise_for_status()
+            log_response_details(self.logger, response.status_code)
 
             response_data = response.json()
+            self.logger.debug(f"Upload response received: {response_data}")
+
             upload_url = response_data.get("s3_object_url")
 
             if not upload_url:
+                self.logger.error(f"No upload URL returned for file: {file_path}")
                 raise ValueError(f"Upload failed for '{file_data['path']}': No upload URL returned from server")
 
+            self.logger.info(f"File upload successful for: {file_path}")
+            self.logger.debug(f"Upload URL obtained: {upload_url[:50]}...")
             return upload_url
 
         except Exception as e:
             if hasattr(e, "response") and hasattr(e.response, "status_code"):
+                self.logger.error(f"HTTP error during upload for '{file_path}': {e.response.status_code} - {str(e)}")
                 raise ValueError(f"Upload failed for '{file_data['path']}': HTTP {e.response.status_code} - {str(e)}") from e
             else:
+                self.logger.error(f"General error during upload for '{file_path}': {str(e)}")
                 raise ValueError(f"Upload failed for '{file_data['path']}': {str(e)}") from e
 
     def _prepare_json_data(
@@ -164,20 +226,33 @@ class Perplexity:
         timezone: str | None,
         coordinates: tuple[float, float] | None,
     ) -> dict[str, Any]:
+        self.logger.info("Preparing request data")
+        self.logger.debug(f"Query: {query[:100]}{'...' if len(query) > 100 else ''}")
+        self.logger.debug(f"Model: {model._get_identifier()}, Mode: {model._get_mode()}")
+        self.logger.debug(f"Search focus: {search_focus.value}, Time range: {time_range.value}")
+        self.logger.debug(f"Language: {language}, Timezone: {timezone}")
+        self.logger.debug(f"Save to library: {save_to_library}, Coordinates: {coordinates}")
+
         validated_files = self.validate_files(files)
         file_urls = []
 
         if validated_files:
-            for file_data in validated_files:
+            self.logger.info(f"Processing {len(validated_files)} files for upload")
+            for i, file_data in enumerate(validated_files):
+                self.logger.debug(f"Uploading file {i+1}/{len(validated_files)}")
                 try:
                     upload_url = self.upload_file(file_data)
                     file_urls.append(upload_url)
                 except ValueError as e:
+                    self.logger.error(f"File upload failed: {str(e)}")
                     raise ValueError(f"File upload error: {str(e)}") from e
+        else:
+            self.logger.debug("No files to upload")
 
         sources = [source_focus.value] if isinstance(source_focus, SourceFocus) else [s.value for s in source_focus]
+        self.logger.debug(f"Source focus processed: {sources}")
 
-        return {
+        json_data = {
             "params": {
                 "attachments": file_urls,
                 "language": language,
@@ -204,31 +279,56 @@ class Perplexity:
             "query_str": query,
         }
 
+        self.logger.debug(f"Prepared request JSON (params only): {json_data['params']}")
+        self.logger.info("Request data preparation completed")
+        return json_data
+
     def _process_data(
         self,
         data: dict[str, Any],
     ) -> None:
+        self.logger.debug(f"Processing incoming data chunk: {list(data.keys())}")
+
         if self.conversation_uuid is None and "backend_uuid" in data:
             self.conversation_uuid = data["backend_uuid"]
+            self.logger.info(f"Conversation UUID established: {self.conversation_uuid}")
 
         if "text" in data:
-            json_data = loads(data["text"])
+            self.logger.debug("Processing text data from response")
+            try:
+                json_data = loads(data["text"])
+                self.logger.debug(f"Parsed JSON data type: {type(json_data)}")
+            except Exception as e:
+                self.logger.error(f"Failed to parse JSON from text data: {e}")
+                return
+
             answer_data = {}
 
             if isinstance(json_data, list):
-                for item in json_data:
-                    if item.get("step_type") == "FINAL":
+                self.logger.debug(f"Processing list with {len(json_data)} items")
+                for i, item in enumerate(json_data):
+                    step_type = item.get("step_type")
+                    self.logger.debug(f"Item {i}: step_type = {step_type}")
+
+                    if step_type == "FINAL":
+                        self.logger.info("Found FINAL step, processing answer content")
                         raw_content = item.get("content", {})
                         answer_content = raw_content.get("answer")
 
                         if isinstance(answer_content, str) and match(r"^\{.*\}$", answer_content):
-                            answer_data = loads(answer_content)
+                            self.logger.debug("Answer content appears to be JSON, parsing")
+                            try:
+                                answer_data = loads(answer_content)
+                            except Exception as e:
+                                self.logger.warning(f"Failed to parse answer JSON: {e}")
+                                answer_data = raw_content
                         else:
                             answer_data = raw_content
 
                         self._update_response_data(data.get("thread_title"), answer_data)
                         break
             elif isinstance(json_data, dict):
+                self.logger.debug("Processing dict data directly")
                 self._update_response_data(data.get("thread_title"), json_data)
 
     def _update_response_data(
@@ -236,16 +336,30 @@ class Perplexity:
         title: str | None,
         answer_data: dict[str, Any],
     ) -> None:
+        self.logger.debug(f"Updating response data with title: {title}")
+        self.logger.debug(f"Answer data keys: {list(answer_data.keys()) if answer_data else 'None'}")
+
         self.title = title
+
+        # Process search results
+        web_results = answer_data.get("web_results", [])
+        self.logger.debug(f"Processing {len(web_results)} web results")
+
         self.search_results = [
             SearchResultItem(title=r.get("name"), snippet=r.get("snippet"), url=r.get("url"))
-            for r in answer_data.get("web_results", [])
+            for r in web_results
             if isinstance(r, dict)
         ]
-        self.answer = format_citations(self._citation_mode, answer_data.get("answer"), self.search_results)
+
+        # Process answer and chunks
+        raw_answer = answer_data.get("answer")
+        self.answer = format_citations(self._citation_mode, raw_answer, self.search_results)
         self.chunks = answer_data.get("chunks", [])
         self.last_chunk = self.chunks[-1] if self.chunks else None
         self.raw_data = answer_data
+
+        self.logger.debug(f"Response updated - Answer length: {len(self.answer) if self.answer else 0}, " +
+                         f"Chunks: {len(self.chunks)}, Search results: {len(self.search_results)}")
 
     def ask(
         self,
@@ -281,6 +395,10 @@ class Perplexity:
             AskCall object, which can be used to retrieve the response directly or stream it.
         """
 
+        self.logger.info(f"Starting ask request with query: {query[:50]}{'...' if len(query) > 50 else ''}")
+        self.logger.debug(f"Ask parameters - Citation mode: {citation_mode.value}, Model: {model}, " +
+                         f"Search focus: {search_focus.value}, Source focus: {source_focus}")
+
         self._citation_mode = citation_mode
 
         json_data = self._prepare_json_data(
@@ -296,4 +414,5 @@ class Perplexity:
             coordinates,
         )
 
+        self.logger.info("Ask request prepared, returning AskCall object")
         return AskCall(self, json_data)

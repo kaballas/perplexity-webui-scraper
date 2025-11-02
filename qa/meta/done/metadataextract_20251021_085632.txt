@@ -1,0 +1,120 @@
+# HCMS Technical Overview - Comprehensive Notes from Debate
+
+## Executive Summary
+The Queensland Department of Education's Human Capital Management System (HCMS) represents a critical transformation initiative replacing a 28-year-old legacy TSS (COBOL/Oracle-based) system with a modern hybrid architecture leveraging SAP SuccessFactors and Microsoft Azure technologies. The implementation targets November 2025 for production deployment with full enablement by mid-2026.
+
+## Core Technical Architecture
+
+### SAP Technology Stack
+- **SuccessFactors Modules**: EC, ECP, Recruiting, Onboarding 2.0
+- **SAP BTP**: IAS/IPS, Workflow Management, Event Mesh
+- **Integration Suite**: CPI/IC for system connectivity
+- **Data Sphere**: Central data management and analytics
+- **ALM**: Application Lifecycle Management
+- **Additional Components**: Signavio, Build Apps, Joule, WalkMe
+
+### Content & Records Management
+- **OpenText xECM**: SAP-integrated content management
+- **OpenText InfoArchive**: Azure-hosted long-term retention
+
+### Azure/Microsoft Fabric Layer
+- **HR Resource Group**: Medallion architecture (Bronze/Silver/Gold)
+- **Azure DataHub**: Primary data ingestion
+- **Microsoft Fabric**: Analytics and reporting platform
+- **Azure DevOps**: CI/CD pipeline management
+- **Terraform IaC**: Infrastructure as Code
+- **Microsoft Purview**: Data governance and classification
+
+## Integration Architecture Framework
+
+### System Integration Scope
+- **46+ Downstream Systems**: Including OneSchool, CIS, IAM, SBS
+- **Legacy Migration**: TSS to SAP SuccessFactors/Azure transition
+- **Real-time Data Flows**: SAP ↔ Azure connectivity
+- **Document Management**: xECM ↔ InfoArchive workflows
+
+### Integration Patterns
+- **API-based**: SAP Integration Suite to Azure DataHub
+- **Batch Processing**: Legacy TSS data ingestion
+- **Real-time Synchronization**: Cross-platform connectivity
+- **Medallion Architecture**: Raw → Cleansed → Business-ready data transformation
+
+## Implementation Strategy & Timeline
+
+### Phased Approach
+1. **Foundation Setup**: Core infrastructure and connectivity
+2. **Integration Development**: API certificates, monitoring, and connectivity
+3. **Core Integration**: Data flows and error handling
+4. **Testing and Optimization**: PPRT framework implementation
+5. **Production Deployment**: Go-live and documentation
+6. **Full Enablement**: Complete system transition by mid-2026
+
+### Critical Cutover Strategy
+- **Early HR RG Implementation**: Essential for data migration and legacy transition
+- **Parallel Payroll Runs**: TSS vs. SAP ECP reconciliation validation
+- **Golden Record Strategy**: HR RG as master data source for EDP and downstream systems
+
+## Security & Compliance Framework
+
+### Governance Standards
+- **IS18:2018**: Information security management
+- **IPOLA**: Identify, Protect, Observe, Alert framework
+- **QGEA**: Queensland Government Enterprise Architecture alignment
+
+### Identity Management
+- **Multi-layered Identity**: Ping Federation/Entra ID integration
+- **SAP IAS/IPS**: Identity authentication and provisioning
+- **RBAC and MFA**: Access control implementation
+- **Federated Identity**: Seamless cross-platform integration
+
+## Risk Management & Mitigation
+
+### Key Risk Areas
+- **Legacy Logic Loss**: COBOL reverse engineering through Fabric Notebooks
+- **Data Divergence**: SAP Data Sphere as canonical data layer
+- **Cutover Complexity**: Early HR RG implementation strategy
+- **Security Configuration**: IPOLA alignment with Purview controls
+
+### Critical Dependencies
+1. **Integration Point Validation**: Complete mapping between SAP, Azure, and legacy systems
+2. **SuccessFactors Module Licensing**: All required modules must be provisioned
+3. **Downstream Integration Documentation**: 46+ integrations must be documented
+4. **WRICEF Prioritization**: Complete item list with functional area owners
+
+## DevOps & Lifecycle Management
+
+### CI/CD Framework
+- **Azure DevOps**: End-to-end pipeline management
+- **Terraform IaC**: Infrastructure automation
+- **SAP ALM Integration**: Application lifecycle coordination
+- **Monitoring**: Splunk/Sentinel operational visibility
+
+## Current Critical Items Requiring Attention
+
+### High-Priority Dependencies
+- **Integration Mapping Validation**: All SAP, Azure, and legacy system connections
+- **SuccessFactors Module Provisioning**: Complete licensing and configuration
+- **Downstream System Agreements**: 46+ integration specifications
+- **Security Framework Implementation**: Compliance validation and controls
+
+### Blocking Issues Identified
+- Integration dependency documentation (severity: high, blocking: true)
+- Data migration requirements mapping to SAP and Azure components
+- Downstream integration agreements in Solution Design
+- Legacy TSS migration requirements validation
+
+## Strategic Recommendations
+
+### Immediate Actions
+1. **Validate All Integration Points**: Ensure complete mapping between all systems
+2. **Document Downstream Integrations**: Formalize agreements for all 46+ systems
+3. **Complete SuccessFactors Licensing**: Ensure all required modules are provisioned
+4. **Establish WRICEF Ownership**: Assign owners to all functional area requirements
+
+### Long-term Considerations
+- **Operational Excellence**: Focus on monitoring, maintenance, and optimization
+- **Scalability Planning**: Ensure architecture supports future growth requirements
+- **Compliance Continuity**: Maintain ongoing governance and security standards
+- **Knowledge Transfer**: Ensure institutional knowledge retention throughout transition
+
+This comprehensive technical overview provides the foundation for understanding the HCMS program's complexity, scope, and implementation requirements within the defined technology stack, emphasizing the critical path items that require immediate attention for successful delivery.

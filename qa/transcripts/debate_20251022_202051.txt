@@ -1,0 +1,340 @@
+================================================================================
+Date: 2025-10-22 20:20:52
+TASK: HCMS Project – SuccessFactors ECP
+
+SPECIFICATION
+E003 – Leave Balance Overview
+Department of Education Queensland
+
+
+Review/Approvals
+
+Date	Role	Name
+2/6/2025	Author	Murray Burdan
+	SAP Solution Lead or Architect	Nigel Moore
+
+
+
+
+
+Versions
+
+Version
+Date	Name	Alteration Reason
+1	1/8/2025	Murray Burdan	Initial Version
+1.1	21/8/25	Murray Burdan	BTP Integration for Work Hours Change (Award)
+
+
+
+ 
+Table of Content
+1	Introduction	3
+1.1	Overview	3
+1.2	Assumptions	3
+1.3	Dependencies	4
+1.4	Further Information	4
+1.5	Concurrent Employment in SuccessFactors and ECP	4
+2	Design	5
+2.1	High Level Design	5
+2.2	Key Components	5
+2.3	Data Model	6
+2.4	Functional Flows	6
+2.4.1	Leave Balances in BTP	6
+2.5	BTP Application Validations	7
+2.6	BTP Application UI Mock Screens	7
+2.7	BTP Integration for Leave Balance Cross Counting Conversion on Award Level Change	7
+2.8	Authorizations	8
+3	Usage	10
+3.1	Cutover Considerations	10
+Appendix A -	Custom objects created in ECP/SuccessFactors/BTP	11
+1.	Custom objects	11
+Appendix B -	Acronyms & Abbreviations	12
+Appendix C -	Example OData Calls	13
+Appendix D -	Example Concurrent Employment	15
+
+1	Introduction
+1.1	Overview
+Current Department of Education (DoE) System
+In the existing DoE system, leave balances are shown at the employee level, aggregating all entitlements, accruals, and usages for an individual across multiple roles.  This consolidated view simplifies tracking for leave types like recreation leave, sick leave, etc
+Balances are also converted when an award change occurs to an employment in the TSS system.
+
+SuccessFactors Standard Behaviour
+In contrast, SuccessFactors handles leave balances at an assignment level, managing independent time accounts, accrual rules, and holiday calendars for each job or concurrent employment.  For example, an employee with multiple roles (e.g., teacher and administrator) has separate entitlements per assignment, with absences booked accordingly to ensure accuracy and payroll integration.  This granularity supports job change adjustments and negative balance restrictions but requires navigating separate views in the Time Off module, which can complicate user experience compared to aggregated systems.
+
+Required Enhancement for Compatibility
+The solution requires employees with concurrent employment to view all assignment-linked leave balances on one screen, bridging the gap between DoE's employee-level view and SuccessFactors' assignment granularity.  A BTP Application fills this by retrieving and consolidating data via SuccessFactors APIs (e.g., REST for timeAccountBalances) in real-time.  Built on SAP BTP with CAP for backend and UI5 for frontend, it offers unified dashboards, secure permissions, and features like notifications or transfers, enhancing compatibility without altering core configurations.
+For the Balances to be converted on an award change then an event driven architecture is required to fire a BTP integration to adjust the required balances.
+
+1.2	Assumptions
+To maintain flexibility, the specification is designed to be language-agnostic, supporting various frameworks available on the SAP Business Technology Platform (BTP).  The Department of Education (DoE) should collaborate with their Service Integrator to select the most suitable framework.  For optimal integration and user experience, we recommend adopting the Cloud Application Programming Model (CAP) with an SAPUI5/Fiori-based user interface.
+DoE should be able to use the standard SuccessFactors leave applications as a fallback position – therefore the BTP application must use the standard APIs and processes.
+
+1.3	Dependencies
+None
+
+1.4	Further Information
+OData API for employee time account balances.
+https://help.sap.com/docs/successfactors-platform/sap-successfactors-api-reference-guide-odata-v2/emptimeaccountbalance
+SuccessFactors REST API Reference Time Balance - It explains the use of the REST APIs for Time Off and how to permission correctly to allow the data to be retrieved correctly.
+https://help.sap.com/docs/successfactors-time-tracking/implementing-time-management-in-sap-successfactors-083e8bcccdbc40249f82a5e4b1efcfdc/rest-api-time-account-balances.
+
+1.5	Concurrent Employment in SuccessFactors and ECP
+In SuccessFactors Employee Central, concurrent employments for a single person are identified by:
+o	A single personIdExternal (unique to the person across all employments).
+o	Multiple userId values (one for each employment – also known as assignment).
+When this data is replicated to SAP ECP via Point-to-Point (P2P) replication or another integration method, each userId typically maps to a unique Personnel Number (PERNR) in ECP.
+The Concurrent Employment feature in SAP ECP allows a single person to have multiple PERNRs, linked by a Central Person (CP) object, which corresponds to the personIdExternal from SuccessFactors.
+Using principal propagation between SuccessFactors and BTP the current users personIdExternal should be known via Single Sign On.
+
+
+
+2	Design
+2.1	High Level Design
+To provide a seamless experience for employees to view leave balances across multiple assignments, a custom SAP BTP application retrieves data from SuccessFactors using OData APIs and presents it in a unified UI. The process is designed to align with the Department of Education's need for employee-level balance visibility while leveraging SuccessFactors' assignment-level data structure.
+1.	Fetch Assignments: Get personIdExternal from user credentials; query EmpEmployment for assignments, including userId, assignmentId, employmentId, and job details.
+2.	Fetch Balances: Query the timeAccountBalance REST endpoint using assignmentId for each assignment; use $at for past/current; for future projections over 12 months, calculate in BTP using daily accrual rates from the TimeProfile, adding estimated accruals.
+3.	Display: Consolidate balances in SAPUI5-based UI with dashboards and filters for easy viewing.
+
+
+Leave crosss counting conversion happens when an employee changes their planned working hours via an award change on an assignment.  This can be achieved using the SAP BTP Advaned Event Mesh service to trigger an Integration.
+2.2	Key Components
+The system comprises the following main components:
+•	SuccessFactors (SF) System:
+o	Source of truth for leave balances.
+o	Includes Employee Central (EC) for employment information and OData entities and REST endpoints for read operations.
+•	SAP BTP Platform:
+o	BTP Table/Database: Custom tables in SAP HANA on BTP to store time profiles and related time types, accrual estimations by time type for projections over 12 months.    Tables need to be designed for the conversion rules for DoE so Leave Balance conversion can occur in BTP. (Note: a utility BTP application may be required for showing how the conversion occurs and the calculations are made).  If there are audit requirements for the conversion then an additional table and step is required in the conversion process.
+o	BTP Integration Flows: An integration process (e.g., using SAP Cloud Integration) that fetches time profiles and time types from SF and updates the BTP tables.  Flow to implement the leave balances cross counting conversions is also required.
+o	Fiori Frontend Application: A SAPUI5/Fiori app hosted on BTP for user interactions, including input field and validation logic.
+•	APIs and Interfaces:
+o	SF OData API/REST Endpoint: For reading leave balances in EC.
+
+2.3	Data Model
+Time Profile and Time Account Type Replication.
+The time profile and time account types will be used across
+The following OData entities/REST Endpoints can be called in SuccessFactors to return the required information.
+SF OData Entity	Key/Filter	Return	Notes
+PerEmail	emailAddress	personIdExternal	Fetch the employee level ID via authenticated employee.
+EmpEmployement	personIdExternal	userId, employmentId	Fetch the different assignments for the employee
+TimeAccountType		externalCode	The different AccountTypes for the Balance call.
+timeAccountBalances	asssignmentId, $at	Balances	Connection via OAuth2 but requires call at assignment level.
+
+
+2.4	Functional Flows
+2.4.1	Leave Balances in BTP
+•	UI Elements:
+•	Input field for selecting a projection date.
+•	List/Table of assignments with time account types (leave types) and balances in hours (per assignment).
+•	Process:
+1.	Start by fetching the personIdExternal for the current logged in user from the framework.
+2.	Next, fetch the current EmpEmployment records associated with that personIdExternal using an OData API call. This should return the UserId, while expanding the jobInfoNav entity and selecting details like Assignment ID, Job Title, Time Profile, FTE, End Date and Pay Scale Level.
+3.	For each employment, fetch the Time Account Types using the associated Time Profile (From the BTP tables to reduce API calls).
+4.	Default the application with the balances as at todays date but allow the user to select a projection date (current or future) to view their leave balance after the initial load.
+5.	Fetch the effective Leave Balances through the timeAccountBalances REST Endpoint, utilizing the assignmentId for each call.
+6.	If the selected date is in the future:
+a.	(If over 12months) Retrieve the daily accrual rate for each timeAccountType held in the BTP table.
+b.	Adjust the future date if the employment ends before the projection date.
+c.	Calculate the projected balance by adding the accrued leave (daily accrual rate × number of days from current date (+12 months) to selected date) to the balance returned from the timeAccountBalances.
+7.	If the selected date is the current date or up to 12 months in the future, use the balance from timeAccountBalances REST Endpoint passing the $at = selected date.
+8.	Finally, list the balances (current or projected) for display.
+
+2.5	BTP Application Validations
+Don’t allow the user to select a projection date in the past.
+Use REST Endpoint for up to 12 month projections then switch to BTP logic for determining projections past 12 months.
+
+2.6	BTP Application UI Mock Screens
+
+The leave type and assignment fields should be sortable.  To allow the end user to see their balances by different methods.
+
+2.7	BTP Integration for Leave Balance Cross Counting Conversion on Award Level Change
+Award Level Change Event Execution:
+•	Trigger: when an Award Level change occurs in the SuccessFactors EC system an intelligent service event is raised passing through the date of award change and the user id/assignment id.  The BTP Advanced Event Mesh (AEM) acts as an event broker and fires the BTP integration.
+•	Steps:
+o	If the date change is in the future, then it is saved into a BTP future events table.
+o	If the change is not in the future, then the Leave Balance Conversion integration is called
+Leave Balance Conversion Execution:
+•	Trigger: via the Award Change Event Integration or via a background job running over the BTP future events table when the change date is reached.
+•	Steps:
+o	Read the assignment standard weekly hours, award and required job info from the EmpJob OData entity for Date of change and the Day before.  If the planned hours value has not changed then exit the integration.
+o	Read the leave type (to be determined from workbooks) balances via REST API endpoint timeAccountBalances using the $at date of the day before the change and pass the assignment id.
+o	Determine the conversion rule for the leave type and award from and to.   Use the conversion rule to determine the correction that is required.
+o	Create a TimeAccountDetail record in SuccessFactors via OData V2 API for the source assignment: Set bookingType = "MANUAL_ADJUSTMENT", negative quantity (deduction)/positive quantity(addition), linked to the source timeAccountExternalCode.
+o	Use OData upsert operation (POST to /TimeAccountDetail) with required fields:
+	timeAccountExternalCode: ID of the time account. (This is taken from the timeAccountBalances data)
+	bookingDate: Old jobinfo Date.
+	quantity: Amount to adjust (positive or negative).
+	unit: "HOURS".
+	comment: "Balance Conversion Adjustment from BTP”
+•	API Authentication: Use OAuth or principal propagation from BTP to SuccessFactors.
+•	Error Handling: Log errors in BTP and push to the payroll admin team
+
+2.8	Authorizations
+The employees will require the API access to the specific OData entities.
+The BTP application will be available to all employees and is a read only application.
+SAP BTP applications are moving to an Authorization Management Service (AMS), restricting operations like Create is handled through a policy-based approach integrated into the CAP model.  The policy can be refined in the SAP Cloud Identity Service (SCI) console for attribute-based access control (ABAC) or role-based access control (RBAC). This ensures operations are restricted based on user roles, attributes, or instance-specific conditions, following the principle of least privilege.
+https://community.sap.com/t5/technology-blog-posts-by-sap/authorization-management-service-in-sap-cloud-identity-service/ba-p/13881014
+The BTP Integration OAuth user will be required to have access to all employees to be able to read the assignment leave balances.
+3	Usage
+3.1	Cutover Considerations
+The Leave Balances need to be loaded into EC against the assignments of the Employees.  This will require a mapping exercise to determine if the current incumbency records are a true concurrent assignment or require merging with an employee’s existing assignment.
+
+Appendix A -	Custom objects created in ECP/SuccessFactors/BTP
+1.	Custom objects
+System	Object Type	Object Description
+BTP	Application	Unified Leave Balances Application
+BTP	Entity/Data Model	Tables to store the time profile, time types, accrual approximations, conversion rules
+BTP	Integration	Leave balance cross counting conversion
+BTP	Event	Event to be raised to trigger the balance conversions from Award changes in SuccessFactors
+SuccessFactors	Event/Exit	Raise the BTP Event
+
+
+Appendix B -	Acronyms & Abbreviations
+
+Acronym	Definition
+EC	SuccessFactors Employee Central
+ECP	SuccessFactors Employee Central Payroll
+BTP	Business Technology Platform
+DoE	Department of Education
+CAP	Cloud Application Programming Model – Framework in BTP for cloud-native, enterprise grade applications.
+Fiori UI	A design system and set of guidelines for creating modern, consistent, and user-friendly applications.
+CRUD 	Create, Read, Update and Delete Actions
+SCI	SAP Cloud Identity Service
+RBAC	Role Based Access Control
+ABAC	Attribute Based Access Control
+AMS	Authorization Management Service
+
+
+
+Appendix C -	Example OData Calls
+Find the employments for an employee via personIdExternal and select the job title etc
+https://api10preview.sapsf.com/odata/v2/EmpEmployment?$filter=personIdExternal%20eq%20%277793211%27&$select=personIdExternal,userId,employmentId,jobInfoNav/jobTitle,jobInfoNav/payScaleLevel,jobInfoNav/timeTypeProfileCode&$expand=jobInfoNav&$format=json
+
+{  "d" : {  "results" : [ {
+"__metadata" : {
+"uri" : "https://api10preview.sapsf.com/odata/v2/EmpEmployment(personIdExternal='7793211',userId='7793211')", "type" : "SFOData.EmpEmployment"
+}, "personIdExternal" : "7793211", "userId" : "7793211", "employmentId" : "1046", "jobInfoNav" : {
+"results" : [
+{
+"__metadata" : {
+"uri" : "https://api10preview.sapsf.com/odata/v2/EmpJob(seqNumber=1L,startDate=datetime'2025-07-01T00:00:00',userId='7793211')", "type" : "SFOData.EmpJob"
+}, "timeTypeProfileCode" : "1", "jobTitle" : "Highly Accomplished Teacher", "payScaleLevel" : "AUS/12/Z1/A05/01"
+} ] }
+}, {
+"__metadata" : {
+"uri" : "https://api10preview.sapsf.com/odata/v2/EmpEmployment(personIdExternal='7793211',userId='1000265')", "type" : "SFOData.EmpEmployment"
+}, "personIdExternal" : "7793211", "userId" : "1000265", "employmentId" : "1127", "jobInfoNav" : {
+"results" : [
+{
+"__metadata" : {
+"uri" : "https://api10preview.sapsf.com/odata/v2/EmpJob(seqNumber=1L,startDate=datetime'2025-05-01T00:00:00',userId='1000265')", "type" : "SFOData.EmpJob"
+}, "timeTypeProfileCode" : "1", "jobTitle" : "Teacher (General)", "payScaleLevel" : "AUS/10/Z1/B02/01"
+} ] } } ] } }
+
+https://api.sap.com/products/SAPSuccessFactors/apis/all
+https://help.sap.com/doc/a7c08a422cc14e1eaaffee83610a981d/2505/en-US/SF_HCM_OData_API_DEV.pdf
+https://api10preview.sapsf.com/odata/v2/EmpTimeAccountBalance?$filter=userId eq '139' and timeAccountType in 'AL','LSL','LWP'&$format=json
+SAP Not 2966355 - Unable to fetch data on EmpTimeAccountBalance - OData API
+
+Appendix D -	Example Concurrent Employment
+Example in the IPS System
+
+
+
+
+https://api10preview.sapsf.com/odata/v2/EmpEmployment?$filter=userId eq '1000265'&$select=personIdExternal,userId,employmentId&$format=json
+https://api10preview.sapsf.com/odata/v2/EmpEmployment?$filter=personIdExternal eq '7793211'&$select=personIdExternal,userId,employmentId&$format=json
+{
+"d" : {
+"results" : [
+{
+"__metadata" : {
+"uri" : "https://api10preview.sapsf.com/odata/v2/EmpEmployment(personIdExternal='7793211',userId='7793211')", "type" : "SFOData.EmpEmployment"
+}, "personIdExternal" : "7793211", "userId" : "7793211", "employmentId" : "1046"
+}, {
+"__metadata" : {
+"uri" : "https://api10preview.sapsf.com/odata/v2/EmpEmployment(personIdExternal='7793211',userId='1000265')", "type" : "SFOData.EmpEmployment"
+}, "personIdExternal" : "7793211", "userId" : "1000265", "employmentId" : "1127"
+} ] } }
+
+
+Tadsk : Critique my work what did I miss?
+================================================================================
+
+================================================================================
+Task 1
+================================================================================
+Based on my analysis of your BTP application specification for E003 - Leave Balance Overview, here are the key areas that need attention:
+
+## Critical Missing Elements
+
+### 1. **Integration Dependencies & Architecture Gaps**
+- **Missing detailed integration mapping** with EC/ECP workflows (referenced in Context 0 as "evidence_gap")
+- No clear data flow diagram showing how BTP integrates with standard EC Time Off processes
+- Missing specification for how custom absence processes (Deferred, Purchase Leave) will integrate with your BTP solution
+- No mention of how this connects to the "Accrual Lookup Table" referenced in Context 0
+
+### 2. **Technical Architecture Concerns**
+- **No error handling strategy** for API failures or timeouts when calling SuccessFactors from BTP
+- Missing **caching strategy** - calling multiple APIs per user session could cause performance issues
+- No **data synchronization** plan between BTP tables and SuccessFactors changes
+- Missing **security architecture** details beyond basic OAuth (encryption, data at rest, audit logging)
+
+### 3. **Concurrency & Performance**
+- **No performance requirements** specified (response times, concurrent users, data volume)
+- Missing **load balancing** considerations for BTP application
+- No **fallback mechanism** if BTP application is unavailable
+
+## Design Gaps
+
+### 4. **Business Logic Incompleteness**
+- **Leave balance conversion rules** mentioned but not defined - what are the actual DoE conversion formulas?
+- No clear specification of **which leave types** should be consolidated vs. remain assignment-specific
+- Missing **business rules** for handling conflicting assignment end dates when projecting balances
+
+### 5. **User Experience & Accessibility**
+- **No accessibility compliance** mentioned (WCAG, screen readers)
+- Missing **mobile responsiveness** requirements
+- No **offline capability** consideration for remote users
+
+## Process & Governance Issues
+
+### 6. **Change Management**
+- **No testing strategy** defined (unit, integration, UAT, performance testing)
+- Missing **rollback plan** if the solution fails in production
+- No **monitoring and alerting** specifications
+
+### 7. **Data Management**
+- **No data retention policy** for BTP tables
+- Missing **backup and recovery** procedures
+- No **data privacy** considerations for storing leave data in BTP
+
+## Integration-Specific Issues
+
+### 8. **Event-Driven Architecture Gaps**
+- **Event mesh configuration** details missing (topics, subscriptions, retry logic)
+- No **dead letter queue** strategy for failed award change events
+- Missing **event ordering** guarantees when multiple changes occur
+
+### 9. **Reporting & Analytics**
+- No mention of how consolidated balances will feed into **standard SuccessFactors reporting**
+- Missing **audit trail** for balance conversions
+- No **integration with existing DoE reporting tools**
+
+## Recommendations
+
+1. **Create detailed integration flow diagrams** showing all touchpoints with EC/ECP
+2. **Define concrete conversion rules** with examples and test cases
+3. **Add performance SLAs** and stress testing requirements
+4. **Include security architecture** with penetration testing requirements
+5. **Define fallback strategies** when BTP service is unavailable
+6. **Add comprehensive error handling** and user notification mechanisms
+7. **Specify data governance** including retention and privacy compliance
+
+Your specification shows good understanding of the core problem but needs significant detail in the technical implementation, integration, and governance areas to be production-ready.
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 1
+Total Characters: 3590

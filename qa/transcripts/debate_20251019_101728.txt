@@ -1,0 +1,91 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 10:17:29
+Topic: ---
+
+## SAP SuccessFactors Onboarding 2H 2025 Preview Release Analysis
+
+### Executive Summary
+
+The 2H 2025 Preview Release (October 13, 2025) for SAP SuccessFactors Onboarding introduces critical issues affecting Custom MDF objects in rehire scenarios, e-signature workflows with "Click to Sign" functionality, and candidate initiation processes post-release. The Queensland Department of Education HCMS Programme faces significant operational risks related to document flow integrity, external user permissions, and Business Process Engine (BPE) stability that require immediate attention and implementation of documented workarounds.
+
+### Critical Issue Analysis
+
+#### Issue 1: Custom MDF Objects - Rehire Scenario Limitation (KBA 3669144)
+
+**Root Cause:** Standard product design constraints prevent Custom MDF object data collection during Configurable New Hire processes for rehire scenarios (both "Rehire on Old Employment" and "Rehire on New Employment").
+
+**Technical Impact:** Only non-effective dated Custom MDF objects are supported during Additional Data Collection steps, with standard MDFs displayed during data review for rehires. The system architecture restricts rehire templates from capturing custom metadata objects that would normally be available to new hire processes.
+
+**Business Process Implications:** Queensland Department of Education will experience data gaps for rehired employees requiring custom attribute collection, necessitating manual Custom Data Collection workflows as a workaround. This creates compliance and audit trail concerns for jurisdiction-specific data requirements.
+
+**Workaround Strategy:** Deploy Custom Data Collection (CDC) process as separate workflow step using ONB2DataCollectionConfig MDF generic object with business rule ONB2_DataCollectionConfigSelect to control UI item visibility. Configure multiple UI configurations with different lists targeting rehire populations specifically.
+
+#### Issue 2: E-Signature "Click to Sign" Application Error (KBA 3668178)
+
+**Root Cause:** Incorrect dimensional configurations for DocuSignSignHere and DocuSignDateSigned fields in document templates trigger ServerErrorException with null COSArray fieldAreaArray.
+
+**Technical Diagnosis:** Network developer tools reveal the error: `{"error": {"code": "ServerErrorException", "message": {"lang": "en-US", "value": "Cannot invoke \"org.apache.pdfbox.cos.COSArray.get(int)\" because \"fieldAreaArray\" is null"}}}`.
+
+**Document Flow Impact:** Complete e-Signature step failures prevent onboardee signature capture, blocking document flow completion and creating process bottlenecks. This affects both Adobe PDF and XDP format templates configured through Admin Center > Maintain Onboarding and Offboarding Document Templates.
+
+**Resolution Protocol:** Reconfigure document templates with standardized field dimensions: Width: 52.92mm, Height: 7.76mm for both signature and date fields. Upload corrected templates via Admin Center and restart affected onboarding processes to apply updated documents. Validate through Network tab in developer tools before production deployment.
+
+#### Issue 3: Candidate Initiation Failures Post-2H 2025 Release (KBA 3667207)
+
+**System Impact:** Candidates fail to successfully initiate onboarding processes following 2H 2025 release deployment on production environments (November 14-16, 2025).
+
+**Integration Dependencies:** This issue affects Recruiting-to-Onboarding integration points requiring SFAPI Retrieve Candidate Permission and OData API Candidate Export permissions for BPE Service Users. PFS (Platform Feature Settings) and DG (Dynamic Group) filter configurations impact external user role-based access patterns.
+
+**BPE Job Management Considerations:** Business Process Engine monitor processes may experience validation errors during candidate-to-onboardee transition workflows. Service user permissions for Process Management, Onboarding Update Permission, and Administrate Onboarding or Offboarding content are critical dependencies.
+
+### Metadata Object Configuration Analysis
+
+#### Custom MDF Task Linkage
+
+Custom MDF objects require explicit linkage to custom tasks through configuration in Admin Center with visibility controls defined via ONB2DataCollectionConfig generic object. The DEFAULT_DATA_COLLECTION_CONFIG external code provides baseline configuration that can be extended with multiple UI item configurations controlled by predefined business rules.
+
+#### Document Flow Step Configuration
+
+Document Flow utilizes three-step process architecture: PDF/XDP form creation, field mapping and signature assignment, and Assign Forms business rule configuration. Multiple document flows require business rule scenarios defined in Onboarding section with Process Variant step conditions determining form assignment logic.
+
+#### Onboarding Process Variant Manager
+
+Primary and Secondary New Hire Tasks steps now support standard and custom task associations as independent blocks within Process Variant Manager, enabling event-triggered task coordination alongside Document Flow blocks. This architectural change from 2H 2024 enables deeper customization but introduces complexity in dependency mapping.
+
+### Integration Dependency Mapping
+
+**BPE Service User Requirements:** OnboardingBPEServiceUser permission group requires comprehensive permissions including Manage Hires (Add New User, Rehire scenarios), Process Management, Recruiting Permissions (SFAPI, OData API), and Administrate Onboarding content. Target population must include External Onboarding User with Everyone (External Onboarding User) scope.
+
+**Role-Based Permission Architecture:** External user role-based permissions require DG filter configuration for Onboarding or Offboarding Process Trigger object permissions, with narrowed-down list access for rehire verification tasks. Permission group SAP_ONB2_RehireCoordinator determines ToDo tile visibility for rehire verification workflows.
+
+**Platform Feature Dependencies:** Business Process Engine and BPE in UI must be enabled in Provisioning > Company Settings along with Employee Central V2 activation (required even without EC license). Intelligent Services enablement via Upgrade Center rather than Provisioning ensures proper intelligent workflow integration.
+
+### Risk Assessment and Mitigation Strategies
+
+**Priority 1 - Critical:** E-signature document template validation across all templates before November 14-16 production release deployment. Implement automated dimensional validation scripts for all PDF/XDP templates in Admin Center inventory.
+
+**Priority 2 - High:** Establish Custom Data Collection fallback workflows for rehire scenarios with custom MDF requirements. Document business rule configurations for ONB2_DataCollectionConfigSelect with appropriate UI item lists for rehire populations.
+
+**Priority 3 - High:** Conduct comprehensive BPE Service User permission audit ensuring OnboardingBPEServiceUser group membership and role assignments meet documented requirements. Validate Process Management permissions for candidate initiation workflows before production cutover.
+
+**Priority 4 - Medium:** Implement regression testing framework covering Custom MDF object visibility, document flow business rule evaluation, and e-signature field rendering across supported browsers and devices.
+
+### Compliance and Audit Considerations
+
+Queensland Department of Education HCMS Programme must maintain comprehensive audit trails for rehire data collection workarounds, documenting Custom Data Collection process flows as compensating controls for Custom MDF rehire limitations. E-signature failure incidents require retention of Network tab error logs and document template version history for compliance validation. BPE Service User activity monitoring through BPE: Monitor Process interface enables process-level audit trail maintenance for candidate initiation workflows.
+
+### Actionable Recommendations
+
+1. **Immediate Action (Pre-Production):** Execute document template dimensional audit and correction cycle for all templates containing DocuSignSignHere and DocuSignDateSigned fields using 52.92mm x 7.76mm standard.
+
+2. **Configuration Requirement:** Deploy Custom Data Collection workflows with ONB2DataCollectionConfig configurations specific to rehire scenarios, testing business rule ONB2_DataCollectionConfigSelect evaluation logic.
+
+3. **Permission Validation:** Conduct OnboardingBPEServiceUser permission group review ensuring complete permission set coverage per documented requirements, including SFAPI Retrieve Candidate and OData API Candidate Export permissions.
+
+4. **Monitoring Protocol:** Establish BPE process monitoring dashboard tracking candidate initiation success rates, document flow completion metrics, and e-signature error rates post-production deployment.
+
+5. **Knowledge Transfer:** Document all workaround configurations, business rule logic, and service user permission mappings for Queensland Department of Education support team knowledge base.
+Max Rounds: 80
+First Speaker: hugging
+================================================================================

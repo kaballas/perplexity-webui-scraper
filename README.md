@@ -2,19 +2,6 @@
 
 This project provides an unofficial Python client library designed for programmatic interaction with Perplexity AI. It enables developers to access Perplexity's features by simulating communications with its web user interface's internal endpoints.
 
-## Installation
-
-You can install the library using UV (recommended):
-
-```bash
-uv add git+https://github.com/henrique-coder/perplexity-webui-scraper.git@main
-```
-
-Or using pip:
-
-```bash
-pip install git+https://github.com/henrique-coder/perplexity-webui-scraper.git@main
-```
 
 ## Requirements
 
@@ -62,6 +49,38 @@ with Live(Panel("", title="Waiting for answer", border_style="white"), refresh_p
     live.update(Panel(final_answer, title="Final answer", border_style="green"))
 ```
 
+## FastAPI Application
+
+This repository now exposes a FastAPI app that wraps the `Perplexity` client for HTTP access.
+
+1. Install the project (this pulls in FastAPI) and ensure `uvicorn` is available, e.g. `uv pip install uvicorn`.
+2. Set the `PERPLEXITY_SESSION_TOKEN` environment variable or provide the token per request.
+3. Start the API:
+
+```bash
+uvicorn perplexity_webui_scraper.api:app --reload
+```
+
+Available endpoints:
+
+- `GET /health` – simple readiness probe.
+- `POST /ask` – submits a query and waits for the full response.
+- `POST /ask/stream` – streams newline-delimited JSON chunks as the answer is generated.
+
+### CLI Client
+
+The repository includes a small command-line client (`api_client.py`) that talks to the FastAPI service.
+
+```bash
+# Ensure the API server is running locally on port 8000.
+python api_client.py "Explain what a chatbot is." --stream
+```
+
+Environment variables:
+
+- `PERPLEXITY_SESSION_TOKEN` – defaults for both the API server and the CLI if `--session-token` is omitted.
+- `PERPLEXITY_API_BASE_URL` – optional override of the API base URL for the CLI (defaults to `http://127.0.0.1:8000`).
+
 ## Important Disclaimers and Usage Guidelines
 
 Please read the following carefully before using this library:
@@ -71,5 +90,3 @@ Please read the following carefully before using this library:
 - **Risk and Responsibility:** You assume all risks associated with the use of this software. The maintainers of this project are not responsible for any direct or indirect consequences, disruptions, or potential issues that may arise from its use, including (but not limited to) any actions taken by Perplexity AI regarding your account.
 - **Compliance and Ethical Use:** Users are solely responsible for ensuring that their use of this library adheres to Perplexity AI's Terms of Service, Acceptable Use Policy, and any other relevant guidelines. This library should be used in a manner that respects Perplexity's infrastructure and does not constitute abuse (e.g., by making an excessive number of requests).
 - **Educational and Experimental Tool:** This library is provided primarily for educational and experimental purposes. It is intended to facilitate learning and exploration of programmatic interaction with web services. It is **not recommended for critical, production, or commercial applications** due to its inherent instability.
-
-By using this library, you acknowledge and agree to these terms.

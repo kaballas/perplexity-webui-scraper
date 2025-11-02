@@ -1,0 +1,230 @@
+# SAP SuccessFactors Metadata Extraction Report
+## HCMS Program - Queensland Department of Education
+
+### Executive Summary
+Based on the HCMS technical architecture, this metadata extraction report provides a comprehensive analysis of the SAP SuccessFactors metadata landscape, focusing on the core components within the hybrid SAP/Microsoft Azure ecosystem.
+
+### 1. Core SAP SuccessFactors Modules Metadata
+
+#### 1.1 Employee Central (EC) Metadata
+- **Primary Function**: Core HR master data management
+- **Data Model Type**: Object-oriented data model with temporal dependencies
+- **Key Objects**: Employee records, organizational units, job roles, job classifications
+- **Relationships**: Referential integrity maintained through temporal dependencies
+- **Workflows**: Integrated with payroll and external systems via Azure Data Services
+- **Business Rules**: Embedded within the object-oriented data model
+- **Dependencies**: Critical integration with Employee Central Payroll (ECP)
+
+#### 1.2 Employee Central Payroll (ECP) Metadata
+- **Primary Function**: Payroll engine and processing
+- **Integration Points**: SAP Data Sphere for data harmonization
+- **Output Types**: Payslips, deductions, leave balances, general ledger entries, ATO submissions
+- **Testing Framework**: Parallel Payroll Run Testing (PPRT) with TSS comparison
+- **Governance**: Managed through SAP ALM with variance tracking
+
+#### 1.3 Recruitment Module Metadata
+- **Component**: SAP SuccessFactors Recruiting
+- **Integration**: Through SAP BTP and Integration Suite
+- **Data Flow**: Bidirectional with HR Resource Group (HR RG)
+
+#### 1.4 Onboarding 2.0 Metadata
+- **Component**: SAP SuccessFactors Onboarding
+- **Integration**: API-based connectivity with downstream systems
+- **Data Model**: Temporal dependencies with Employee Central
+
+### 2. SAP Business Technology Platform (BTP) Metadata
+
+#### 2.1 Identity Authentication Service (IAS) / Identity Provisioning Service (IPS)
+- **Function**: Identity federation and provisioning
+- **Integration**: With Ping Federation/Entra ID
+- **Security**: Role-based provisioning with RBAC enforcement
+- **Authentication**: Multi-factor authentication (MFA) on all endpoints
+
+#### 2.2 Workflow Management
+- **Platform**: SAP BTP Workflow
+- **Governance**: Part of unified DevOps model
+- **Integration**: API-based communication across services
+
+#### 2.3 Event Mesh
+- **Function**: Event-driven architecture
+- **Integration**: Secure communication between SAP modules and external platforms
+- **Connectivity**: Bridges to Microsoft Azure via Integration Suite
+
+### 3. Integration Suite Metadata
+
+#### 3.1 Cloud Platform Integration (CPI) / Integration Cloud (IC)
+- **Primary Function**: API and data flow orchestration
+- **Scope**: Between SAP and external systems including Azure
+- **Connectivity**: Real-time and batch integration patterns
+- **Governance**: Standards-based hybrid integration model
+
+#### 3.2 Data Flow Architecture
+- **Source Systems**: SAP SuccessFactors, S/4HANA Finance, Fieldglass
+- **Destination**: SAP Data Sphere → HR Resource Group (HR RG)
+- **Transformation**: Harmonization of HR and payroll data
+- **Frequency**: Real-time and batch processing
+
+### 4. SAP Data Sphere Metadata
+
+#### 4.1 Semantic Layer
+- **Function**: SAP-native semantic modeling
+- **Data Sources**: SuccessFactors, S/4HANA Finance, Fieldglass
+- **Processing**: Transform, join, and feed data to Fabric
+- **Quality**: Canonical data modeling to prevent divergence
+
+#### 4.2 Data Harmonization
+- **Process**: Integration of multiple HR data sources
+- **Output**: Standardized datasets for HR RG consumption
+- **Validation**: Quality checks before Azure ingestion
+
+### 5. Foundation Objects Metadata
+
+#### 5.1 Master Data Framework (MDF) Objects
+- **Structure**: Custom field definitions and MDF object configurations
+- **Management**: Through SAP SuccessFactors configuration
+- **Integration**: API-based extraction via OData services
+- **Dependencies**: Referential integrity with Employee Central
+
+#### 5.2 Foundation Object Definitions
+- **Organizational Structure**: Companies, divisions, departments
+- **Job Information**: Job codes, grades, positions
+- **Pay Structures**: Pay grades, pay components, compensation plans
+- **Temporal Dependencies**: Historical data tracking and versioning
+
+### 6. Picklist Metadata
+
+#### 6.1 System Picklists
+- **Employee Status**: Active, Inactive, Terminated
+- **Employment Types**: Full-time, Part-time, Contract, Casual
+- **Organizational Levels**: Division, Department, Team
+- **Country-Specific**: Australian employment classifications
+
+#### 6.2 Custom Picklists
+- **Department-Specific**: Education sector classifications
+- **Role-Based**: Queensland DoE specific job categories
+- **Compliance**: IPOLA framework classifications
+
+### 7. Field Definitions and Properties
+
+#### 7.1 Employee Central Fields
+- **Personal Information**: Name, address, contact details, emergency contacts
+- **Employment Data**: Start date, position, supervisor, employment type
+- **Compensation**: Salary, pay grade, bonus eligibility
+- **Benefits**: Health insurance, superannuation, leave entitlements
+
+#### 7.2 Data Types and Properties
+- **String Fields**: Names, addresses, job titles
+- **Numeric Fields**: Salaries, employee IDs, cost centers
+- **Date Fields**: Employment dates, birth dates, anniversary dates
+- **Boolean Fields**: Active status, eligibility flags
+
+### 8. Security and Permission Metadata
+
+#### 8.1 Role-Based Access Control (RBAC)
+- **User Roles**: HR administrators, managers, employees, payroll staff
+- **Permissions**: Read, write, update, delete based on role
+- **Segregation**: Payroll vs. HR data access controls
+- **Compliance**: IPOLA framework alignment
+
+#### 8.2 Field-Level Security
+- **Sensitive Data**: Protected through field-level permissions
+- **Privacy Controls**: IPOLA-compliant data handling
+- **Audit Trail**: Comprehensive logging of access and changes
+
+### 9. Integration Mapping Metadata
+
+#### 9.1 SAP to Azure Integration Points
+- **Source**: SAP SuccessFactors (EC, ECP, Recruiting, Onboarding)
+- **Destination**: Microsoft Fabric HR Resource Group
+- **Protocol**: API-based via SAP Integration Suite
+- **Frequency**: Real-time and batch processing
+
+#### 9.2 Data Transformation Rules
+- **ETL Processes**: Extracted from COBOL logic in TSS
+- **Business Rules**: Embedded in Fabric Notebooks
+- **Validation**: Data quality checks before loading
+- **Error Handling**: Comprehensive error logging and recovery
+
+### 10. Workflow and Business Rule Metadata
+
+#### 10.1 HR Workflows
+- **Onboarding Workflows**: New employee setup processes
+- **Change Management**: Employee data modification processes
+- **Approval Workflows**: Manager approval requirements
+- **Notification Systems**: Automated communication triggers
+
+#### 10.2 Business Rules Engine
+- **Compensation Rules**: Pay calculation and processing rules
+- **Leave Management**: Accrual and usage rules
+- **Compliance Rules**: IPOLA and Queensland Government requirements
+- **Validation Rules**: Data integrity and business logic enforcement
+
+### 11. Custom Field and Extension Metadata
+
+#### 11.1 MDF Custom Objects
+- **Education-Specific**: Queensland DoE custom requirements
+- **Extension Points**: SAP Build Apps low-code extensions
+- **Integration**: API connectivity with existing modules
+- **Governance**: Managed through SAP ALM
+
+#### 11.2 Custom Field Definitions
+- **Department-Specific**: School and educational facility information
+- **Role-Specific**: Teacher, administrator, support staff classifications
+- **Location-Based**: Geographic and facility-specific data
+
+### 12. Metadata Governance and Documentation
+
+#### 12.1 SAP ALM Integration
+- **Configuration Management**: Transport and change management
+- **Test Management**: Test case and execution tracking
+- **Release Management**: Change control and release documentation
+- **Traceability**: End-to-end requirement to deployment tracking
+
+#### 12.2 Microsoft Purview Integration
+- **Classification**: Data sensitivity and privacy classification
+- **Lineage**: Complete data flow and transformation lineage
+- **Security Labels**: IPOLA-aligned security labelling
+- **Compliance**: Queensland Government compliance tracking
+
+### 13. Compliance and Security Metadata
+
+#### 13.1 IPOLA Framework Compliance
+- **Privacy Controls**: Personal information handling procedures
+- **Access Controls**: Role-based access and MFA requirements
+- **Audit Requirements**: Comprehensive logging and monitoring
+- **Data Retention**: OpenText InfoArchive integration for long-term retention
+
+#### 13.2 Queensland Government IS18:2018 Alignment
+- **Security Controls**: Encryption at rest and in transit
+- **Identity Management**: Federation and provisioning controls
+- **Monitoring**: Security event logging and alerting
+- **Incident Response**: SAP BTP security event monitoring
+
+### 14. Data Model Relationships
+
+#### 14.1 Primary Entity Relationships
+- **Employee → Position**: Employment relationship tracking
+- **Position → Organization**: Hierarchical organizational structure
+- **Employee → Payroll**: Compensation and payment relationships
+- **Organization → Cost Center**: Financial allocation tracking
+
+#### 14.2 Temporal Dependencies
+- **Historical Tracking**: Employment history and changes over time
+- **Version Control**: Data changes with effective dating
+- **Audit Trail**: Complete change history and approval tracking
+
+### 15. Metadata Extraction Recommendations
+
+#### 15.1 OData API Extraction Points
+- **Employee Data**: /odata/v2/Employee
+- **Organizational Data**: /odata/v2/FOrganization
+- **Payroll Data**: /odata/v2/PayrollInformation
+- **Custom Objects**: /odata/v2/CustomEntity
+
+#### 15.2 Metadata Documentation Standards
+- **Schema Definitions**: Complete field definitions and relationships
+- **Integration Mappings**: Source-to-target transformation rules
+- **Security Configurations**: Role and permission matrices
+- **Business Rules**: Complete business logic documentation
+
+This metadata extraction provides the foundation for understanding the SAP SuccessFactors implementation within the HCMS program and supports data migration, integration, and governance activities.

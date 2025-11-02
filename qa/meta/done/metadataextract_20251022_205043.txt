@@ -1,0 +1,75 @@
+# Key Information Gaps for Enhanced Context
+
+## **Business Process Understanding**
+
+### **Queensland DoE Specific Operational Patterns**
+- **School calendar integration**: How leave calculations differ during school terms vs. holidays vs. summer break
+- **Regional assignment variations**: Different leave rules across metropolitan vs. regional vs. remote locations  
+- **Emergency staffing protocols**: How temporary reassignments during natural disasters affect leave calculations
+- **Seasonal staff management**: Part-time and casual teacher leave accrual patterns during school terms only
+
+### **Award and Collective Agreement Complexity**
+- **Current award structure mapping**: Specific award types and their corresponding leave entitlement rules
+- **Award change frequency**: How often and when awards change in Queensland DoE operations
+- **Cross-award compatibility rules**: How different awards interact when employees hold multiple assignments
+- **Historical award data retention**: How long historical award information needs to be maintained for compliance
+
+## **User Experience Requirements**
+
+### **Role-Based Workflow Patterns**
+- **HR Administrator daily tasks**: Common scenarios and bulk processing needs during payroll periods
+- **School Principal access patterns**: When and how principals need leave information for their staff
+- **Employee self-service expectations**: What employees need to see vs. what HR manages centrally
+- **Manager approval workflows**: Multi-level approval requirements for different leave types
+
+### **Performance and Access Requirements**
+- **Peak usage timing**: Specific periods when system load is highest (month-end, year-end, school holidays)
+- **Mobile access needs**: Which users need mobile access and for what scenarios
+- **Offline capability requirements**: Whether any functionality needs to work without internet connection
+- **Response time expectations**: Actual business requirements vs. technical possibilities
+
+## **Compliance and Regulatory Context**
+
+### **Queensland Government Requirements**
+- **Specific compliance regulations**: Queensland DoE vs. general Australian employment law requirements
+- **Audit frequency and requirements**: How often compliance audits occur and what they examine
+- **Government reporting obligations**: What reports need to be submitted to Queensland government
+- **Privacy and data handling**: Specific Queensland government data protection requirements
+
+## **Integration Dependencies Beyond Current Scope**
+
+### **External System Connections**
+- **Existing HR systems**: What other HR systems are in use that need integration
+- **Financial systems**: Integration requirements with Queensland DoE financial management systems
+- **Timesheet systems**: Current casual staff timesheet processes and requirements
+- **Organizational structure systems**: How organizational hierarchy affects leave approvals
+
+### **Change Management Context**
+- **Current leave management process**: How leave is currently handled manually/semi-manually
+- **User training capacity**: How many users need training and their technical proficiency levels
+- **Go-live timing constraints**: Business reasons for specific go-live dates or timing requirements
+- **Parallel running requirements**: Whether old and new systems need to run simultaneously
+
+## **Risk and Business Continuity**
+
+### **Operational Risk Factors**
+- **System downtime tolerance**: How long can the system be down before impacting operations
+- **Disaster recovery scenarios**: Natural disaster impact on leave processing requirements
+- **Data accuracy requirements**: What level of accuracy is required for different leave types
+- **Business interruption impact**: What happens when leave processing fails during critical periods
+
+## **User Adoption and Change Management**
+
+### **Organizational Readiness**
+- **Current pain points**: What specific problems users are experiencing with current leave management
+- **Change resistance factors**: What might cause users to resist the new system
+- **Champion user identification**: Who are the key users who can help drive adoption
+- **Communication preferences**: How best to communicate changes to different user groups
+
+## **Success Metrics and Business Outcomes**
+
+### **Business Success Criteria**
+- **Process improvement goals**: What efficiency improvements are expected
+- **Compliance improvement targets**: What compliance gaps the system should address
+- **User satisfaction measures**: How success will be measured from user perspective
+- **Cost reduction expectations**: What cost savings are anticipated from the new system

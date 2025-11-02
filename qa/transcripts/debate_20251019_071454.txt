@@ -1,0 +1,347 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 07:14:54
+Topic: E001 - SALARY INCREMENT
+Salary Increment progression is the process whereby an employee advances through their assigned
+classification automatically until they reach the maximum pay point. The following processes are in scope:
+􀍻 Manage Senior Teacher
+􀍻 Manage Experienced Senior Teacher
+􀍻 Manage Teacher Aide
+􀍻 Manage Increments
+Current State
+􀍻 Automated Increment Progression supported by Fortnightly Increment Runs and Additional
+Nightly Runs
+􀍻 Exception and Error Reporting
+􀍻 Manual Check Reasons
+The following scenarios impact an employee’s project salary increment date (dependant on award):
+Service Related
+􀍻 Recognised Prior Service
+􀍻 Higher Duties
+􀍻 Leave Without Pay
+Non-Service Related
+􀍻 Setting Professional Goals (SPG)
+􀍻 Senior Teacher Personal Action Plan (STAP)
+Future State - Out of The Box
+Given the EBA specific rules associated with Salary Increment, there is no equivalent functionality existing
+in SuccessFactors, hence a custom extension is required.
+Enhancement Considerations
+Overview
+Increments for Department of Education employees are influenced by several key components:
+􀍻 Period of Service/Tenure: This refers to the duration an employee has served at an assigned
+Classification and Paypoint. Increments for departmental employees are typically awarded
+annually or bi-annually based on this tenure. Breaks in service will impact of incremental
+progression.
+􀍻 Periods of Eligible Higher Duties Service: Employees who assume higher duties may have this
+service recognised towards their increment on the base or substantive classification.
+􀍻 Service Exclusions Due to Leave Without Pay: Certain unpaid leave types as outlined under
+the schedule of directive - leave without salary credited as service, including but not limited to
+conditions for sick, parental, and other special leave may result in an exclusion for increment
+calculation purposes. For example, an employee on Parental Leave no pay for 12 months will
+have the first three months credited as eligible service for incremental progression. The remaining
+9 months of leave period will be an exclusion.
+Page | 195
+In addition to the above classifications, the following factors apply when determining the increment date:
+􀍻 Performing Duties at the Same or Lower Classification:
+○ Service performed at the same salary classification level is counted towards the employee's
+increment.
+○ Service performed at a lower salary classification level is not counted towards the
+employee's substantive salary classification increment. This would constitute as a break in
+service for increment purposes when calculating the employees base/substantive
+incremental progression. Applies to all employee types.
+○ Cross counting rules. DoE currently maintain a table which governs which roles count as
+service towards other roles for increments. For example, service as a Teacher may count
+towards service as a Teacher Aide, but not vice versa.
+􀍻 Performing Duties at a Higher Classification:
+○ Service performed at a higher classification level is counted towards the substantive position.
+○ For temporary employees, Higher Duties refer to situations where an engagement at a lower
+classification ends to begin another engagement at a higher classification. If re- engaged at a
+later point at the lower classification, the service previously completed at the higher
+classification should count towards the lower one, provided that the break in service is not
+greater than 12 months (for non-teachers).
+○ When a temporary teacher performs contracts (consecutive or concurrent) at a higher
+classification level, the service in the higher classification counts towards the increment in the
+lower classification, but not vice versa.
+○ Dependant on certain criteria, employees performing higher duties may be eligible for an
+increment on the higher classification level. Refer Higher duties directive (12 months service
+within 24-month period).
+○ Cross counting rules. DoE currently maintain a table which governs which roles count as
+service towards other roles for increments. For example, service as a Teacher may count
+towards service as a Teacher Aide, but not vice versa.
+􀍻 Concurrent Employment:
+○ Employee working in two separate roles at the same time e.g., Admin Officer 0.6FTE &
+Teacher Aide 0.4FTE, will be entitled to increment in each position separately.
+􀍻 Payroll Maintenance of Salary Increments:
+○ The ability to manually adjust (Bring forward or delay) is required - Includes Calendar Days,
+School Days, Hours. For example, if an employee has 8 months service with Queensland
+Health as an AO301 and transfers to DoE at the same level, they would only need to serve 4
+months before being entitled to increment. In this case an entry of 8 months is manually
+entered by a payroll operator the system will automatically apply the increment after a
+further 4 months service.
+Increment Cohorts
+Increments for Teachers
+􀍻 Increments for permanent teachers are based on Calendar Days worked
+􀍻 Increments for temporary teachers are based on School Days worked.
+Page | 196
+􀍻 FTE (full time equivalent fraction) is not applicable. All employees regardless of their assigned FTE
+will progress by either annual or bi-annual increment, dependent on the specific rules for their
+Award/Classification/Position
+􀍻 Leave exclusions apply (in accordance with the Leave without Salary Credited as Service
+Directive)
+􀍻 Paid leave does not affect an increment. All paid leave is counted as service.
+􀍻 Service deemed as 'higher duties' counts towards incremental progression on the substantive
+salary. It can also count to periods of relieving (i.e., the higher relieving classification will count as
+service towards a lower relieving classification, but not vice versa).
+􀍻 Higher duties ceasing over the Christmas vacation period i.e., ceasing last day of school year and
+commencing 1st day of next year is not considered to be a break in service for increment
+purposes.
+􀍻 All prior teaching service is counted in the calculation of salary increments for teachers,
+irrespective of breaks greater than 12 months.
+􀍻 When changing from temporary to permanent employment (or vice versa); service is converted
+from school days to calendar days, or the inverse when changing from permanent to temporary
+employment.
+○ Formula for conversion of temporary to permanent service: Total school days served * 360 /
+200
+○ Formula for conversion of permanent to temporary service: Total service days in period * 200
+/ 360.
+􀍻 A teacher with temporary employment status who ceases work one week prior to the end of the
+school year can have service credited to the last day of the school year if they work at a 7-week
+school.
+􀍻 Retrospective changes should occur where an increment which has already been applied is
+affected by a change made to an employee's service (such as shortening or extension of
+engagements, leave without pay affecting increments etc.)
+􀍻 Classroom Teachers
+○ Increment every 12 months (unless subject to a Managing Unsatisfactory Performance plan
+(MUP) or disciplinary action)
+○ Maximum salary for teachers under the Classroom Teacher Stream is Band 3
+○ Once a teacher has reached Band 3 Step 4, the teacher will no longer progress through the
+salary scale except where a teacher accesses the Senior Teacher salary
+􀍻 Senior Teachers
+In order progress to Senior Teacher, an employee must satisfy the following conditions:
+○ One year's teaching service at Band 3 Step 4; and
+○ Teacher Annual Performance Review (APR)
+○ Senior Teacher Undertaking and Personal action plan (STAP) as part of the APR Maximum
+􀁸 Experienced Senior Teachers (Paypoint 1)
+In order progress to Experienced Senior Teacher (Paypoint 1), an employee must satisfy the
+following conditions:
+Page | 197
+􀍻 Two or more years' satisfactory service as a…
+○ Senior Teacher (ST) or
+○ Senior Instrumental Music Teacher (SMIT); or
+􀍻 Five or more years' satisfactory service as a Senior Instrumental Music Instructor (SIMI); and
+○ APR discussion between the teacher and their principal in the past 12 months.
+􀍻 Experienced Senior Teachers (Paypoint 2)
+In order progress to Experienced Senior Teacher (Paypoint 2), an employee must satisfy the following
+conditions:
+○ Three or more years' satisfactory service as a…
+􀁸 Experienced Senior Teacher (Paypoint 1); and
+○ APR discussion between the teacher and their principal in the past 12 months.
+Note, there is a planned directive to introduce Paypoint 3.
+􀍻 Promotional Teachers
+○ Increment every 24 months until reaching the 3rd Paypoint of the assigned classification level.
+Increments for Non-Teaching Positions
+Increments are applied to Award groups other than teachers. Other Award groups include:
+○ Administrative Officers
+○ Professional Officers
+○ Technical Officers
+○ Operational Officers
+○ Senior Officers
+○ Senior Executives
+○ Health Practitioners
+○ Nurses
+○ Cleaners
+○ Teacher Aides
+○ Assistant/Community Teachers
+􀍻 Casual Service
+Casual work performed under the same classification stream is included in the service calculation of
+an increment (this does not apply to teachers).
+Enhancement Design
+Employee Central
+Page | 198
+The Employee Central design focusses on the required MDF Portlets design, the Role Based Permission
+considerations and the facilitation of sending notifications.
+(1) MDF Portlet
+􀍻 Projected Salary Increment
+The design of the Projected Salary Increment MDF portlet should be based on the following wireframe:
+Based on the wireframe design, the following data element attributes apply:
+Description Source Input
+Field?
+Picklist Validation Read Access Edit
+Access
+Section: General Information
+Current Pay
+Point
+Job
+Information –
+Pay Scale
+Level
+No n/a n/a Employee;
+Manager;
+Admin
+n/a
+Projected Pay
+Point
+Job
+Information –
+Pay Scale
+Level + 1 Pay
+Point
+No n/a System must derive
+next pay point from
+current Pay Scale Level
+Employee;
+Manager;
+Admin
+n/a
+Page | 199
+Notification
+Sent
+BTP No n/a System must record
+and send date of
+notification
+* Note: Only applicable
+for Conditional
+Progressions
+Employee;
+Manager;
+Admin
+n/a
+Performance
+Review
+n/a Yes Date Standard Date
+Formatting
+* Note: Only applicable
+for Conditional
+Progressions
+Employee Admin;
+Manager
+Section: Periods of Service / Tenure
+Days BTP No n/a System must derive (in
+days) period of service
+/ tenure based on
+School Days
+Employee;
+Manager;
+Admin
+n/a
+Hours BTP No n/a System must derive (in
+hours) period of service
+/ tenure based on
+School Days
+Employee;
+Manager;
+Admin
+n/a
+Days of
+Recognised
+Service
+Employment
+Information –
+Date Type
+No n/a System will read days
+of recognised service
+based in Employment
+Information
+Employee;
+Manager
+Admin
+Section: Periods of Eligible Higher Duties Service
+Days ECP – Infotype
+0509
+No n/a System will read days
+of Higher Duties from
+Employee Central
+Payroll
+Employee;
+Manager
+Admin
+Hours ECP – Infotype
+0509
+No n/a System will read hours
+of Higher Duties from
+Employee Central
+Payroll
+Employee;
+Manager
+Admin
+Section: Service Exclusion Due to Leave Without Pay
+Days ECP – Infotype
+2001
+No n/a System will read days
+of LWOP from
+Employee Central
+Payroll
+Employee;
+Manager
+Admin
+Hours ECP – Infotype
+2001
+No n/a System will read hours
+of LWOP from
+Employee;
+Manager
+Admin
+Page | 200
+Employee Central
+Payroll
+Section: Increment Dates
+Original
+Projected
+Increment
+Date
+BTP No n/a n/a Employee;
+Manager;
+Admin
+n/a
+Actual
+Projected
+Increment
+Date
+BTP No n/a n/a Employee;
+Manager;
+Admin
+n/a
+􀍻 Historic Salary Increment
+The design of the Historic Salary Increment MDF portlet should be based on that of the Projected Salary
+Increment wireframe, with the following amendment:
+Description Source Input
+Field?
+Picklist Validation Read Access Edit
+Access
+Section: General Information
+Updated Pay
+Point
+Job
+Information –
+Pay Scale
+Level
+No n/a n/a Employee;
+Manager;
+Admin
+n/a
+Previous Pay
+Point
+Job
+Information –
+Pay Scale
+Level + 1 Pay
+Point
+No n/a System must derive
+next pay point from
+current Pay Scale Level
+Employee;
+Manager;
+Admin
+n/a
+(2) Notifications
+Conditional Progressions require notifications to be sent out to teachers 3 months prior to their projected
+service eligibility date:
+􀍻 Senior Teacher
+􀍻 Experienced Senior Teacher (Paypoint 1)
+􀍻 Experienced Senior Teacher (Paypoint 2)
+Note, Notification content will be determined during the implementation.
+(3) Processing Logic
+Refer to the detailed specification.
+Page | 201
+Max Rounds: 80
+First Speaker: hugging
+================================================================================

@@ -1,0 +1,317 @@
+# SAP SuccessFactors Metadata Extraction Report
+## Teacher & Teacher Aide Vacation Payment System
+
+### Executive Summary
+This metadata extraction analyzes the Teacher and Teacher Aide Vacation Payment system requirements within the Queensland Department of Education's SAP SuccessFactors implementation. The system encompasses complex business rules for summer and mid-year vacation payments, requiring BTP extensions and custom MDF objects.
+
+---
+
+## 1. MDF Object Definitions
+
+### 1.1 Summer Vacation MDF Object
+**Object Name:** `SummerVacationPayment`
+**Purpose:** Store vacation payment calculations and eligibility data
+
+**Field Definitions:**
+```
+- employeeId: Personnel Number (unique to work assignment) - String(10)
+- assignmentId: Assignment Identifier - String(20)
+- effectiveStartDate: School Year Start - Date
+- effectiveEndDate: School Year End - Date
+- paymentType: Payment Type (Prorata/LSSP/LSOT) - String(10)
+- paymentDate: Derived Payment Date - Date
+- paymentHours: School Hours - Decimal(10,2)
+- schoolType: 6 or 7 Week School - String(2)
+- employmentType: Employment Type (Perm/FT/Casual) - String(10)
+- unpaidLeave: LWOP during Vacation - Boolean
+- sickLeave: Sick Leave during Vacation - Boolean
+- sickLeaveOver12Months: Sick Leave > 12 months - Boolean
+- sickLeaveResume: Sick Leave ends during Vacation - Boolean
+- terminationDate: Termination Date - Date
+- stateHighSchool: At a State High School in Term 4 - Boolean
+- day1Current: Employed Day 1 current school year - Date
+- day1Next: Employed Day 1 next school year - Date
+- week3Current: Employed by Week 3 current year - Date
+- week3Next: Employed by Week 3 next year - Date
+- nineDayBreak: Break over 9 days exists - Boolean
+- serviceDays: Accumulated School Days Service - Integer
+- term4Service: Service in Term 4 until last 2 weeks - Integer
+- workersComp: On Workers Comp over Vacation - Boolean
+- higherDutiesDays: Eligible HD Days - Integer
+- higherDutiesHours: Eligible HD Hours - Decimal(10,2)
+- midYearPaid: Sum of Mid-Year Vacation Payments - Decimal(15,2)
+- schoolDays: Total number of Days in School Year - Integer
+- currentFTE: Current FTE % - Decimal(5,4)
+- averageFTE: Average FTE % - Decimal(5,4)
+- seconded: On Secondment - Boolean
+- suspend: On Pay Suspend - Boolean
+- systemMessage: System Message - String(255)
+- systemLoggedMessage: Logged Messages - String(500)
+- calcTimestamp: Calculation Timestamp - DateTime
+```
+
+### 1.2 Teacher Aide Vacation MDF Object
+**Object Name:** `TeacherAideVacationPayment`
+**Purpose:** Store Teacher Aide vacation payment calculations
+
+**Field Definitions:**
+```
+- employeeId: Personnel Number - String(10)
+- assignmentId: Assignment Identifier - String(20)
+- sjmEligible: Standard Job Model Eligible - Boolean
+- ftePercentage: FTE % at term end - Decimal(5,4)
+- multipleAssignments: Multiple Assignment Average - Boolean
+- vacationEligible: Vacation Payment Eligible - Boolean
+- proRataEligible: Pro Rata Eligible - Boolean
+- youthDetention: Youth Detention Centre Employee - Boolean
+- serviceDays: Service Days Count - Integer
+- unpaidLeaveTerm: LWOP for whole term or longer - Boolean
+- vacationPayment: Vacation Payment Amount - Decimal(15,2)
+- effectiveStartDate: School Year Start - Date
+- effectiveEndDate: School Year End - Date
+- calcTimestamp: Calculation Timestamp - DateTime
+```
+
+---
+
+## 2. Foundation Object Relationships
+
+### 2.1 Employee Assignment Relationship
+```
+Employee (perPerson) → Assignment (perAssignment)
+├── employmentType
+├── currentFTE
+├── averageFTE
+└── effectiveDates
+```
+
+### 2.2 Leave and Time Management
+```
+Employee → LeaveEntitlement (Leave Entitlement)
+├── annualLeaveBalance
+├── sickLeaveBalance
+├── LWOPRecords
+└── vacationEligibility
+```
+
+### 2.3 Payroll Integration Points
+```
+Employee → PayScale (PayScale Determination)
+├── ordinaryHourlyRate
+├── payGrade
+└── employmentCategory
+```
+
+---
+
+## 3. Picklist Metadata
+
+### 3.1 Payment Type Picklist
+```
+Object: PaymentType
+Values:
+- PRORATA: Prorata Summer Vacation
+- LSSP: Lump Sum Summer Payment
+- LSOT: Lump Sum On Termination
+- MID_YEAR: Mid-Year Vacation Payment
+- ANNUAL_LEAVE: Annual Leave Payment
+```
+
+### 3.2 Employment Type Picklist
+```
+Object: EmploymentType
+Values:
+- PERM: Permanent
+- FIXED_TERM: Fixed Term (Temporary)
+- CASUAL: Casual Supply
+- TEACHER_AIDE: Teacher Aide
+- PRESERVED: Preserved Arrangements
+```
+
+### 3.3 School Type Picklist
+```
+Object: SchoolType
+Values:
+- 6_WEEK: 6 Week School
+- 7_WEEK: 7 Week School
+- YOUTH_DETENTION: Youth Detention Centre
+- SHS: State High School
+```
+
+---
+
+## 4. Business Rule Metadata
+
+### 4.1 Teacher Summer Vacation Eligibility Rules
+```
+Rule Name: TeacherSummerVacationEligibility
+Trigger: Payroll Period Processing
+Conditions:
+- employmentType IN (PERM, FIXED_TERM)
+- serviceDays >= 100 (for LSSP)
+- term4Service > 0 (for LSSP)
+- averageFTE > 0
+- terminationDate NOT BETWEEN schoolYearStart AND schoolYearEnd
+```
+
+### 4.2 Fixed Term Teacher Rules
+```
+Rule Name: FixedTermSummerVacation
+Conditions:
+- employmentType = FIXED_TERM
+- IF serviceDays >= 100 AND term4Service > 0 THEN LSSP
+- IF fullYearEmployment OR partialYearEmployment THEN PRORATA
+- ELSE LSOT
+```
+
+### 4.3 Teacher Aide SJM Rules
+```
+Rule Name: TeacherAideSJMEligibility
+Conditions:
+- employmentType = TEACHER_AIDE
+- IF sjmEligible = TRUE THEN SJM applies
+- IF youthDetention = TRUE THEN special rules apply
+- averageFTE calculation for multiple assignments
+```
+
+---
+
+## 5. Integration Mapping Metadata
+
+### 5.1 EC to ECP Integration
+```
+Source: Employee Central
+Target: Employee Central Payroll
+Object: SummerVacationPayment
+Fields: employeeId, assignmentId, employmentType, ftePercentage, serviceDays
+Frequency: Real-time (on change) and batch (payroll run)
+```
+
+### 5.2 BTP Extension Points
+```
+Extension: VacationPaymentCalculator
+Hook: PayrollOperation
+Method: calculateVacationPayment()
+Parameters: employeeId, payrollPeriod, vacationType
+Return: paymentAmount, paymentType
+```
+
+---
+
+## 6. Custom Field Metadata
+
+### 6.1 Employee Central Custom Fields
+```
+Object: perPerson
+Fields:
+- qld_teacher_vacation_eligible: Boolean
+- qld_teaching_years: Integer
+- qld_school_type: String(10)
+- qld_principal_status: Boolean
+
+Object: perAssignment
+Fields:
+- qld_fte_average: Decimal(5,4)
+- qld_service_days: Integer
+- qld_vacation_payment_type: String(10)
+```
+
+### 6.2 Payroll Custom Fields
+```
+Object: PayrollResult
+Fields:
+- vacationPaymentAmount: Decimal(15,2)
+- vacationPaymentType: String(10)
+- vacationHours: Decimal(10,2)
+- retroCalculationFlag: Boolean
+```
+
+---
+
+## 7. Workflow and Business Process Metadata
+
+### 7.1 Vacation Payment Calculation Workflow
+```
+Workflow: VacationPaymentCalculation
+Steps:
+1. Validate Employee Eligibility
+2. Calculate FTE Averages
+3. Determine Payment Type
+4. Calculate Payment Amount
+5. Update MDF Objects
+6. Trigger Payroll Processing
+```
+
+### 7.2 Self-Service Preview Workflow
+```
+Workflow: VacationHoursPreview
+Trigger: Employee Self-Service Request
+Steps:
+1. Validate Employee Access
+2. Retrieve MDF Data
+3. Calculate Projected Hours
+4. Display to Employee
+5. Log Calculation History
+```
+
+---
+
+## 8. Security and Permission Metadata
+
+### 8.1 Role-Based Access Control
+```
+Role: VacationPaymentAdministrator
+Permissions:
+- Read/Write SummerVacationPayment MDF
+- Execute Payroll Operations
+- Access Service Days Calculations
+
+Role: EmployeeSelfService
+Permissions:
+- Read Own Vacation Data
+- Preview Vacation Hours
+- View Payment History
+```
+
+### 8.2 Data Privacy Considerations
+```
+Sensitive Fields:
+- terminationDate (restricted access)
+- sickLeave (HR only)
+- workersComp (HR only)
+- paySuspend (HR only)
+```
+
+---
+
+## 9. Configuration Dependencies
+
+### 9.1 Required System Configurations
+```
+- Payroll Period Configuration for vacation periods
+- Leave Type Configuration for Annual Leave
+- Pay Scale Configuration for hourly rates
+- Cost Center Configuration for regional distribution
+```
+
+### 9.2 Integration Dependencies
+```
+- EC to ECP Integration Setup
+- BTP Extension Deployment
+- MDF Object Activation
+- Workflow Configuration
+```
+
+---
+
+## 10. Data Model Summary
+
+The vacation payment system requires:
+- **2 Custom MDF Objects** for vacation calculations
+- **Multiple picklist extensions** for business rules
+- **BTP extension** for calculation logic
+- **EC custom fields** for employee data
+- **Integration mappings** between EC and ECP
+- **Security configurations** for role-based access
+
+This comprehensive metadata extraction provides the foundation for implementing the complex vacation payment system within SAP SuccessFactors, supporting both teacher and teacher aide requirements with proper business rule enforcement and payroll integration.

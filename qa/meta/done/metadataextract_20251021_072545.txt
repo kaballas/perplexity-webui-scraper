@@ -1,0 +1,53 @@
+Based on the debate transcript, here are the key learnings:
+
+## Key Learnings from HCMS Technical Architecture Debate
+
+### 1. **Role Specialization and Complexity**
+- The HCMS Technical Architecture Prompt Engineer is a highly specialized role requiring deep expertise in both SAP SuccessFactors and Microsoft Azure ecosystems
+- Success requires bridging complex technical architecture with AI-driven development processes
+- The role acts as a critical translation layer between technical requirements and AI-guided outputs
+
+### 2. **Dual-Platform Architecture Mastery**
+- Engineers must understand the hybrid SAP-Microsoft architecture, not just individual platform knowledge
+- Integration between SAP SuccessFactors modules (EC, ECP, BTP, Integration Suite) and Azure components (HR RG, DataHub, Purview) is crucial
+- The complexity increases significantly when managing 46+ downstream system integrations
+
+### 3. **Compliance and Security Integration**
+- IPOLA compliance and IS18:2018 security frameworks must be embedded into every prompt design
+- Compliance cannot be an afterthought—it must be architecturally integrated from the prompt creation stage
+- Queensland Government standards require continuous validation throughout the development lifecycle
+
+### 4. **Token Efficiency vs. Technical Accuracy Balance**
+- There's a critical balance between maintaining technical precision and optimizing for token efficiency
+- Prompt engineers must achieve maximum technical clarity with minimum token consumption
+- This balance directly impacts AI output quality and cost-effectiveness
+
+### 5. **Multi-Stakeholder Collaboration Requirements**
+- The role must support collaboration between DoE, SI, Data#3, and SAP partners simultaneously
+- Prompts need to be accessible to various technical skill levels while maintaining accuracy
+- Governance alignment across multiple organizations is essential
+
+### 6. **Legacy System Transformation Challenges**
+- Reverse engineering 28-year-old TSS COBOL systems into modern platforms requires specialized approach
+- Parallel Payroll Run Testing (PPRT) strategy must be built into prompt design
+- Migration complexity adds urgency to prompt optimization requirements
+
+### 7. **Unified DevOps Across Platforms**
+- The unified DevOps model spanning both SAP and Azure platforms creates unique orchestration challenges
+- Prompt engineers must ensure consistency across dual-platform operations
+- CI/CD pipelines need to be reflected in prompt structure and validation criteria
+
+### 8. **Program Timeline Pressure**
+- November 2025 production readiness target creates urgency for prompt optimization
+- Phased delivery approach (Explore, Realize, Deploy) requires adaptable prompt structures
+- Time constraints make token efficiency and reuse critical success factors
+
+### 9. **Governance and Traceability**
+- All prompt outputs must demonstrate clear traceability to HCMS program artifacts
+- Design Authority governance requirements must be embedded in prompt validation
+- Error handling and ambiguity resolution are not optional—they're compliance requirements
+
+### 10. **Strategic Positioning**
+- This role is positioned as essential for mission-critical HCMS project success
+- The complexity of the dual-platform ecosystem makes prompt engineering a strategic capability
+- Success directly impacts the organization's ability to modernize its 28-year-old HR/payroll system

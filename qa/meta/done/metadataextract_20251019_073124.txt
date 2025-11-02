@@ -1,0 +1,364 @@
+# SAP SuccessFactors Metadata Extraction Report: Teacher & Teacher Aide Vacation Payments
+
+## Executive Summary
+This metadata extraction analyzes the vacation payment system for teachers and teacher aides within the Queensland Department of Education's SAP SuccessFactors HCM solution. The system encompasses complex eligibility rules, multiple payment types, and specialized processing requirements with critical compliance and audit trail considerations identified.
+
+## 1. Core Object Definitions
+
+### 1.1 Employee Central MDF Objects
+
+**Summer Vacation Payment MDF Object (SFVACATION_PAY)**
+- **Object Type**: Custom MDF (Master Data Framework)
+- **Purpose**: Store vacation payment calculations and projections
+- **Self-Service Capability**: Yes (Employee preview functionality)
+- **Key Attributes**: Payment type, hours, dates, eligibility status
+- **Effective Dated**: Yes (supports historical changes)
+- **Validation Rules**: 
+  - Effective date range validation
+  - Payment type dependency on employment type
+  - Hours calculation validation against FTE
+
+**Teacher Vacation Payment Configuration (SFVACATION_CONFIG)**
+- **Object Type**: Custom MDF Object
+- **Access Level**: Employee Self-Service via homepage tile
+- **Processing Period**: Available from October onwards for simulation
+- **Integration**: Linked to ECP for calculation storage
+- **Security**: Role-based access control per employment type
+
+### 1.2 Foundation Objects
+
+**Employee Assignment (PerPerson)**
+- **Related Objects**: Employment type, FTE calculations, leave balances
+- **Key Fields**: Personnel Number, Assignment ID, Effective Dates
+- **Relationships**: Multiple assignments support for teacher aides
+- **Audit Trail**: All changes logged with user, timestamp, and reason
+
+**Payroll Result Objects (Payroll-Result)**
+- **Custom Payroll Operations**: Embedded within ECP processing
+- **Retroactive Processing**: Standard SAP retro functionality
+- **Performance Optimization**: Custom ECP tables for calculation storage
+- **Compliance Logging**: All payroll calculations audited per regulatory requirements
+
+## 2. Field Definitions and Properties
+
+### 2.1 Core Payment Fields
+
+| Field Name | Data Type | Purpose | Validation Rules | Audit Trail | Security Classification |
+|------------|-----------|---------|------------------|-------------|----------------------|
+| `paymentType` | Picklist | Payment classification | Prorata/LSSP/LSOT | Required | Public |
+| `effectiveStartDate` | Date | School year start | Must be before end date | Required | Public |
+| `effectiveEndDate` | Date | School year end | Must be after start date | Required | Public |
+| `paymentHours` | Decimal (15,2) | Calculated school hours | Positive values only | Required | Sensitive |
+| `schoolType` | Picklist | School duration type | 6/7 week schools | Required | Public |
+| `employmentType` | Picklist | Staff category | Perm/Fixed Term/Casual | Required | Public |
+| `calculationTimestamp` | DateTime | Last calculation time | Auto-generated | Required | System |
+| `systemMessage` | String (500) | Processing messages | Max 500 chars | Required | Internal |
+
+### 2.2 Leave and FTE Calculation Fields
+
+| Field Name | Data Type | Purpose | Calculation Logic | Audit Trail | Compliance Impact |
+|------------|-----------|---------|-------------------|-------------|-------------------|
+| `averageFTE` | Decimal (5,4) | Annual FTE average | Hours worked / total hours | Required | High |
+| `currentFTE` | Decimal (5,4) | Current assignment FTE | As of last day of term | Required | High |
+| `serviceDays` | Integer | Accumulated service days | Excluding breaks > 9 days | Required | High |
+| `term4Service` | Integer | Term 4 service period | Until last 2 weeks | Required | High |
+| `lwpDays` | Integer | Leave without pay days | Excludes from payment calculation | Required | High |
+
+### 2.3 Termination and Special Conditions
+
+| Field Name | Data Type | Purpose | Business Rule | Audit Trail | Privacy Classification |
+|------------|-----------|---------|---------------|-------------|---------------------|
+| `terminationDate` | Date | Employment end date | Triggers LSOT calculation | Required | Private |
+| `shsCondition` | Boolean | State High School indicator | Special calculation rules | Required | Public |
+| `nineDayBreak` | Boolean | Service break > 9 days | Affects eligibility | Required | Public |
+| `workersComp` | Boolean | Workers compensation status | Special handling | Required | Private |
+| `paySuspend` | Boolean | Pay suspension status | Exclusion criteria | Required | Private |
+
+## 3. Picklist Metadata
+
+### 3.1 Payment Type Picklist (SFVACATION_PAYTYPE)
+```
+Values:
+- PRORATA: Prorata Summer Vacation Payment
+- LSSP: Lump Sum Summer Payment  
+- LSOT: Lump Sum on Termination
+- TA_SUMMER: Teacher Aide Summer Payment
+- TA_MIDYEAR: Teacher Aide Mid-Year Payment
+
+Validation: 
+- Mutually exclusive selection
+- Business rule dependent on employment type
+- Audit trail required for all changes
+```
+
+### 3.2 Employment Type Picklist (SFVACATION_EMPTYPE)
+```
+Values:
+- PERM: Permanent Teacher
+- FIXED_TERM: Fixed Term Teacher
+- CASUAL: Casual Teacher
+- TA_PERM: Teacher Aide Permanent
+- TA_FIXED: Teacher Aide Fixed Term
+- TA_CASUAL: Teacher Aide Casual
+
+Dependencies: 
+- Payment type restrictions
+- Calculation rule variations
+- Access control requirements
+```
+
+### 3.3 School Type Picklist (SFVACATION_SCHOOLTYPE)
+```
+Values:
+- 6_WEEK: 6-week school calendar
+- 7_WEEK: 7-week school calendar
+- YOUTH_DET: Youth Detention Centre (special rules)
+- SPECIAL: Special School (modified calendar)
+
+Compliance: 
+- IPOLA data classification applied
+- Regional processing variations
+- Audit trail requirements
+```
+
+## 4. Business Rules Metadata
+
+### 4.1 Teacher Eligibility Rules (MDF Business Rules)
+
+**LSSP (Lump Sum Summer Payment) Rule**
+```
+Rule ID: SFVACATION_LSSP_ELIG
+Conditions:
+- serviceDays > 100
+- term4Service > 0 (worked entire Semester 2)
+- nineDayBreak = false
+- employmentType in [PERM, FIXED_TERM]
+
+Actions:
+- Set paymentType = LSSP
+- Calculate paymentHours based on FTE
+- Log eligibility determination
+- Trigger audit trail entry
+
+Compliance: All conditions audited per regulatory requirements
+```
+
+**LSOT (Lump Sum on Termination) Rule**
+```
+Rule ID: SFVACATION_LSOT_ELIG
+Conditions:
+- terminationDate exists
+- term4Service >= 10 (additional 10 days)
+- serviceDays >= 100
+- NOT eligible for Prorata or LSSP
+
+Actions:
+- Set paymentType = LSOT
+- Calculate based on 20 days Annual Leave notional
+- Deduct mid-year payments from accrued leave
+- Generate system message
+- Update audit trail
+
+Privacy: Termination data handling per privacy controls
+```
+
+### 4.2 Teacher Aide SJM Rules (MDF Business Rules)
+
+**Standard Job Model (SJM) Rule**
+```
+Rule ID: SFVACATION_SJM_CALC
+Conditions:
+- employmentType starts with 'TA_'
+- schoolType != 'YOUTH_DET'
+- worked >= 12.5% additional hours during term
+
+Actions:
+- Calculate deferred vacation hours
+- Apply Easter/Winter/Spring vacation payment
+- Generate SJM compliance log
+- Update vacation balance
+
+Compliance: SJM 2022 agreement compliance tracking
+```
+
+## 5. Integration Mapping Metadata
+
+### 5.1 BTP Extension Components
+- **Primary Integration**: EC to ECP via custom payroll operation
+- **Data Flow**: EC → BTP → ECP → Payroll Result
+- **Retroactive Processing**: Enabled for all vacation payment types
+- **Audit Trail**: All integration points logged per regulatory requirements
+
+### 5.2 System Integration Points
+- **EC Self-Service**: Vacation hour projection capability
+- **ECP Payroll**: Custom operation for payment calculation
+- **BTP Layer**: Business logic and calculation engine
+- **Foundation Tables**: Service, leave, and assignment data
+
+### 5.3 Integration Validation Framework (Required per Context 3)
+```
+Validation Components:
+- Automated mapping validation
+- Data integrity checks
+- Performance monitoring
+- Error handling and recovery
+- Compliance verification
+
+Monitoring:
+- Real-time integration status
+- Data quality metrics
+- Performance benchmarks
+- Audit trail completeness
+```
+
+## 6. Workflow and Business Rule Metadata
+
+### 6.1 Vacation Payment Workflow (WF_VACATION_PAYMENT)
+```
+Trigger: Payroll period containing vacation start date
+Process: Custom payroll operation execution
+Validation: Eligibility and service calculation
+Output: Payment hours and type determination
+Storage: Custom ECP tables for performance
+Audit: All steps logged per compliance requirements
+
+Steps:
+1. Employee data validation
+2. Eligibility rule evaluation
+3. Payment calculation
+4. Result storage
+5. Audit trail generation
+6. Notification delivery
+```
+
+### 6.2 Calculation Timestamp Management
+- **Field**: `calcTimestamp` (DateTime)
+- **Purpose**: Retroactive processing trigger
+- **Logic**: Recalculate if system date > timestamp
+- **Scope**: All vacation payment scenarios
+- **Audit**: All recalculation events logged
+
+## 7. Security and Permission Metadata
+
+### 7.1 Access Control (RBAC/ABAC per Context 9)
+- **Employee Self-Service**: Summer vacation hour preview (Public data only)
+- **Manager Access**: Vacation payment status and history (Role-based)
+- **Payroll Administrator**: Full configuration and processing (Privileged access)
+- **HR Business Partner**: Configuration and exception handling (Role-based)
+- **Compliance Officer**: Audit trail access (Privileged access)
+
+### 7.2 Data Privacy Considerations
+- **Sensitive Data**: Termination dates, leave balances (Private classification)
+- **Access Logging**: All calculation and modification activities
+- **Audit Trail**: System messages and logged events
+- **Data Classification**: Per IPOLA standards (Context 9)
+
+## 8. Configuration Dependencies
+
+### 8.1 Required Configuration Objects
+- **Payroll Operations**: Custom vacation payment operation
+- **MDF Objects**: Summer vacation projection object
+- **Picklists**: All vacation-related selection values
+- **Business Rules**: Eligibility and calculation logic
+- **Integration Specifications**: EC-ECP-BTP data flow
+
+### 8.2 Compliance Configuration Requirements
+```
+Mandatory Components:
+- Audit trail configuration (per Context 5)
+- Data privacy controls (per IPOLA)
+- Segregation of duties (SoD) rules
+- Compliance dashboard setup
+- Automated validation framework
+- Disaster recovery procedures
+```
+
+## 9. Performance Optimization Metadata
+
+### 9.1 Custom ECP Tables
+- **Purpose**: Store calculated vacation payment data
+- **Structure**: Employee assignment and calculation results
+- **Performance**: Reduce processing time for complex calculations
+- **Retroactive**: Support for historical period recalculation
+- **Audit**: All table operations logged per compliance requirements
+
+### 9.2 Processing Optimization
+- **Batch Processing**: Assignment-level calculation grouping
+- **Caching**: Frequently accessed configuration data
+- **Indexing**: Employee, assignment, and calculation date fields
+- **Partitioning**: School year-based data partitioning
+
+## 10. Compliance and Audit Trail Metadata
+
+### 10.1 Regulatory Compliance Framework
+```
+Standards Applied:
+- IS18:2018 (Data Sphere semantic layer)
+- IPOLA (Queensland Government data handling)
+- Queensland DoE Certified Agreements
+- Australian Privacy Principles
+- SAP SuccessFactors compliance standards
+
+Compliance Tracking:
+- All data access logged
+- Calculation changes audited
+- User activity monitored
+- System changes tracked
+- Performance metrics collected
+```
+
+### 10.2 Audit Trail Specifications
+```
+Required Audit Events:
+- Employee data access
+- Calculation initiation
+- Payment type determination
+- Result storage
+- User modifications
+- System errors
+- Performance metrics
+
+Audit Trail Fields:
+- User ID and role
+- Timestamp (UTC)
+- Action performed
+- Data affected
+- Result of action
+- Compliance status
+```
+
+## 11. Risk Mitigation Metadata
+
+### 11.1 Critical Risk Areas Identified
+```
+Risk Matrix:
+- Audit Trail Compliance: CRITICAL (Regulatory non-compliance)
+- Data Privacy: HIGH (Privacy breach potential)
+- Integration Validation: HIGH (Data integrity failures)
+- Performance: MEDIUM (Processing delays)
+- Security Controls: HIGH (Data breach potential)
+```
+
+### 11.2 Mitigation Strategies
+```
+Immediate Actions:
+1. Implement comprehensive audit trail framework
+2. Deploy automated integration validation
+3. Establish RBAC/ABAC security controls
+4. Create compliance monitoring dashboard
+5. Validate IS18:2018 and IPOLA compliance
+6. Establish disaster recovery procedures
+```
+
+## 12. Metadata Catalog Summary
+
+This vacation payment system represents a complex integration of custom MDF objects, BTP extensions, and ECP payroll operations. The metadata structure supports multiple employment types, complex eligibility rules, and specialized calculation requirements for both teachers and teacher aides. 
+
+**Critical Compliance Requirements:**
+- Complete audit trail implementation per Context 5
+- Automated mapping validation per Context 3
+- RBAC/ABAC security controls per Context 9
+- IS18:2018 and IPOLA compliance requirements
+- Queensland DoE Certified Agreement adherence
+
+**Implementation Status:** RED (High Risk) - Critical compliance gaps identified requiring immediate remediation before proceeding to implementation phase.

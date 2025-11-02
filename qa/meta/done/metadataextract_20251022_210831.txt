@@ -1,0 +1,71 @@
+# Key Information Gaps for Enhanced Context
+
+## Missing Business Domain Knowledge
+
+### Queensland DoE Employment Structures
+- **Complex Assignment Types**: Teachers with multiple simultaneous assignments (permanent at one school, casual at another, relief positions)
+- **Award Classification System**: Teacher levels (A-L), Administrative levels (1-12), lateral movements, temporary classifications
+- **Casual Relief Teacher Patterns**: Irregular hours, multiple schools, rolling 12-month accrual calculations
+- **Academic Calendar Variations**: Different terms for primary/secondary/special schools, year-round schools with different break patterns
+
+### Leave Type Specifics
+- **Holiday vs. Term Leave**: Different leave types during school holidays vs. term time with special provisions
+- **Professional Development Leave**: Pre-approved requirements, different calculation methods, separate from regular leave balances
+- **Emergency Coverage Leave**: Priority workflows, cross-assignment impact considerations
+- **Sabbatical/Study Leave**: Extended approval workflows, temporary position coverage requirements
+
+## Real-World Processing Scenarios
+
+### Peak Load Events
+- **End-of-Year Processing**: 100K+ teachers cashing out leave simultaneously with different deadlines per school type
+- **Industrial Action Periods**: Suspended accruals, modified leave provisions, compliance reporting requirements
+- **School Holiday Periods**: Peak leave request periods with academic calendar constraints
+
+### Retroactive Processing Complexity
+- **Award Change Impact**: Retroactive classification changes affecting historical leave balances and already-taken leave
+- **Parental Leave Returns**: Different return conditions affecting leave balance calculations and award classifications
+- **Payroll Integration**: Synchronization with ECP for retroactive pay adjustments
+
+## Integration Architecture Clarifications Needed
+
+### Data Ownership Hierarchy
+- **EC vs. ECP vs. BTP**: Clear demarcation of which system owns which data elements
+- **Conflict Resolution**: Business rules for resolving data conflicts between systems
+- **Synchronization Frequency**: Real-time vs. batch processing requirements for different data types
+
+### Performance Requirements
+- **Concurrent Processing**: 1000+ employees during peak periods
+- **Response Time SLAs**: <2-3 seconds for leave balance queries during high-load periods
+- **Bulk Operation Handling**: 50K+ calculations per hour during end-of-year processing
+
+## Compliance and Security Requirements
+
+### Queensland Government Specifics
+- **IS18:2018 Compliance**: Audit trail requirements for government entities
+- **Data Sovereignty**: Australian region-only data processing requirements
+- **Industrial Relations Reporting**: Compliance reporting for union/industrial action periods
+- **Disaster Recovery**: Critical periods (school holidays, pay periods) recovery requirements
+
+## User Experience Considerations
+
+### Role-Based Requirements
+- **Multi-Assignment Managers**: Tools to view coverage impact across multiple responsibilities
+- **Mobile-First Design**: Leave requests from schools during breaks, mobile accessibility needs
+- **Dashboard Clarity**: Assignment-level vs. employee-level leave balance visibility
+- **Workflow Prioritization**: Emergency vs. planned leave approval logic
+
+## Technical Architecture Decisions
+
+### Integration Pattern Resolution
+- **Single Primary Pattern**: Event-driven vs. point-to-point vs. hybrid approach
+- **Middleware Selection**: Integration Center vs. Event Mesh vs. Kafka for different use cases
+- **Error Handling Strategy**: Circuit breakers, fallback mechanisms, retry logic
+- **Caching Strategy**: Redis implementation for frequently accessed leave balances
+
+## Critical Business Rules
+
+### Leave Calculation Logic
+- **Assignment-Level Granularity**: How leave taken for one assignment affects other assignments
+- **Prorated Calculations**: Different methods for part-time, casual, and permanent employees
+- **Cross-School Coverage**: Approval workflows considering coverage availability across assignments
+- **Award Transition Handling**: Leave balance preservation during classification changes

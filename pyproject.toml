@@ -15,6 +15,7 @@ dependencies = [
     "httpx",
     "orjson",
     "pydantic>=2.0.0",
+    "fastapi",
 ]
 
 [dependency-groups]

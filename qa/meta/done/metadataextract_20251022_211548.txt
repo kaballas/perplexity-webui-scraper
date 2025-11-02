@@ -1,0 +1,154 @@
+# Key Missing Information for Enhanced Context
+
+## **User Personas and Roles**
+```
+{
+  "primary_users": [
+    {
+      "role": "Classroom Teacher",
+      "requirements": "Multi-school assignment leave tracking, real-time balance visibility, easy leave request process",
+      "pain_points": "Currently unclear how leave is allocated across multiple assignments"
+    },
+    {
+      "role": "School Principal", 
+      "requirements": "Assignment-specific approval capabilities, proportional leave management",
+      "pain_points": "Managing leave for teachers with multiple school assignments"
+    },
+    {
+      "role": "HR Administrator",
+      "requirements": "Consolidated reporting, compliance monitoring, bulk processing",
+      "pain_points": "Handling 100K+ employee leave during peak periods"
+    },
+    {
+      "role": "Payroll Officer",
+      "requirements": "Payroll integration for leave payments, accurate calculations",
+      "pain_points": "Processing leave payments for complex multi-assignment scenarios"
+    }
+  ]
+}
+```
+
+## **Current State and Volume Metrics**
+```
+{
+  "current_state": {
+    "employee_population": "100K+ Queensland DoE employees",
+    "peak_processing_periods": [
+      "Christmas break (2 weeks before holiday) - 80% of teachers take leave",
+      "Term start periods - high assignment changes",
+      "Year-end processing - accrual resets and new year calculations"
+    ],
+    "current_transaction_volumes": {
+      "daily_leave_requests": "TBD - needs quantification",
+      "concurrent_peak_requests": "40,000+ during Christmas period",
+      "assignment_changes_daily": "High volume due to casual relief teachers"
+    }
+  }
+}
+```
+
+## **Queensland-Specific Business Rules**
+```
+{
+  "business_rules": {
+    "multi_assignment_leave": {
+      "allocation_method": "Proportional based on FTE across assignments",
+      "approval_process": "Assignment-specific principal approval required",
+      "balance_tracking": "Employee-level aggregation with assignment-level detail"
+    },
+    "academic_calendar_requirements": {
+      "term_based_accruals": "Leave accrues based on school terms not calendar year",
+      "holiday_restrictions": "Special rules during school holidays and breaks",
+      "year_end_processing": "Complex bulk operations during Christmas break"
+    },
+    "casual_relief_teacher_rules": {
+      "leave_across_schools": "Accrues based on total hours worked across all assignments",
+      "real_time_updates": "Requires immediate processing for new assignment acceptance",
+      "reporting_needs": "Consolidation for end-of-year reporting across multiple schools"
+    }
+  }
+}
+```
+
+## **Performance and Technical Requirements**
+```
+{
+  "performance_requirements": {
+    "response_times": "<3 seconds during normal operations, maintain during peak periods",
+    "concurrent_processing": "40,000+ simultaneous leave requests during Christmas break",
+    "system_availability": "Standard SuccessFactors SLAs with Queensland DoE specific uptime needs",
+    "integration_timing": "Real-time updates for assignment changes and transfers"
+  }
+}
+```
+
+## **Regulatory and Compliance Framework**
+```
+{
+  "compliance_requirements": {
+    "industrial_relations": "Queensland Industrial Relations Act specific provisions",
+    "education_sector_awards": "EBA agreement details affecting leave calculations",
+    "workcover_integration": "Queensland WorkCover requirements for workers' compensation",
+    "privacy_compliance": "Queensland government data protection requirements",
+    "audit_trails": "Specific compliance monitoring and reporting needs"
+  }
+}
+```
+
+## **Integration Touchpoints**
+```
+{
+  "external_systems": [
+    {
+      "system": "OneSchool",
+      "integration_type": "Leave approval triggers student allocation changes",
+      "data_flow": "SuccessFactors → OneSchool for coverage planning"
+    },
+    {
+      "system": "QSuper/ART", 
+      "integration_type": "Leave payouts calculation and reporting",
+      "data_flow": "Employment end → superannuation fund reporting"
+    },
+    {
+      "system": "WorkCover Queensland",
+      "integration_type": "Workers' compensation claim processing",
+      "data_flow": "Claims pause or modify leave accrual calculations"
+    }
+  ]
+}
+```
+
+## **SuccessFactors Configuration Specifics**
+```
+{
+  "configuration_requirements": {
+    "time_types": "Queensland-specific leave types (Personal, Annual, Long Service, etc.)",
+    "accrual_schedules": "Based on Queensland Industrial Relations requirements",
+    "approval_workflows": "Assignment-specific routing with employee-level oversight",
+    "academic_calendar": "Standard SuccessFactors academic calendar with Queensland school terms"
+  }
+}
+```
+
+## **Error Scenarios and Exception Handling**
+```
+{
+  "exception_scenarios": [
+    {
+      "scenario": "Teacher transfer mid-leave period",
+      "requirement": "Split leave across old and new assignments proportionally",
+      "current_gap": "Not addressed in current specification"
+    },
+    {
+      "scenario": "Industrial action days (strikes, work bans)",
+      "requirement": "Process days that affect leave accrual calculations",
+      "current_gap": "No defined processes for industrial actions"
+    },
+    {
+      "scenario": "Parental leave return with reduced FTE",
+      "requirement": "Recalculate leave balances based on new FTE upon return",
+      "current_gap": "Complex FTE adjustment business rules missing"
+    }
+  ]
+}
+```

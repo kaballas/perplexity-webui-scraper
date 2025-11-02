@@ -1,0 +1,390 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 13:00:22
+Topic: ENH-01	Enhancement	Management of Position FTE at Org Level	Medium	33		"Standard SAP only manages FTE at a position level not at an Organisation Unit level.
+As specified in the requirements, a custom solution is required to alert users during position creation/change if the organisation level FTE is exceeded. Alternative is to manage org FTE using reporitng. "
+Max Rounds: 80
+First Speaker: hugging
+================================================================================
+
+================================================================================
+Round 1 - AskQuestions
+================================================================================
+As a curious inquirer, I'd like to ask several clarifying questions about this FTE management enhancement:
+
+**Technical Architecture & Integration:**
+- How will the custom FTE validation at org unit level interact with existing position control mechanisms? Could there be conflicts between position-level FTE enforcement and org unit-level validation?
+- What specific triggers will activate the FTE cap validation - is it only during position creation/changes, or does it also monitor real-time FTE calculations as incumbents are assigned/removed?
+
+**Business Process & User Experience:**
+- When the system detects an FTE cap violation at the org unit level, what happens to the position creation/change workflow? Is it blocked, or does it require additional approval?
+- How will the system handle time-dependent FTE calculations, given that positions and assignments have start/end dates that could affect org unit FTE totals over time?
+
+**Operational Considerations:**
+- What's the expected performance impact of real-time FTE validation across multiple organizational units, especially during high-volume position management activities?
+- How will the system handle organizational restructures or bulk position changes that could temporarily exceed FTE caps but are part of a planned transition?
+
+**Governance & Compliance:**
+- Are there different FTE cap rules for different organizational levels or types within the hierarchy, or is this consistent across all org units?
+- How will audit trails be maintained for FTE cap exceptions or overrides to ensure compliance with budgeted FTE allocations?
+
+These questions aim to explore the practical implications and potential edge cases of implementing this enhancement.
+
+[User Feedback]
+5
+
+================================================================================
+Round 2 - AnswerQuestions
+================================================================================
+Thank you for these excellent and comprehensive questions about the FTE management enhancement. I'll address each area systematically based on the technical requirements and design considerations.
+
+## Technical Architecture & Integration
+
+**Interaction with existing position control mechanisms:**
+The custom FTE validation at the org unit level will operate as a WRICEF Enhancement that supplements existing position control mechanisms rather than replacing them. There will be a layered validation approach:
+- Position-level FTE enforcement will continue to operate for individual position budgeted vs. actual FTE
+- Org unit-level validation will aggregate FTE across all positions within the organizational unit
+- The system will use custom fields in Employee Central to track both position-specific and organizational unit FTE totals
+- Potential conflicts will be managed through a validation hierarchy where org unit validation acts as an additional check before position-level validation
+
+**Validation triggers:**
+The FTE cap validation will be activated by multiple events:
+- Position creation (primary trigger for the enhancement)
+- Position FTE modifications (changes to budgeted FTE values)
+- Incumbent assignment/removal (real-time FTE calculation updates)
+- Organizational unit reassignments (when positions move between org units)
+- The validation will operate in real-time through PeopleForms integration and Azure DataHub synchronization
+
+## Business Process & User Experience
+
+**Workflow behavior upon violation detection:**
+When the system detects an FTE cap violation, the position creation workflow will be **blocked** with the following user experience:
+- A clear warning message will display the current FTE total, the proposed increase, and the remaining available FTE capacity
+- The system will prevent the position save until either the FTE is reduced or proper exception approval is obtained
+- For planned exceptions, a separate approval workflow will be triggered to document business justification
+- The validation will be configurable to allow different behaviors (warning vs. hard block) based on organizational unit type
+
+**Time-dependent FTE calculations:**
+The system will handle temporal FTE calculations through:
+- Date-effective FTE calculations that consider position and assignment start/end dates
+- Rolling FTE totals that account for positions that may be active in the future or have past end dates
+- Scenario planning capabilities that allow users to model FTE impacts over time
+- The Azure DataHub integration will maintain historical FTE data for trend analysis and forecasting
+
+## Operational Considerations
+
+**Performance impact:**
+The real-time validation architecture includes several performance optimization strategies:
+- Caching mechanisms for frequently accessed org unit FTE totals
+- Asynchronous processing for complex multi-level FTE calculations
+- Database indexing on organizational unit hierarchies and FTE-related fields
+- Batch processing capabilities for high-volume scenarios during month-end closing
+- The system will be designed to handle validation within 2-3 seconds for standard use cases
+
+**Organizational restructuring handling:**
+For bulk changes and restructures, the system will include:
+- A "planned state" mode that allows temporary cap exceedances during restructuring
+- Workflow-based exception handling for approved organizational changes
+- Rollback capabilities if restructuring plans change
+- Parallel processing of FTE calculations during bulk operations to maintain system responsiveness
+
+## Governance & Compliance
+
+**Different FTE cap rules by organizational level:**
+Yes, the system will support configurable FTE cap rules including:
+- Different cap types (budgeted vs. approved vs. actual) at various organizational levels
+- Variations based on organizational unit type (schools vs. regional offices vs. central administration)
+- Time-based rule variations (fiscal year vs. calendar year considerations)
+- Exception rules for special circumstances (emergency staffing, temporary assignments)
+- The Configuration Workbook will document these variations and their application logic
+
+**Audit trail maintenance:**
+Comprehensive audit capabilities will include:
+- Complete change history for all FTE-related modifications
+- User identification and timestamp for all FTE cap violations and overrides
+- Business justification capture for any approved exceptions
+- Automated compliance reporting through Microsoft Fabric integration
+- Integration with existing audit frameworks within the Queensland DoE environment
+- Export capabilities for external audit requirements
+
+The integration with Azure DataHub ensures that all validation logic and audit trails are maintained consistently across the hybrid architecture, supporting both real-time operational needs and long-term compliance requirements.
+
+These design considerations ensure the enhancement provides robust FTE cap validation while maintaining system performance and supporting the complex organizational structure of the Queensland Department of Education.
+
+================================================================================
+Round 3 - FunctionalSpec
+================================================================================
+# Functional Specifications: Organizational Unit Level FTE Management Enhancement
+
+## 1. Executive Summary
+
+### 1.1 Business Context
+Standard SAP SuccessFactors Employee Central manages Full-Time Equivalent (FTE) allocation at the position level only. The Queensland Department of Education requires enhanced functionality to manage and validate FTE allocations at the organizational unit level to ensure compliance with budgeted staffing levels and operational planning requirements.
+
+### 1.2 Functional Gap
+- **Standard SAP Behavior**: FTE control exists only at position level via positionControlled attribute
+- **Business Requirement**: Real-time validation and monitoring of FTE totals across organizational units
+- **Solution Approach**: Custom WRICEF Enhancement using SAP Build Apps and Azure DataHub integration
+
+## 2. Business Requirements Analysis
+
+### 2.1 Core Business Requirements
+
+#### 2.1.1 FTE Cap Validation
+- **Requirement ID**: REQ-FTE-001
+- **Description**: System must validate that proposed position FTE allocations do not exceed organizational unit FTE caps
+- **Priority**: High
+- **Acceptance Criteria**: Position creation/modification blocked when org unit FTE cap would be exceeded
+
+#### 2.1.2 Real-time FTE Calculation
+- **Requirement ID**: REQ-FTE-002  
+- **Description**: System must calculate and display current FTE utilization for each organizational unit
+- **Priority**: High
+- **Acceptance Criteria**: FTE totals update in real-time as positions are created/modified/assigned
+
+#### 2.1.3 Time-Dependent FTE Management
+- **Requirement ID**: REQ-FTE-003
+- **Description**: System must account for position start/end dates in FTE calculations
+- **Priority**: Medium
+- **Acceptance Criteria**: FTE calculations reflect date-effective positions and assignments
+
+### 2.2 User Personas and Roles
+
+#### 2.2.1 HR Business Partners
+- **Responsibilities**: Position planning, FTE allocation oversight
+- **Key Activities**: Position creation, FTE validation, exception management
+- **System Access**: Full position management, FTE reporting, approval workflows
+
+#### 2.2.2 Organizational Planners
+- **Responsibilities**: Budget planning, organizational design
+- **Key Activities**: FTE forecasting, capacity planning, scenario modeling
+- **System Access**: FTE reporting, planning tools, configuration access
+
+#### 2.2.3 System Administrators
+- **Responsibilities**: System configuration, user management, integration maintenance
+- **Key Activities**: Configuration management, integration monitoring, security administration
+- **System Access**: Configuration tools, integration monitoring, audit trails
+
+## 3. Functional Design Specifications
+
+### 3.1 Enhanced Data Model
+
+#### 3.1.1 Custom Fields in Employee Central
+```
+Object: Organization Unit
+- Custom Field: OrgUnit_FTETotal (Decimal, 10,2)
+- Custom Field: OrgUnit_FTECap (Decimal, 10,2)  
+- Custom Field: OrgUnit_FTEUtilization (Decimal, 10,2)
+- Custom Field: OrgUnit_FTEValidationEnabled (Boolean)
+
+Object: Position
+- Custom Field: Position_OrgUnitFTEImpact (Decimal, 10,2)
+- Custom Field: Position_AffectsOrgUnitFTE (Boolean)
+```
+
+#### 3.1.2 SAP Build Apps Custom Objects
+```
+Object: FTEValidationLog
+- Fields: ValidationDate, OrgUnit, PositionID, ProposedFTE, CurrentTotal, CapLimit, ValidationResult
+
+Object: FTEExceptionRequest
+- Fields: RequestID, OrgUnit, PositionID, ExceptionReason, Justification, ApprovalStatus, Approver
+```
+
+### 3.2 Business Rules and Validation Logic
+
+#### 3.2.1 Primary Validation Rule
+```
+IF OrgUnit_FTEValidationEnabled = TRUE
+THEN
+    CalculatedTotalFTE = SUM(Position_BudgetedFTE for all positions in org unit)
+    IF CalculatedTotalFTE > OrgUnit_FTECap
+    THEN
+        Block position creation/modification
+        Display error message with current total and cap limit
+    END IF
+END IF
+```
+
+#### 3.2.2 Time-Dependent Validation
+```
+FOR each position in org unit
+    IF position is active during validation period (start date <= current date <= end date)
+    THEN
+        include in FTE calculation
+    END IF
+END FOR
+```
+
+#### 3.2.3 Hierarchical Validation
+```
+IF org unit has parent organizational units
+THEN
+    validate FTE cap at each parent level
+    ensure compliance with parent unit caps
+END IF
+```
+
+### 3.3 User Interface Requirements
+
+#### 3.3.1 Position Creation Interface
+- **Enhancement**: Real-time FTE utilization display during position creation
+- **Field**: Current org unit FTE total and remaining capacity
+- **Warning**: Visual indicators when approaching FTE cap (80%, 90%, 95% thresholds)
+- **Error**: Blocking validation when cap would be exceeded
+
+#### 3.3.2 Organizational Unit Dashboard
+- **Widget**: FTE utilization by organizational unit
+- **Chart**: Visual representation of FTE usage vs. capacity
+- **Drill-down**: Ability to view individual positions contributing to FTE totals
+- **Export**: Excel/PDF export capabilities for reporting
+
+#### 3.3.3 Exception Management Interface
+- **Workflow**: Structured exception request and approval process
+- **Form**: Business justification capture for FTE cap overrides
+- **Tracking**: Exception status and approval history
+- **Reporting**: Exception summary and trend analysis
+
+## 4. Integration Specifications
+
+### 4.1 SAP Build Apps Integration
+- **Platform**: Low-code development using PeopleForms methodology
+- **Function**: Custom validation logic and exception management
+- **Interface**: Fiori-compliant user experience
+- **Security**: Integration with SAP SuccessFactors authentication
+
+### 4.2 Azure DataHub Integration
+- **Purpose**: Real-time FTE data aggregation and historical tracking
+- **Frequency**: Event-driven updates for position changes
+- **Data Flow**: Employee Central → Azure DataHub → Validation Engine
+- **Recovery**: Error handling and retry mechanisms for failed updates
+
+### 4.3 Microsoft Fabric Integration
+- **Purpose**: Advanced analytics and compliance reporting
+- **Data Source**: Azure DataHub FTE validation logs
+- **Reports**: FTE utilization dashboards, exception reports, compliance metrics
+
+## 5. Business Process Flows
+
+### 5.1 Position Creation with FTE Validation
+
+```mermaid
+flowchart TD
+    A[User Initiates Position Creation] --> B[Validate Org Unit FTE Cap]
+    B --> C{FTE Cap Exceeded?}
+    C -->|No| D[Allow Position Creation]
+    C -->|Yes| E[Display Error Message]
+    E --> F[User Modifies FTE or Requests Exception]
+    F --> G{Validated Again?}
+    G -->|Yes| D
+    G -->|No| H[Block Creation]
+```
+
+### 5.2 Exception Management Process
+
+```mermaid
+flowchart TD
+    A[Exception Required] --> B[Create Exception Request]
+    B --> C[Capture Business Justification]
+    C --> D[Submit for Approval]
+    D --> E[Approval Workflow]
+    E --> F{Approved?}
+    F -->|Yes| G[Temporary FTE Cap Override]
+    F -->|No| H[Return to Position Creation]
+    G --> I[Update Validation Status]
+    I --> J[Complete Position Creation]
+```
+
+## 6. Security and Authorization
+
+### 6.1 Role-Based Access Control
+- **Position Creator**: Can view FTE utilization, create positions within cap
+- **FTE Manager**: Can override FTE validation with proper authorization
+- **System Administrator**: Full access to configuration and exception management
+- **Auditor**: Read-only access to validation logs and audit trails
+
+### 6.2 Data Security
+- **Encryption**: All FTE data encrypted in transit and at rest
+- **Audit Trail**: Complete logging of all FTE-related changes
+- **Compliance**: Adherence to IS18:2018 security standards
+- **Access Monitoring**: Real-time monitoring of unauthorized access attempts
+
+## 7. Reporting and Analytics Requirements
+
+### 7.1 Standard Reports
+- **FTE Utilization by Organizational Unit**: Current status and trends
+- **FTE Cap Violations**: Historical violations and resolution status  
+- **Exception Summary**: Exception requests, approvals, and business justification
+- **Capacity Planning**: Forecasted FTE requirements vs. available capacity
+
+### 7.2 Ad-hoc Analytics
+- **Scenario Modeling**: "What-if" analysis for organizational changes
+- **Trend Analysis**: Historical FTE utilization patterns
+- **Compliance Dashboard**: Real-time compliance status across all organizational units
+
+## 8. Testing Scenarios
+
+### 8.1 Unit Testing
+- **Test Case**: Position creation within FTE cap
+- **Test Case**: Position creation exceeding FTE cap
+- **Test Case**: Position modification affecting org unit FTE
+- **Test Case**: Time-dependent FTE calculations
+
+### 8.2 Integration Testing
+- **Test Case**: Real-time validation during high-volume position creation
+- **Test Case**: Azure DataHub synchronization accuracy
+- **Test Case**: Exception approval workflow functionality
+- **Test Case**: Hierarchical FTE validation across org unit levels
+
+### 8.3 Performance Testing
+- **Test Case**: Validation response time under normal load
+- **Test Case**: System performance during bulk position operations
+- **Test Case**: Concurrent user scenarios with multiple org unit validations
+- **Test Case**: DataHub integration performance under peak conditions
+
+## 9. Configuration Requirements
+
+### 9.1 Configuration Workbook Dependencies
+- **Section**: Position Management Configuration
+- **Items**: FTE validation rules, cap thresholds, exception workflows
+- **Owner**: EC Architect, Configuration Manager
+- **Timeline**: Realize Phase - Design Stage
+
+### 9.2 Integration Specifications
+- **Source**: Employee Central Position Management
+- **Target**: Azure DataHub, SAP Build Apps
+- **Protocol**: OData, REST APIs
+- **Schedule**: Real-time event-driven with batch fallback
+
+## 10. Risk and Mitigation Strategies
+
+### 10.1 Technical Risks
+- **Risk**: Performance degradation during validation
+- **Mitigation**: Caching, indexing, and asynchronous processing
+- **Owner**: Technical Architect
+
+### 10.2 Business Risks
+- **Risk**: User resistance to new validation processes
+- **Mitigation**: Comprehensive training and change management
+- **Owner**: Change Management Lead
+
+### 10.3 Compliance Risks
+- **Risk**: Non-compliance with FTE budget constraints
+- **Mitigation**: Mandatory validation with exception workflows
+- **Owner**: Compliance Officer
+
+## 11. Success Criteria and Acceptance Criteria
+
+### 11.1 Functional Success Criteria
+- [ ] 100% of position creations validated against org unit FTE caps
+- [ ] Real-time FTE calculation accuracy maintained at 99.9%
+- [ ] Exception approval workflow completed within 48 hours
+- [ ] User satisfaction score of 85% or higher
+
+### 11.2 Technical Success Criteria
+- [ ] Validation response time under 3 seconds
+- [ ] System availability maintained at 99.5% or higher
+- [ ] Data accuracy maintained at 99.9% or higher
+- [ ] Integration error rate maintained below 0.1%
+
+This functional specification provides the comprehensive framework for implementing organizational unit level FTE management while maintaining alignment with standard SAP SuccessFactors functionality and Queensland Department of Education operational requirements.

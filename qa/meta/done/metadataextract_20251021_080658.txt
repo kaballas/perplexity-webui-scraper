@@ -1,0 +1,43 @@
+# Key Learnings from HCMS Technical Architecture Debate
+
+## 1. **Dual-Pillar Architecture Success**
+- **Learning**: The hybrid approach combining SAP SuccessFactors (operational) with Microsoft Fabric HR RG (master data/analytics) creates a robust foundation
+- **Impact**: Separates transactional operations from strategic data management, enabling scalability and governance
+
+## 2. **Phased Cutover Strategy Validates Risk Management**
+- **Learning**: Early HR RG implementation before SAP go-live reduces complexity and enables gradual downstream system transitions
+- **Impact**: Avoids big-bang approach, allowing for earlier testing and stabilization of interfaces
+
+## 3. **Integration Complexity is Underestimated**
+- **Learning**: 46+ downstream systems with complex legacy-to-cloud data flows require detailed mapping beyond current documentation
+- **Impact**: **Critical blocking issue identified** - integration dependencies not fully mapped, requiring immediate attention
+
+## 4. **Legacy Logic Preservation Critical**
+- **Learning**: 28-year-old COBOL/Oracle TSS system contains embedded business logic that must be reverse-engineered into modern platforms
+- **Impact**: Risk of losing critical payroll and HR business rules during transformation
+
+## 5. **Unified DevOps Governance Model Works**
+- **Learning**: Cross-platform governance using SAP ALM and Azure DevOps with linked defect management creates consistent traceability
+- **Impact**: Maintains compliance and governance across hybrid cloud environments
+
+## 6. **Security Framework Alignment Achieved**
+- **Learning**: Queensland Government IS18:2018 and IPOLA compliance integrated across both platforms using multiple security layers
+- **Impact**: Ensures regulatory compliance while maintaining operational security
+
+## 7. **Parallel Testing Strategy is Essential**
+- **Learning**: Parallel Payroll Run Testing (PPRT) with identical inputs across legacy and new systems is critical for payroll validation
+- **Impact**: Ensures data accuracy and business continuity during transition
+
+## 8. **Master Data Management as Single Source of Truth**
+- **Learning**: HR RG as "Golden Record" feeding Enterprise Data Platform enables strategic analytics while serving operational needs
+- **Impact**: Eliminates data silos and provides authoritative data source for the organization
+
+## 9. **Documentation Gaps Create Project Risk**
+- **Learning**: Critical integration mappings and API dependencies remain undocumented, blocking design phase progression
+- **Impact**: **High-severity blocking issue** requiring immediate documentation and validation
+
+## 10. **Technology Stack Validation Confirmed**
+- **Learning**: End-to-end proof of concept with 1,000+ employee records and 3,000+ tables successfully demonstrated
+- **Impact**: Validates technical approach while highlighting need for comprehensive integration documentation
+
+**Key Takeaway**: While the technical architecture is sound, immediate focus on integration documentation and legacy data mapping is required to de-risk the program.

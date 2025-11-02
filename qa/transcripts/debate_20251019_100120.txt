@@ -1,0 +1,279 @@
+Debate Transcript
+================================================================================
+Date: 2025-10-19 10:01:21
+Topic: 3668696 - "There is an invalid business rule with code **** for the trigger absence event notification in the Employee Time object definition" is raised in Time Sheet UI and Job Info's Time Management section for time sheet
+SAP Knowledge Base Article, Version: 2, Released On: 16.10.2025
+
+
+
+
+
+Component
+LOD-SF-EC-TMS
+Priority
+Normal
+Category
+Bug Filed
+Release Status
+Released to Customer
+Rated Helpful
+(0 people)
+Quality Rating
+
+SAP Note/KBA Number
+
+Description
+Products
+Attachments
+Attributes
+Available Languages
+Rate this document
+Description
+Symptom
+After 2H 2025 release, it is noticed the error "There is an invalid business rule with code **** for the trigger absence event notification in the Employee Time object definition" is raised when accessing time sheet UI.
+
+
+Same error can also be found in Job Info's Time section in People Profile.
+
+
+And the Time Sheet Summary card on Latest People Profile would also fail with error message "Looks like something went wrong" with Error Code: 412.
+
+
+Environment
+SAP SuccessFactors Employee Central - Time Sheet
+SAP SuccessFactors Time Tracking
+Cause
+aThere is a business rule assigned to Employee Time, where the execution of rule function Trigger Worker Absence Event() is configured under an always true condition like below.
+
+
+The rule function Trigger Worker Absence Event() should only be used for absences, so if this function configured in the business rule like above under an always true condition, our check will raise error and block the access to time sheet.
+This is the expected outcome.
+
+However before the 2H 2025 release, the time sheet function only checks the currently valid time slot of the business rule, and raises error only when the currently valid time slot of the business rule has a wrong configuration like above.
+But after 2H 2025 release, the time sheet function also checks the previous time slot which is not valid on the current day, and raises error if this out-of-dated time slot executes the rule function Trigger Worker Absence Event() under an always true condition.
+We are aware of this and are investigating and discussing whether the new logic or the old logic should be persisted.
+
+
+
+
+Resolution
+First of all, please understand the rule function Trigger Worker Absence Event() should only be used for absence, so usually an IF condition like below is needed.
+
+Please make sure that, the execution of rule function Trigger Worker Absence Event() is not under an always true condition.
+
+As for the checking logic on the time slots within the business rule, we will keep you updated in this KBA with progress on from our end.
+
+Keywords
+KI2H2025, view, time sheet, timesheet, for..., access, UI, TMS, TTR, tracking, business rule, Trigger Worker Absence Event, PPX, people, profile, management, section, Job, Info, looks like something went wrong, PP3, 412, Trigger Worker Absence Event, always, true
+
+Products
+Products
+SAP SuccessFactors Employee Central all versions
+SAP SuccessFactors Time Tracking all versions
+Attachments
+(only available in English)
+File Name
+File Size
+Pasted image.png	92 KB
+Attributes
+Key
+Value
+Alternative ID	KB1285349
+Other Components	OnDemand > SuccessFactors > Time Tracking > Time Sheet (LOD-SF-TTR-TMS)
+Requires Action	0
+Max Rounds: 80
+First Speaker: hugging
+================================================================================
+
+================================================================================
+Round 1 - MetadataExtract
+================================================================================
+# SAP SuccessFactors Metadata Extraction Report
+## Business Rule and Time Management Object Analysis
+
+### Executive Summary
+This metadata extraction focuses on the business rule configuration and object definitions related to the identified issue with invalid business rules in Employee Time object definitions, specifically involving the `Trigger Worker Absence Event()` function.
+
+### 1. Affected System Components Metadata
+
+#### 1.1 Core Objects
+- **Employee Time Object** (TMS)
+  - Object Type: Time Sheet Entity
+  - Related Modules: Time Tracking, Employee Central
+  - Primary Fields: timeSheetId, status, startDate, endDate, timeEntries
+  - Temporal Management: Effective dating support for time sheet records
+
+- **Job Information Object** (JobInfo)
+  - Object Type: Employment Assignment
+  - Time Management Section: Embedded time tracking configuration
+  - Key Fields: timeType, timeProfile, timeManagement
+  - Relationship: One-to-Many with Employee Time objects
+
+#### 1.2 Business Rule Metadata
+- **Invalid Rule Configuration**
+  - Rule Function: `Trigger Worker Absence Event()`
+  - Trigger Context: Absence Event Notification
+  - Object Assignment: Employee Time
+  - Condition Logic: Always True (Invalid Configuration)
+  - Error Code: 412 (Precondition Failed)
+
+### 2. Business Rule Object Definition Metadata
+
+#### 2.1 Rule Configuration Structure
+```
+BusinessRule Object:
+- ruleId: **** (masked code)
+- ruleType: Validation/Action Rule
+- targetObject: EmployeeTime
+- executionContext: onSave/onChange
+- timeValidity: Multiple time slots supported
+- functionLibrary: Time Management Functions
+- conditionLogic: Boolean expression evaluation
+```
+
+#### 2.2 Rule Function Metadata
+- **Function Name**: `Trigger Worker Absence Event()`
+- **Function Category**: Absence Management
+- **Valid Contexts**: Absence objects only
+- **Parameters**: Worker ID, Event Type, Date Range
+- **Restrictions**: Should not be used in Time Sheet context
+- **Validation Scope**: Cross-object dependency check
+
+### 3. Time Management Data Model Metadata
+
+#### 3.1 Employee Time Object Schema
+```
+EmployeeTime:
+  Fields:
+    - timeSheetId (String, Required)
+    - workerId (String, Required)
+    - status (Picklist: SUBMITTED, APPROVED, REJECTED)
+    - startDate (Date, Required)
+    - endDate (Date, Required)
+    - createdDate (DateTime)
+    - lastModified (DateTime)
+    - timeEntries (Collection)
+  
+  Relationships:
+    - Worker (Employee Central)
+    - Cost Center (Foundation Object)
+    - Pay Component (Foundation Object)
+```
+
+#### 3.2 Job Information Time Section
+```
+JobInfo.TimeManagement:
+  Fields:
+    - timeProfile (String)
+    - timeType (Picklist)
+    - timeAccounting (Boolean)
+    - timeRecordingMethod (Picklist)
+    - absenceEntitlement (String)
+```
+
+### 4. UI Component Metadata
+
+#### 4.1 Time Sheet UI Elements
+- **Component**: Time Sheet Summary Card
+- **Location**: People Profile (PP3)
+- **Error Handling**: Error Code 412
+- **Failure Message**: "Looks like something went wrong"
+- **Access Points**: 
+  - Direct Time Sheet UI
+  - Job Info Time Section
+  - People Profile Summary Card
+
+#### 4.2 People Profile Integration
+- **UI Framework**: PPX/PP3
+- **Component Type**: Embedded Time Management Section
+- **Data Source**: EmployeeTime OData Service
+- **Integration Method**: Cross-object lookup
+
+### 5. Business Rule Validation Metadata
+
+#### 5.1 Rule Execution Context
+- **Pre-2H 2025 Logic**: Current time slot validation only
+- **Post-2H 2025 Logic**: All time slots validation (including expired)
+- **Validation Scope**: 
+  - Active time slots: Checked for function appropriateness
+  - Inactive time slots: Now also checked (new behavior)
+  - Historical time slots: Effective dating validation
+
+#### 5.2 Rule Function Restrictions
+```
+Function: Trigger Worker Absence Event()
+  Valid Target Objects: ["Absence", "AbsenceBalance", "AbsenceType"]
+  Invalid Target Objects: ["EmployeeTime", "TimeSheet", "TimeEntry"]
+  Context Requirements: Absence-specific workflow
+  Permission Scope: Absence Management Role
+```
+
+### 6. Error and Validation Metadata
+
+#### 6.1 Error Code Definition
+- **HTTP Code**: 412 (Precondition Failed)
+- **Error Context**: Business rule validation failure
+- **Message Template**: "There is an invalid business rule with code [RULE_CODE] for the trigger absence event notification in the [OBJECT_NAME] object definition"
+- **Logging Level**: Error
+- **Audit Trail**: Yes, with rule execution details
+
+#### 6.2 Validation Rules
+```
+Validation Rule: TMS_Absence_Function_Validation
+  Target: EmployeeTime business rules
+  Check: Function usage appropriateness
+  Scope: All effective-dated rule versions
+  Action: Block UI access if invalid
+  Exception Handling: Detailed error message
+```
+
+### 7. Configuration Dependencies
+
+#### 7.1 System Dependencies
+- **Employee Central**: Core employee data
+- **Time Tracking**: Time entry processing
+- **Absence Management**: Absence event processing
+- **Workflow Engine**: Rule execution processing
+
+#### 7.2 Integration Points
+- **OData Services**: EmployeeTime, JobInfo, Absence
+- **Business Rule Engine**: Validation and execution
+- **UI Framework**: PPX/PP3 rendering
+- **Security Framework**: Access control validation
+
+### 8. Recommended Metadata Updates
+
+#### 8.1 Immediate Actions Required
+1. **Rule Audit**: Identify all business rules using `Trigger Worker Absence Event()` in Time contexts
+2. **Condition Review**: Verify non-always-true conditions for absence functions
+3. **Time Slot Cleanup**: Remove invalid historical rule configurations
+4. **Validation Update**: Align rule configuration with intended usage
+
+#### 8.2 Metadata Documentation Updates
+- Update business rule function usage guidelines
+- Document time slot validation behavior changes
+- Create cross-object function usage matrix
+- Establish validation rule catalog
+
+### 9. Technical Specifications
+
+#### 9.1 API Endpoints Affected
+- `/odata/v2/EmployeeTime` - Time sheet data access
+- `/odata/v2/BusinessRule` - Rule configuration access
+- `/odata/v2/JobInfo` - Job information time section
+- UI rendering endpoints with error handling
+
+#### 9.2 Performance Considerations
+- Multiple time slot validation impact on UI response time
+- Business rule execution overhead
+- Cross-object validation complexity
+- Historical data validation requirements
+
+This metadata extraction provides comprehensive information for understanding and resolving the business rule validation issue in the Time Management context.
+
+================================================================================
+Debate Summary
+================================================================================
+Stop Reason: user_stop
+Total Rounds: 1
+Total Characters: 6466

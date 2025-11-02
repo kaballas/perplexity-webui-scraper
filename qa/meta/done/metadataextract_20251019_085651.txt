@@ -1,0 +1,267 @@
+# SAP SuccessFactors Organization Design Metadata Extraction Report
+
+## Executive Summary
+This metadata extraction report analyzes the organizational design requirements for the Queensland Department of Education HCMS implementation, focusing on the metadata structures required to support the 38 functional requirements for organization design management.
+
+## 1. Core Foundation Objects Metadata
+
+### 1.1 Organizational Units (FODepartment)
+- **Object Name**: FODepartment
+- **Purpose**: Support organizational units including department, divisions, regions, schools/centres, offices, branches, business units
+- **Key Fields**:
+  - `externalCode` - Org Unit ID
+  - `name` - Org Unit Title
+  - `status` - Status (Active/Inactive)
+  - `headOfUnit` - Head Position ID
+  - `costCenter` - Cost Centre reference
+  - `location` - Location reference
+  - `transferRating` - Transfer Rating
+  - `startDate`/`endDate` - Date effective management
+- **Temporal Management**: Effective dating support for historical organizational changes
+- **Required for**: FR-1, FR-2, FR-3, FR-5
+
+### 1.2 Job Foundation Object (FOJobCode)
+- **Object Name**: FOJobCode
+- **Purpose**: Support job management with date-effective capabilities
+- **Key Fields**:
+  - `externalCode` - Job ID
+  - `jobFamily` - Job Family reference
+  - `jobFunction` - Job Function
+  - `jobRoleL1` - Job Role Level 1
+  - `jobRoleL2` - Job Role Level 2
+  - `anzscoCode` - ANZSCO Code
+  - `anzscoName` - ANZSCO Name
+  - `certifiedAgreement` - Certified Agreement
+  - `startDate`/`endDate` - Date effective management
+- **Temporal Management**: Effective dating support for job changes
+- **Required for**: FR-9, FR-10, FR-11, FR-12, FR-13
+
+### 1.3 Cost Center Foundation Object (FOCostCenter)
+- **Object Name**: FOCostCenter
+- **Purpose**: Support cost center management
+- **Key Fields**:
+  - `externalCode` - Cost Center ID
+  - `name` - Cost Center Name
+  - `startDate`/`endDate` - Date effective management
+- **Required for**: FR-1, FR-2, FR-15
+
+### 1.4 Location Foundation Object (FOLocation)
+- **Object Name**: FOLocation
+- **Purpose**: Support location/centre management
+- **Key Fields**:
+  - `externalCode` - Location ID
+  - `name` - Location Name
+  - `address` - Location Address
+  - `contactDetails` - Location Contact Details
+  - `latitude`/`longitude` - Geographic coordinates
+  - `startDate`/`endDate` - Date effective management
+- **Temporal Management**: Effective dating support for location changes
+- **Required for**: FR-1, FR-34, FR-35, FR-36
+
+## 2. Master Data Framework (MDF) Objects Metadata
+
+### 2.1 Position MDF Object
+- **Object Name**: Position
+- **Purpose**: Support position management with comprehensive attributes
+- **Key Fields**:
+  - `positionId` - Position ID
+  - `name` - Position Title
+  - `localName` - Locally Known As
+  - `jobCode` - Job Profile reference
+  - `reportsTo` - Reports To
+  - `supervisorPosition` - Supervisor Position
+  - `maxHeadCount` - Number of Direct Reports
+  - `budgetedFTE` - Budgeted FTE
+  - `actualFTE` - Actual FTE
+  - `headCount` - Number of Incumbents
+  - `vacant` - Vacant (Y/N)
+  - `positionType` - Position Type
+  - `startDate`/`endDate` - Start/End Date
+  - `fundingType` - Funding Type
+  - `department` - Organisational Unit
+  - `location` - Location reference
+  - `costCenter` - Cost Centre reference
+  - `payGrade` - Award/Classification
+  - `startDate`/`endDate` - Date effective management
+- **Temporal Management**: Effective dating support for position changes
+- **Required for**: FR-1, FR-15, FR-18, FR-19, FR-21, FR-23
+
+### 2.2 Concurrent Employment MDF Object
+- **Object Name**: ConcurrentEmployment
+- **Purpose**: Support concurrent employment scenarios
+- **Key Fields**:
+  - `employeeId` - Employee ID
+  - `positionId` - Position ID
+  - `assignmentId` - Assignment identifier
+  - `ftePercentage` - FTE percentage for concurrent assignment
+  - `awardType` - Award type for concurrent employment
+  - `startDate`/`endDate` - Date effective management
+- **Temporal Management**: Effective dating for concurrent employment periods
+- **Required for**: FR-20, FR-30, FR-31
+
+### 2.3 Position Allowance MDF Object
+- **Object Name**: PositionAllowance (Custom MDF)
+- **Purpose**: Support position-based allowances
+- **Key Fields**:
+  - `positionId` - Position ID reference
+  - `allowanceType` - Allowance type (e.g., Site Specific Allowance)
+  - `allowanceAmount` - Allowance amount
+  - `startDate`/`endDate` - Date effective management
+- **Required for**: FR-15, FR-32
+
+## 3. Employee Central Integration Metadata
+
+### 3.1 JobInfo Object Integration
+- **Object Name**: JobInfo
+- **Purpose**: Support employee position assignments and concurrent employment
+- **Key Fields**:
+  - `position` - Position reference
+  - `jobCode` - Job code reference
+  - `startDate`/`endDate` - Assignment dates
+  - `eventReason` - Movement type for concurrent employment
+  - `employmentType` - Employment type for concurrent scenarios
+- **Required for**: FR-20, FR-30, FR-31, FR-33
+
+### 3.2 EmploymentInfo Object
+- **Object Name**: EmploymentInfo
+- **Purpose**: Track employment history and concurrent assignments
+- **Key Fields**:
+  - `employmentStatus` - Employment status
+  - `startDate`/`endDate` - Employment dates
+  - `position` - Position reference for each assignment
+- **Required for**: FR-20, FR-30, FR-31
+
+## 4. Picklist Metadata for Organizational Design
+
+### 4.1 Position Type Picklist
+- **Picklist Name**: positionType
+- **Values**: 
+  - Permanent
+  - Temporary
+  - Contract
+  - Casual
+  - Volunteer
+- **Required for**: FR-15, FR-28
+
+### 4.2 Funding Type Picklist
+- **Picklist Name**: fundingType
+- **Values**:
+  - Direct Government Funding
+  - Self-Funded
+  - Project-Based Funding
+  - Contract Funding
+- **Required for**: FR-15, FR-21, FR-23
+
+### 4.3 Position Status Picklist
+- **Picklist Name**: positionStatus
+- **Values**:
+  - Active
+  - Inactive
+  - Vacant
+  - Pending Approval
+  - Abolished
+- **Required for**: FR-15, FR-17, FR-19
+
+## 5. Organizational Chart Metadata
+
+### 5.1 Organizational Structure Hierarchy
+- **Object**: FODepartment with parent-child relationships
+- **Key Fields**:
+  - `parentCode` - Parent organizational unit
+  - `hierarchyLevel` - Organizational hierarchy level
+  - `hierarchyCode` - Complete hierarchy path
+- **Required for**: FR-6, FR-7, FR-8
+
+### 5.2 Position Hierarchy Management
+- **Object**: Position with reporting relationships
+- **Key Fields**:
+  - `reportsTo` - Manager position reference
+  - `supervisorPosition` - Direct supervisor
+  - `orgLevel` - Organizational level in hierarchy
+- **Required for**: FR-6, FR-7, FR-8
+
+## 6. Workflow and Business Rule Metadata
+
+### 6.1 Position Creation Workflow
+- **Workflow Name**: Position Creation Approval Process
+- **Trigger**: Position creation/update
+- **Conditions**: 
+  - Permanent positions → JADE approval
+  - SES positions → Executive approval
+  - Self-funded positions → School manager approval
+- **Required for**: FR-28, FR-23
+
+### 6.2 FTE Cap Validation Rule
+- **Business Rule Name**: FTESpendingRule
+- **Purpose**: Validate FTE limits against organizational units
+- **Logic**: Compare total budgeted FTE against approved FTE cap
+- **Required for**: FR-17, FR-24, FR-25, FR-26
+
+## 7. Reporting and Analytics Metadata
+
+### 7.1 Organizational Reporting Objects
+- **Report Object**: OrganizationReportingCube
+- **Dimensions**:
+  - Organizational Unit
+  - Job Family/Function
+  - Position Type
+  - FTE/Headcount
+  - Location
+  - Cost Center
+- **Measures**:
+  - Total FTE
+  - Available FTE
+  - Vacant Positions
+  - Occupied Positions
+- **Required for**: FR-38
+
+### 7.2 Vacancy Management Report
+- **Object**: VacancyManagementReport
+- **Fields**:
+  - Position ID
+  - Position Title
+  - Vacant Status
+  - Days Vacant
+  - FTE Value
+  - Organizational Unit
+- **Required for**: FR-27, FR-38
+
+## 8. Integration Metadata for CIS
+
+### 8.1 CIS Integration Endpoints
+- **API**: OData Integration Service
+- **Entity Sets**:
+  - FODepartment (for organizational units)
+  - FOJobCode (for job data)
+  - FOLocation (for location data)
+  - Position (for position data)
+- **Required for**: FR-4
+
+## 9. Custom Fields and Extensions
+
+### 9.1 ANZSCO Mapping Fields
+- **Field Name**: customAnzscoCode
+- **Object**: FOJobCode
+- **Type**: String (10 characters)
+- **Purpose**: Store ANZSCO codes for external mapping
+- **Required for**: FR-10
+
+### 9.2 Identified Position Field
+- **Field Name**: identifiedPosition
+- **Object**: Position
+- **Type**: Boolean
+- **Purpose**: Mark positions as identified/protected positions
+- **Required for**: FR-15
+
+## 10. Metadata Summary and Dependencies
+
+The metadata extraction reveals that the organizational design requirements will need:
+
+1. **Foundation Objects**: Enhanced FODepartment, FOJobCode, FOCostCenter, FOLocation
+2. **MDF Objects**: Custom Position object with extensive attributes
+3. **Integration Objects**: JobInfo and EmploymentInfo for concurrent employment
+4. **Custom Picklists**: Position type, funding type, and status picklists
+5. **Business Rules**: FTE validation and approval workflows
+6. **Reporting Objects**: Comprehensive organizational reporting cubes
+
+This metadata foundation supports all 38 functional requirements for organization design management while maintaining date-effective processing and hierarchical organizational structure management capabilities.

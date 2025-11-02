@@ -1,0 +1,300 @@
+# SAP SuccessFactors Metadata Extraction Report: Teacher Transfer Points System
+
+## Executive Summary
+This metadata extraction focuses on the Teacher Transfer Points system within the Queensland Department of Education's HCMS program, specifically analyzing the BTP (Business Technology Platform) application for teacher transfers and the underlying data structures required for transfer point calculations.
+
+## Core Entity Analysis
+
+### Primary Foundation Objects
+```
+Entity: FOCompany
+- Purpose: Organizational structure for transfer rating locations
+- Key Fields: companyCode, companyName, transferRatingLevel, locationType
+- Relationships: Linked to JobInfo, EmploymentInfo for location-based calculations
+
+Entity: FODepartment  
+- Purpose: School/Regional office structures
+- Key Fields: departmentCode, departmentName, transferRating, schoolType
+- Relationships: Connected to employee assignments and transfer history
+
+Entity: FOJobCode
+- Purpose: Teacher/Teacher Aide position classifications
+- Key Fields: jobCode, jobTitle, jobFamily, transferEligibilityFlag
+- Relationships: Associated with employment history for service calculations
+```
+
+### Custom MDF Objects for Transfer Points
+
+#### TransferPointAccrual (Custom MDF Object)
+```
+Object Name: TransferPointAccrual
+Description: Stores daily transfer point accrual history for 10-year tracking
+Key Fields:
+- employeeId (string, required)
+- accrualDate (date, required)
+- dailyPointsAccrued (decimal, required)
+- transferRatingAtTime (integer, required)
+- schoolLocationCode (string, required)
+- acceleratedAccrualFlag (boolean)
+- serviceType (picklist: FullTime, PartTime, Temporary)
+- workdaysInYear (integer)
+```
+
+#### TransferPointCalculationHistory (Custom MDF Object)
+```
+Object Name: TransferPointCalculationHistory
+Description: Historical calculation records for audit and reconciliation
+Key Fields:
+- calculationId (string, required, unique)
+- employeeId (string, required)
+- calculationDate (datetime, required)
+- totalPointsBalance (decimal)
+- tenYearLookbackStart (date)
+- pointsAdded (decimal)
+- pointsDeducted (decimal)
+- calculationMethod (picklist: Standard, Accelerated, Reset)
+```
+
+## OData API Entity Sets
+
+### Core Employee Data
+```
+Entity Set: EmploymentInfo
+- Path: /odata/v2/EmploymentInfo
+- Key Fields: userId, startDate, endDate, employmentType, company
+- Purpose: Track employment history for service calculations
+
+Entity Set: JobInfo
+- Path: /odata/v2/JobInfo
+- Key Fields: userId, startDate, endDate, jobCode, department, location
+- Purpose: Track location changes and school assignments
+
+Entity Set: PersonalInfo
+- Path: /odata/v2/PersonalInfo
+- Key Fields: userId, firstName, lastName, dateOfBirth, nationality
+- Purpose: Employee identification for transfer processing
+```
+
+### Transfer-Specific Entities
+```
+Entity Set: TransferApplication
+- Path: /odata/v2/TransferApplication
+- Key Fields: applicationId, userId, applicationDate, transferType
+- PreferredLocations (multi-value string)
+- reasonForTransfer (picklist: Personal, Professional, Hardship)
+- familyDependentsCount (integer)
+
+Entity Set: TransferPreference
+- Path: /odata/v2/TransferPreference
+- Key Fields: preferenceId, applicationId, locationCode, priorityOrder
+- preferenceType (picklist: Region, School, Multiple)
+```
+
+## Picklist Metadata
+
+### Transfer Rating Levels
+```
+Picklist ID: transferRatingLevel
+Values:
+- 1: Standard Location (Default)
+- 2: High Priority Location
+- 3: Accelerated Accrual Location (1-3 years)
+- 4: Accelerated Accrual Location (4-6 years)
+- 5: Accelerated Accrual Location (7+ years)
+- 6: Rural/Remote Priority Location
+- 7: Critical Need Location
+```
+
+### Service Type Classification
+```
+Picklist ID: serviceType
+Values:
+- FullTime: Full-time continuous service
+- PartTime: Part-time service (accrues same as full-time)
+- Temporary: Temporary engagement
+- Contract: Fixed-term contract
+- LeaveWithoutPay: Unpaid leave (service break if >1 month)
+- WorkersCompensation: Workers' compensation leave
+```
+
+### Transfer Application Status
+```
+Picklist ID: transferApplicationStatus
+Values:
+- Draft: Application in progress
+- Submitted: Application submitted
+- UnderReview: HR review in progress
+- Approved: Transfer approved
+- Rejected: Application denied
+- Withdrawn: Application withdrawn by employee
+- Completed: Transfer finalized
+- RolledOver: Application rolled to next year
+```
+
+## Business Rules Metadata
+
+### Transfer Eligibility Rules
+```
+Rule Name: TransferEligibilityCheck
+- Trigger: Pre-save on TransferApplication
+- Conditions: 
+  * Service requirement: minimum X years continuous service
+  * Employment status: active employment
+  * Previous transfer: minimum time since last transfer
+- Actions: Set eligibilityFlag, populate error messages
+
+Rule Name: TransferPointCalculation
+- Trigger: Post-save on EmploymentInfo changes
+- Conditions: Location change, employment start/end
+- Actions: Recalculate transfer points, update balances
+```
+
+## Integration Metadata
+
+### HR Resource Group Integration Points
+```
+Integration Type: Point-to-Point via SAP Integration Suite
+Source: HR Resource Group legacy system
+Target: SuccessFactors Employee Central
+Frequency: Daily incremental, Annual full refresh
+Data Objects:
+- HistoricalTransferPoints: 10-year history
+- PreviousEmploymentRecords: Pre-SuccessFactors service
+- TransferRatingHistory: Historical location ratings
+```
+
+### Data Transformation Rules
+```
+Transformation: ServiceYearsCalculation
+- Source: Legacy employment records
+- Target: TransferPointAccrual objects
+- Logic: Convert legacy service periods to daily accrual format
+- Validation: Ensure 10-year lookback compliance
+```
+
+## Reporting Metadata
+
+### Teacher Transfer Points Summary Report
+```
+Report Name: TeacherTransferPointsSummary
+Entity Dependencies: 
+- TransferPointAccrual (aggregated)
+- EmploymentInfo (service history)
+- FOCompany (location ratings)
+Parameters: 
+- EmployeeId (required)
+- DateRange (optional, defaults to 10 years)
+- OrganizationUnit (optional, for filtering)
+Output Fields:
+- EmployeeName
+- TotalTransferPoints
+- ServiceYearsInLast10Years
+- LocationHistoryWithRatings
+- AnnualAccrualSummary
+```
+
+### Teacher Transfer Points Detail Report
+```
+Report Name: TeacherTransferPointsDetail
+Entity Dependencies:
+- TransferPointAccrual (detailed records)
+- TransferPointCalculationHistory
+- JobInfo (location history)
+Parameters:
+- EmployeeId (required)
+- CalculationDate (required)
+Output Fields:
+- DailyAccrualDetails
+- TransferRatingHistory
+- AcceleratedAccrualDetails
+- PointsAdded/Deducted Breakdown
+- ServiceTypeBreakdown
+```
+
+## Security and Permissions Metadata
+
+### Role-Based Permissions (RBP)
+```
+Role: TransferApplicationUser
+- Access: ESS Transfer Application
+- Permissions: Submit, view own applications, update preferences
+
+Role: RegionalHRConsultant
+- Access: Transfer application review, reporting
+- Permissions: View talent pool, run reports, update status
+
+Role: Principal
+- Access: School-specific talent pool
+- Permissions: View applicants for school, preference marking
+
+Role: InternalRecruitment
+- Access: Full system access
+- Permissions: All transfer functions, bulk operations
+```
+
+## Workflow Metadata
+
+### Transfer Application Workflow
+```
+Workflow Name: TransferApplicationWorkflow
+Start: Employee submits transfer application
+Steps:
+1. Application Validation (System)
+2. Manager Notification (Optional)
+3. HR Review (Regional/HR)
+4. Principal Review (School-based)
+5. Decision Processing
+6. Status Update
+Triggers: Status changes, approval actions
+Notifications: Email to stakeholders at each step
+```
+
+## Custom Field Definitions
+
+### Employee Central Custom Fields
+```
+Field: transferPointsBalance (MDF field on Employee Info)
+- Type: Number (decimal)
+- Description: Current transfer point balance
+- Visibility: HR only
+
+Field: transferEligibleFlag (MDF field on Employee Info)  
+- Type: Boolean
+- Description: Eligibility status for transfers
+- Default: true
+
+Field: lastTransferDate (MDF field on Employee Info)
+- Type: Date
+- Description: Date of last approved transfer
+- Used for minimum service calculations
+```
+
+## Data Model Relationships
+
+### Entity Associations
+```
+Employee → TransferApplication (1:M)
+TransferApplication → TransferPreference (1:M)  
+Employee → TransferPointAccrual (1:M)
+TransferPointAccrual → FOCompany (M:1)
+Employee → EmploymentInfo (1:M)
+EmploymentInfo → JobInfo (1:M)
+JobInfo → FOCompany (M:1) [for location]
+```
+
+## Metadata Quality Assurance
+
+### Data Validation Rules
+```
+Validation: TransferPointCalculationIntegrity
+- Requirement: Daily accruals must sum to balance
+- Frequency: Daily validation
+- Action: Flag discrepancies for review
+
+Validation: 10-YearHistoryCompleteness  
+- Requirement: No gaps in 10-year service history
+- Source: Cross-reference SuccessFactors + HR Resource Group
+- Action: Identify missing periods for data collection
+```
+
+This metadata extraction provides the comprehensive data architecture foundation for implementing the teacher transfer points system within SAP SuccessFactors Employee Central, ensuring proper tracking of the 10-year service history and accurate transfer point calculations as required by the Queensland Department of Education.
